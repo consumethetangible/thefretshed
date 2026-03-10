@@ -1083,7 +1083,34 @@ body {
 .status-select.lrn { color: var(--status-lrn); }
 .status-select.itf { color: var(--status-itf); }
 
-/* Reach/stretch icon button */
+/* Reach divider in curriculum column */
+.sl-reach-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 2px;
+  pointer-events: none;
+  user-select: none;
+}
+.sl-reach-divider-line {
+  flex: 1;
+  height: 1px;
+  border-top: 1px dashed var(--border2);
+}
+.sl-reach-divider-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+/* Reach card — dashed border treatment */
+.sl-card.is-reach {
+  border-style: dashed;
+  border-width: 1px;
+}
 .sl-reach-btn {
   background: none;
   border: none;
@@ -2410,16 +2437,21 @@ function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
   // We keep it simple: options = everything not in curriculum
 
   container.innerHTML = `
-    <div class="small muted" style="margin-bottom:16px">Drag songs between columns to build your curriculum. Max 6 songs + 1 reach (🎯 toggle). Drag within the curriculum column to reorder. Changes sync across the site.</div>
+    <div class="small muted" style="margin-bottom:16px">Drag songs between columns to build your curriculum. Max 6 core songs + 1 reach slot (🎯 — unlocks at Learned status). Drag within curriculum to reorder. Changes sync across the site.</div>
     <div class="sl-layout" id="sl-layout-${phaseNum}">
       <div>
         <div class="sl-col-header">
           Curriculum
-          <span class="sl-col-count" id="sl-count-${phaseNum}">${curriculumTitles.length}/6</span>
+          <span class="sl-col-count" id="sl-count-${phaseNum}">${Math.min(curriculumTitles.length,6)}/6${curriculumTitles.length > 6 ? ' + reach' : ''}</span>
         </div>
         <div class="sl-drop-zone" id="sl-curriculum-${phaseNum}" data-phase="${phaseNum}" data-col="curriculum">
           ${curriculumTitles.length === 0 ? '<div class="sl-empty">Drop songs here</div>' :
-            curriculumTitles.map(title => renderSlCard(title, phaseNum, 'curriculum', state, mastered, phase, data)).join('')}
+            curriculumTitles.map((title, i) => {
+              const divider = i === 6
+                ? `<div class="sl-reach-divider"><div class="sl-reach-divider-line"></div><div class="sl-reach-divider-label">🎯 Reach Slot</div><div class="sl-reach-divider-line"></div></div>`
+                : '';
+              return divider + renderSlCard(title, phaseNum, 'curriculum', state, mastered, phase, data);
+            }).join('')}
         </div>
       </div>
       <div>
@@ -2450,9 +2482,12 @@ function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
     : '';
 
   const reachBtnClass = isReach ? 'sl-reach-btn active' : 'sl-reach-btn';
+  const cardClass = `sl-card status-${sc}${isReach ? ' is-reach' : ''}`;
+
+  // 🎯 reach button only visible when song is Learned (lrn)
+  const canToggleReach = col === 'curriculum' && (sc === 'lrn' || isReach);
 
   const badges = [];
-  if (isReach) badges.push(`<span class="badge-reach" style="color:${pm.color};border-color:${pm.border};background:${pm.bg}">🎯 Reach</span>`);
 
   // Status select options
   const statusOpts = Object.entries(SONG_STATUS_LABELS).map(([val, label]) =>
@@ -2461,7 +2496,7 @@ function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
 
   const safetitle = title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-  return `<div class="sl-card status-${sc}"
+  return `<div class="${cardClass}"
     data-title="${title.replace(/"/g, '&quot;')}"
     data-phase="${phaseNum}"
     data-col="${col}"
@@ -2472,10 +2507,11 @@ function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
         <div class="sl-card-artist">${songObj ? songObj.artist : ''}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px">
+        ${isReach ? `<span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:${pm.color};opacity:0.85">🎯 REACH</span>` : ''}
         <select class="status-select ${sc}" title="Song status"
           onclick="event.stopPropagation()"
           onchange="handleStatusChange(event, '${safetitle}', ${phaseNum})">${statusOpts}</select>
-        ${col === 'curriculum' ? `<button class="${reachBtnClass}" title="Toggle reach goal" onclick="toggleStretch(event, ${phaseNum}, '${safetitle}')">🎯</button>` : ''}
+        ${canToggleReach ? `<button class="${reachBtnClass}" title="Toggle reach goal" onclick="toggleStretch(event, ${phaseNum}, '${safetitle}')">🎯</button>` : ''}
       </div>
     </div>
     ${func ? `<div class="sl-card-func">${func}</div>` : ''}
