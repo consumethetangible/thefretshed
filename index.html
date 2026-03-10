@@ -385,6 +385,154 @@ body {
 .sblock-head { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
 .sblock-detail { font-size: 11px; color: var(--text2); }
 
+/* ─── PRACTICE TIMER ─────────────────────── */
+.timer-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px;
+}
+.timer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.timer-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+.timer-mode-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(196,144,96,0.25);
+  border-radius: 3px;
+  padding: 2px 7px;
+}
+.timer-ring-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  position: relative;
+}
+.timer-ring-wrap svg { display: block; }
+.timer-ring-bg { stroke: var(--bg4); }
+.timer-ring-fill {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s linear, stroke 0.3s;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+.timer-ring-fill.running { stroke: var(--accent2); }
+.timer-ring-fill.done { stroke: var(--green); }
+.timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.timer-digits {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.timer-seg-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.timer-controls {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.timer-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.timer-btn:hover { background: var(--bg4); color: var(--text); }
+.timer-btn.primary {
+  background: var(--accent-dim);
+  border-color: rgba(196,144,96,0.4);
+  color: var(--accent);
+}
+.timer-btn.primary:hover { background: rgba(196,144,96,0.18); }
+.timer-segments {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.timer-seg-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.timer-seg-row:hover { background: var(--bg3); border-color: var(--border); }
+.timer-seg-row.active-seg {
+  background: var(--accent-dim2);
+  border-color: rgba(196,144,96,0.2);
+}
+.timer-seg-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.timer-seg-row.active-seg .timer-seg-dot { background: var(--accent); }
+.timer-seg-row.done-seg .timer-seg-dot { background: var(--green); }
+.timer-seg-name { font-size: 11px; color: var(--text2); flex: 1; }
+.timer-seg-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+}
+.timer-custom-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.timer-custom-input {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  width: 56px;
+  text-align: center;
+}
+.timer-custom-input:focus { outline: none; border-color: var(--accent); }
+
 /* ─── SONGS CURRENT ───────────────────────── */
 .song-row {
   display: flex;
@@ -814,7 +962,117 @@ body {
   gap: 4px;
   margin-top: 6px;
 }
-.badge-stretch {
+/* ─── SONG STATUS SYSTEM ─────────────────── */
+/* Status colors */
+:root {
+  --status-ns:  #636870;                          /* not started — gray   */
+  --status-ip:  #c49060;                          /* in progress  — amber */
+  --status-lrn: #72a878;                          /* learned      — green */
+  --status-itf: #6090b8;                          /* in the fingers — blue */
+  --status-ns-bg:  rgba(99,104,112,0.10);
+  --status-ip-bg:  rgba(196,144,96,0.12);
+  --status-lrn-bg: rgba(114,168,120,0.12);
+  --status-itf-bg: rgba(96,144,184,0.12);
+}
+
+/* Status dot — compact views (dashboard, curriculum) */
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.status-dot.ns  { background: var(--status-ns); }
+.status-dot.ip  { background: var(--status-ip); }
+.status-dot.lrn { background: var(--status-lrn); }
+.status-dot.itf {
+  background: var(--status-itf);
+  box-shadow: 0 0 5px 1px rgba(96,144,184,0.55);
+}
+
+/* Status badge — compact text label */
+.status-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-badge.ns  { color: var(--status-ns);  background: var(--status-ns-bg);  border: 1px solid rgba(99,104,112,0.25); }
+.status-badge.ip  { color: var(--status-ip);  background: var(--status-ip-bg);  border: 1px solid rgba(196,144,96,0.3); }
+.status-badge.lrn { color: var(--status-lrn); background: var(--status-lrn-bg); border: 1px solid rgba(114,168,120,0.3); }
+.status-badge.itf {
+  color: var(--status-itf);
+  background: var(--status-itf-bg);
+  border: 1px solid rgba(96,144,184,0.4);
+  box-shadow: 0 0 6px rgba(96,144,184,0.35);
+  text-shadow: 0 0 8px rgba(96,144,184,0.6);
+}
+
+/* Status left-border + inset mist on sl-card */
+.sl-card.status-ns  {
+  border-left: 3px solid var(--status-ns);
+  box-shadow: inset 10px 0 18px -6px rgba(99,104,112,0.22);
+}
+.sl-card.status-ip  {
+  border-left: 3px solid var(--status-ip);
+  box-shadow: inset 10px 0 18px -6px rgba(196,144,96,0.28);
+}
+.sl-card.status-lrn {
+  border-left: 3px solid var(--status-lrn);
+  box-shadow: inset 10px 0 18px -6px rgba(114,168,120,0.30);
+}
+.sl-card.status-itf {
+  border-left: 3px solid var(--status-itf);
+  box-shadow: inset 10px 0 20px -5px rgba(96,144,184,0.38);
+}
+
+/* Status dropdown on sl-card */
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 20px 3px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%239fa099' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+.status-select:focus { outline: none; border-color: var(--accent); }
+.status-select.ns  { color: var(--status-ns); }
+.status-select.ip  { color: var(--status-ip); }
+.status-select.lrn { color: var(--status-lrn); }
+.status-select.itf { color: var(--status-itf); }
+
+/* Reach/stretch icon button */
+.sl-reach-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 3px;
+  border-radius: 3px;
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.sl-reach-btn:hover { color: var(--text2); opacity: 0.8; }
+.sl-reach-btn.active { color: var(--accent2); opacity: 1; transform: scale(1.15); }
+
+/* Reach badge */
+.badge-reach {
   font-family: 'DM Mono', monospace;
   font-size: 8px;
   letter-spacing: 1.5px;
@@ -825,32 +1083,22 @@ body {
   border-style: dashed;
   border-width: 1px;
 }
-.badge-mastered {
-  background: rgba(114,168,120,0.15);
-  color: var(--green);
-  border: 1px solid rgba(114,168,120,0.4);
+
+/* Song row status dot in dashboard */
+.song-row-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: 1.5px;
+  font-size: 9px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: 600;
-}
-.sl-stretch-btn {
-  background: none;
-  border: none;
   cursor: pointer;
-  color: var(--text3);
-  font-size: 14px;
-  line-height: 1;
-  padding: 2px 3px;
-  border-radius: 3px;
-  transition: color 0.15s;
-  flex-shrink: 0;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
 }
-.sl-stretch-btn:hover { color: var(--text2); }
-.sl-stretch-btn.active { color: var(--accent2); }
+.song-row-status:hover { background: var(--bg4); }
 .sl-empty {
   border: 1.5px dashed var(--border);
   border-radius: 6px;
@@ -920,7 +1168,7 @@ body {
         <div class="phase-hero-name" style="color:var(--p1c)">Consolidate &amp; Connect</div>
         <div class="phase-hero-desc">Take what you partially know and own it front to back. Build the 12-bar foundation. Make bends land in tune.</div>
         <div class="week-label">This week's focus</div>
-        <div class="week-focus" id="week-focus-text">12-Bar Foundation — Blues Book 1, Ch. 1–2. Learn the basic structure and open string riffs. Parallel: Purple Haze rhythm parts + Paranoid riff to full song.</div>
+        <div class="week-focus" id="week-focus-text">12-Bar Foundation — Complete Blues Guitar (Book 1, Ch. 1–2). Learn the basic structure and open string riffs. Parallel: Purple Haze rhythm parts + Paranoid riff to full song.</div>
         <div class="prog-bar" style="margin-top:10px">
           <div class="prog-fill" id="phase-progress" style="width:8%"></div>
         </div>
@@ -931,9 +1179,9 @@ body {
         <div class="session-top">
           <div class="session-title">Tonight's Session</div>
           <div class="energy-tabs">
-            <button class="etab active" onclick="setEnergy('high')">High Energy</button>
-            <button class="etab" onclick="setEnergy('low')">Low Energy</button>
-            <button class="etab" onclick="setEnergy('weekend')">Weekend</button>
+            <button class="etab active" onclick="setEnergyAndTimer('high')">High Energy</button>
+            <button class="etab" onclick="setEnergyAndTimer('low')">Low Energy</button>
+            <button class="etab" onclick="setEnergyAndTimer('weekend')">Weekend</button>
           </div>
         </div>
 
@@ -942,13 +1190,13 @@ body {
             <div class="sblock-time">10 min</div>
             <div class="sblock-main">
               <div class="sblock-head">Warmup</div>
-              <div class="sblock-detail">Technique Book 1 — Routine 1 (Picking Hand Focus) or Routine 3 (Linear Fretting Hand). Alternate week to week.</div>
+              <div class="sblock-detail">Ultimate Guitar Technique Collection — Routine 1 (Picking Hand Focus) or Routine 3 (Linear Fretting Hand). Alternate week to week.</div>
             </div>
           </div>
           <div class="sblock theory">
             <div class="sblock-time">20 min</div>
             <div class="sblock-main">
-              <div class="sblock-head">Blues Book 1 — Ch. 1–2</div>
+              <div class="sblock-head">Complete Blues Guitar (Book 1, Ch. 1–2)</div>
               <div class="sblock-detail">12-bar structure and open string riffs. Work slowly through the examples.</div>
             </div>
           </div>
@@ -963,7 +1211,7 @@ body {
             <div class="sblock-time">10 min</div>
             <div class="sblock-main">
               <div class="sblock-head">Ear Training</div>
-              <div class="sblock-detail">Beato Ear Training — Ch. 1–2. Intervals and basic triads. One or two modules.</div>
+              <div class="sblock-detail">Beato Ear Training Booklet (Ch. 1–2). Intervals and basic triads. One or two modules.</div>
             </div>
           </div>
         </div>
@@ -986,7 +1234,7 @@ body {
           <div class="sblock licks">
             <div class="sblock-time">20 min</div>
             <div class="sblock-main">
-              <div class="sblock-head">One Lick — 300 Licks Book</div>
+              <div class="sblock-head">One Lick — 300 Blues, Rock & Jazz Licks</div>
               <div class="sblock-detail">BB King or Hendrix blues section. Pick one lick. Learn it. That's it.</div>
             </div>
           </div>
@@ -997,7 +1245,7 @@ body {
             <div class="sblock-time">15 min</div>
             <div class="sblock-main">
               <div class="sblock-head">Warmup</div>
-              <div class="sblock-detail">Technique Book 1 — full routine of your choice.</div>
+              <div class="sblock-detail">Ultimate Guitar Technique Collection — full routine of your choice.</div>
             </div>
           </div>
           <div class="sblock theory">
@@ -1030,7 +1278,7 @@ body {
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="week-btn-row"></div>
         <div class="divider"></div>
         <div id="week-detail-text" class="small muted" style="line-height:1.7">
-          <strong style="color:var(--text)">Weeks 1–2:</strong> 12-Bar Foundation — Blues Book 1 Ch. 1–2. Learn the basic 12-bar structure and open string riffs. This is the framework underlying nearly everything on your song list. Parallel: Purple Haze rhythm parts and Paranoid riff to full song.
+          <strong style="color:var(--text)">Weeks 1–2:</strong> 12-Bar Foundation — Complete Blues Guitar (Book 1, Ch. 1–2). Learn the basic 12-bar structure and open string riffs. This is the framework underlying nearly everything on your song list. Parallel: Purple Haze rhythm parts and Paranoid riff to full song.
         </div>
       </div>
 
@@ -1054,29 +1302,59 @@ body {
         </div>
       </div>
 
+      <!-- Practice Timer -->
+      <div class="timer-card">
+        <div class="timer-header">
+          <div class="timer-title">Practice Timer</div>
+          <div class="timer-mode-label" id="timer-mode-label">Session</div>
+        </div>
+        <div class="timer-ring-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="timer-ring-bg" cx="70" cy="70" r="58" fill="none" stroke-width="7"/>
+            <circle class="timer-ring-fill" id="timer-ring" cx="70" cy="70" r="58" fill="none" stroke-width="7"
+              stroke-dasharray="364.4" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-display">
+            <div class="timer-digits" id="timer-digits">00:00</div>
+            <div class="timer-seg-label" id="timer-seg-label">—</div>
+          </div>
+        </div>
+        <div class="timer-controls">
+          <button class="timer-btn" onclick="timerReset()">Reset</button>
+          <button class="timer-btn primary" id="timer-start-btn" onclick="timerToggle()">Start</button>
+          <button class="timer-btn" onclick="timerNextSeg()">Skip →</button>
+        </div>
+        <div class="timer-custom-row">
+          <input class="timer-custom-input" id="timer-custom-min" type="number" min="1" max="120" value="20" placeholder="min">
+          <button class="timer-btn" style="flex:1" onclick="timerLoadCustom()">Custom Timer</button>
+          <button class="timer-btn" onclick="timerLoadSession()">Load Session</button>
+        </div>
+        <div class="timer-segments" id="timer-segments"></div>
+      </div>
+
       <!-- Resources -->
       <div class="card">
         <div class="card-title">Active Resources</div>
         <div class="stack" style="gap:6px">
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="check-label small">Blues Book 1 — Ch. 1–9</div>
+            <div class="check-label small">Complete Blues Guitar (Book 1, Ch. 1–9)</div>
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="check-label small">Blues Book 2 — Ch. 1 + Appendices</div>
+            <div class="check-label small">Complete Blues Guitar (Book 2, Ch. 1 + Appendices)</div>
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="check-label small">300 Licks — BB King, Hendrix, Clapton</div>
+            <div class="check-label small">300 Blues, Rock & Jazz Licks — BB King, Hendrix, Clapton</div>
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="check-label small">Technique Book 1 — Routines 1 &amp; 3</div>
+            <div class="check-label small">Ultimate Guitar Technique Collection — Routines 1 & 3</div>
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="check-label small">Beato Ear Training — Ch. 1–2</div>
+            <div class="check-label small">Beato Ear Training Booklet (Ch. 1–2)</div>
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -1229,25 +1507,25 @@ const PHASES = [
     songs:[
       { num:1, title:'Purple Haze', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Tritone interval, Hendrix chord-stab rhythm, string bending as expression, pentatonic phrasing in the solo.',
-        resources:'Hendrix Are You Experienced songbook. 300 Licks — Hendrix blues section.',
+        resources:'Hendrix Are You Experienced songbook. 300 Blues, Rock & Jazz Licks — Hendrix blues section.',
         weeksFocus:'Weeks 1–2 (rhythm), Weeks 7–8 (solo)',
         skills:['tritone','bending','pentatonic','Hendrix voicings'],
         status:'active' },
       { num:2, title:'Paranoid', artist:'Black Sabbath', tuning:'Standard',
         teaches:'Fast alternate picking on a simple riff, pentatonic minor soloing at tempo, blues structure in metal clothing.',
-        resources:'Metal Bible Ch. 1 (Roots of Metal). 300 Licks — Iommi rock section.',
+        resources:'Heavy Metal Bible (Ch. 1 — Roots of Metal). 300 Blues, Rock & Jazz Licks — Iommi rock section.',
         weeksFocus:'Weeks 1–2 (riff), Weeks 7–8 (solo)',
         skills:['alternate picking','pentatonic minor','riff structure'],
         status:'active' },
       { num:3, title:'Sunshine of Your Love', artist:'Cream', tuning:'Standard',
         teaches:'Blues-rock riff as compositional unit, Clapton pentatonic vocabulary, relationship between riff and solo.',
-        resources:'300 Licks — Clapton blues and rock sections.',
+        resources:'300 Blues, Rock & Jazz Licks — Clapton blues & rock sections.',
         weeksFocus:'Weeks 3–4 (rhythm), Weeks 9–10 (solo)',
         skills:['blues-rock riff','Clapton phrasing','pentatonic'],
         status:'upcoming' },
       { num:4, title:'Back in Black', artist:'AC/DC', tuning:'Standard',
         teaches:'Economy of phrasing, how to make three notes mean something, rhythmic placement in a hard rock groove.',
-        resources:'300 Licks — Angus Young rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Angus Young rock section.',
         weeksFocus:'Weeks 5–6 (full song), Weeks 7–8 (solo)',
         skills:['economy','rhythmic placement','hard rock groove'],
         status:'upcoming' },
@@ -1259,17 +1537,17 @@ const PHASES = [
         status:'upcoming' },
       { num:6, title:'Wish You Were Here', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Fingerpicking, dynamics, clean tone, Gilmour\'s sustained melodic phrasing. Palate cleanser and technique builder.',
-        resources:'300 Licks — Gilmour rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'Weeks 9–10 (full song)',
         skills:['fingerpicking','dynamics','clean tone','sustained phrasing'],
         status:'upcoming' },
     ],
     weeks:[
-      { range:'Weeks 1–2', title:'12-Bar Foundation', detail:'Blues Book 1, Ch. 1–2. Learn the basic 12-bar structure and open string riffs. This is the framework underlying nearly everything on your song list. Parallel: Purple Haze rhythm parts and Paranoid riff to full song.' },
-      { range:'Weeks 3–4', title:'Dominant 7 Chords & Extensions', detail:'Blues Book 1, Ch. 3–4. First chord vocabulary upgrade — from power chords to dominant 7 colors. Parallel: Sunshine of Your Love rhythm and intro, continue Purple Haze.' },
-      { range:'Weeks 5–6', title:'Turnarounds & Triplet Feel', detail:'Blues Book 1, Ch. 6–7. Turnarounds are the glue of blues structure. The triplet feel chapter will immediately change how your rhythm sits in the groove. Parallel: Back in Black full song, Hey Joe rhythm parts.' },
-      { range:'Weeks 7–8', title:'Soloing Basics, Bending & Vibrato', detail:'Blues Book 2, Ch. 1 + Appendices A & B. The bending appendix alone is worth the price of the book — intentional, in-tune bending separates blues phrasing from noodling. Parallel: Purple Haze solo, Paranoid solo, Back in Black solo.' },
-      { range:'Weeks 9–10', title:'Melodic Fills & Rhythmic Divisions', detail:'Blues Book 1, Ch. 9 + Blues Book 2, Ch. 2. Fills chapter is your first proper phrasing vocabulary builder. Parallel: Hey Joe solo, Sunshine of Your Love solo, Wish You Were Here full song.' },
+      { range:'Weeks 1–2', title:'12-Bar Foundation', detail:'Complete Blues Guitar (Book 1, Ch. 1–2). Learn the basic 12-bar structure and open string riffs. This is the framework underlying nearly everything on your song list. Parallel: Purple Haze rhythm parts and Paranoid riff to full song.' },
+      { range:'Weeks 3–4', title:'Dominant 7 Chords & Extensions', detail:'Complete Blues Guitar (Book 1, Ch. 3–4). First chord vocabulary upgrade — from power chords to dominant 7 colors. Parallel: Sunshine of Your Love rhythm and intro, continue Purple Haze.' },
+      { range:'Weeks 5–6', title:'Turnarounds & Triplet Feel', detail:'Complete Blues Guitar (Book 1, Ch. 6–7). Turnarounds are the glue of blues structure. The triplet feel chapter will immediately change how your rhythm sits in the groove. Parallel: Back in Black full song, Hey Joe rhythm parts.' },
+      { range:'Weeks 7–8', title:'Soloing Basics, Bending & Vibrato', detail:'Complete Blues Guitar (Book 2, Ch. 1 + Appendices A & B). The bending appendix alone is worth the price of the book — intentional, in-tune bending separates blues phrasing from noodling. Parallel: Purple Haze solo, Paranoid solo, Back in Black solo.' },
+      { range:'Weeks 9–10', title:'Melodic Fills & Rhythmic Divisions', detail:'Complete Blues Guitar (Book 1, Ch. 9) + Complete Blues Guitar (Book 2, Ch. 2). Fills chapter is your first proper phrasing vocabulary builder. Parallel: Hey Joe solo, Sunshine of Your Love solo, Wish You Were Here full song.' },
       { range:'Weeks 11–12', title:'Consolidation & Milestone Assessment', detail:'No new book material. Full run-throughs of all six songs. Record yourself playing each one. Hearing yourself back is the most efficient diagnostic tool there is.' },
     ]
   },
@@ -1281,67 +1559,67 @@ const PHASES = [
     songs:[
       { num:1, title:'The Thrill Is Gone', artist:'BB King', tuning:'Standard',
         teaches:'Minor blues form, BB box (pentatonic shape 2), call and response in its purest form, restraint and space as expression. Clean tone forces every note to count.',
-        resources:'300 Licks — BB King blues section. Blues Book 1, Ch. 13 (minor blues).',
+        resources:'300 Blues, Rock & Jazz Licks — BB King blues section. Complete Blues Guitar (Book 1, Ch. 13) (minor blues).',
         weeksFocus:'Weeks 1–2',
         skills:['minor blues','BB box','call & response','restraint'],
         status:'future' },
       { num:2, title:'Babe I\'m Gonna Leave You', artist:'Led Zeppelin', tuning:'Standard',
         teaches:'Acoustic fingerpicking to explosive electric arc, arrangement dynamics, Page\'s compositional instincts.',
-        resources:'300 Licks — Jimmy Page rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Jimmy Page rock section.',
         weeksFocus:'Weeks 1–2',
         skills:['fingerpicking','dynamics','arrangement'],
         status:'future' },
       { num:3, title:'Crossroads (Live)', artist:'Cream', tuning:'Standard',
         teaches:'Pentatonic runs connecting positions under pressure at rock tempo, Clapton\'s attack and articulation, blues vocabulary at full intensity.',
-        resources:'300 Licks — Clapton blues and rock sections.',
+        resources:'300 Blues, Rock & Jazz Licks — Clapton blues & rock sections.',
         weeksFocus:'Weeks 5–6',
         skills:['connected pentatonic','Clapton attack','rock tempo blues'],
         status:'future' },
       { num:4, title:'Whole Lotta Love', artist:'Led Zeppelin', tuning:'Standard',
         teaches:'Riff economy, pentatonic solo placed with absolute intent, wah and sustain as tonal vocabulary rather than just effects.',
-        resources:'300 Licks — Jimmy Page rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Jimmy Page rock section.',
         weeksFocus:'Weeks 7–8',
         skills:['riff economy','solo placement','wah','sustain'],
         status:'future' },
       { num:5, title:'La Grange', artist:'ZZ Top', tuning:'Standard',
         teaches:'Boogie-blues riff architecture, silence and ghost notes as part of the vocabulary, Gibbons\' impossibly minimal phrasing.',
-        resources:'300 Licks — Billy Gibbons rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Billy Gibbons rock section.',
         weeksFocus:'Weeks 9–10',
         skills:['boogie riff','groove','minimalism','ghost notes'],
         status:'future' },
       { num:6, title:'Heartbreaker', artist:'Led Zeppelin', tuning:'Standard',
         teaches:'Unaccompanied solo playing (no harmonic safety net), pentatonic in multiple positions, legato and hammer-on runs.',
-        resources:'300 Licks — Jimmy Page rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Jimmy Page rock section.',
         weeksFocus:'Weeks 9–10',
         skills:['unaccompanied','multiple positions','legato'],
         status:'future' },
       { num:7, title:'Layla', artist:'Derek & the Dominos', tuning:'Standard',
         teaches:'Guide tones, playing the changes, slow blues feel, Duane Allman\'s slide intro. Everything Phase 2 builds toward.',
-        resources:'Blues Book 3, Part 1, Ch. 1–2. 300 Licks — Duane Allman rock section.',
+        resources:'Complete Blues Guitar (Book 3, Part 1, Ch. 1–2). 300 Blues, Rock & Jazz Licks — Duane Allman rock section.',
         weeksFocus:'Weeks 11–14 (capstone)',
         skills:['guide tones','playing the changes','slow blues','slide intro'],
         status:'future' },
       { num:8, title:'Don\'t Fear the Reaper', artist:'Blue Öyster Cult', tuning:'Standard',
         teaches:'Arpeggiated chord movement in the main riff, Buck Dharma\'s clean melodic soloing, minor key phrasing without blues clichés.',
-        resources:'300 Licks — rock and blues sections for melodic minor phrasing reference.',
+        resources:'300 Blues, Rock & Jazz Licks — rock & blues sections for melodic minor phrasing reference.',
         weeksFocus:'Alongside or after The Thrill Is Gone',
         skills:['arpeggiated riff','melodic minor','clean tone','minor key phrasing'],
         status:'future' },
       { num:9, title:'Time', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Gilmour\'s pentatonic vocabulary at its most urgent — fast bends, rhythmic placement, blues-derived phrasing applied to rock. Pairs with Wish You Were Here as a Gilmour one-two.',
-        resources:'300 Licks — Gilmour rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'Alongside Wish You Were Here or after',
         skills:['urgent pentatonic','fast bends','Gilmour phrasing','rhythmic placement'],
         status:'future' },
     ],
     weeks:[
-      { range:'Weeks 1–2', title:'Minor Blues & the BB Box', detail:'Blues Book 1, Ch. 13 + Blues Book 2, Ch. 5. Minor blues form and pentatonic shape 2 — the conceptual unlock for The Thrill Is Gone. Parallel: The Thrill Is Gone full song, begin Babe I\'m Gonna Leave You acoustic passages.' },
-      { range:'Weeks 3–4', title:'Rhythmic Displacement & Call & Response', detail:'Blues Book 2, Ch. 3–4. Call and response is both theory and the practical explanation for why BB King\'s phrasing lands so hard. Parallel: finish The Thrill Is Gone, Babe I\'m Gonna Leave You full arrangement.' },
-      { range:'Weeks 5–6', title:'Connecting Pentatonic Positions', detail:'Blues Book 2, Ch. 5 continued (shapes 3–5 and connecting). Robert Baker Pentatonic Box Breaker enters here. The fretboard expansion moment of Phase 2. Parallel: Crossroads rhythm and lead, Whole Lotta Love riff.' },
+      { range:'Weeks 1–2', title:'Minor Blues & the BB Box', detail:'Complete Blues Guitar (Book 1, Ch. 13) + Complete Blues Guitar (Book 2, Ch. 5). Minor blues form and pentatonic shape 2 — the conceptual unlock for The Thrill Is Gone. Parallel: The Thrill Is Gone full song, begin Babe I\'m Gonna Leave You acoustic passages.' },
+      { range:'Weeks 3–4', title:'Rhythmic Displacement & Call & Response', detail:'Complete Blues Guitar (Book 2, Ch. 3–4). Call and response is both theory and the practical explanation for why BB King\'s phrasing lands so hard. Parallel: finish The Thrill Is Gone, Babe I\'m Gonna Leave You full arrangement.' },
+      { range:'Weeks 5–6', title:'Connecting Pentatonic Positions', detail:'Complete Blues Guitar (Book 2, Ch. 5) continued (shapes 3–5 and connecting). Robert Baker Pentatonic Box Breaker enters here. The fretboard expansion moment of Phase 2. Parallel: Crossroads rhythm and lead, Whole Lotta Love riff.' },
       { range:'Weeks 7–8', title:'Blues at Rock Tempo', detail:'Consolidation and application block. Crossroads and Whole Lotta Love up to tempo while applying connected pentatonic positions. Ben Eller picking mechanics content useful here. Parallel: both songs full, including solos.' },
-      { range:'Weeks 9–10', title:'Riff Architecture & Groove', detail:'Blues Book 1, Ch. 10–11. La Grange\'s intro riff is a masterclass in rhythmic placement — learning it analytically ties into the triplet feel work from Phase 1. Parallel: La Grange full song, begin Heartbreaker.' },
-      { range:'Weeks 11–12', title:'Playing the Changes — Guide Tones', detail:'Blues Book 3, Part 1, Ch. 1–2. Biggest conceptual leap of Phase 2 — targeting notes that change between chords rather than running patterns. This is what Layla demands. Parallel: Heartbreaker full song, begin Layla.' },
-      { range:'Weeks 13–14', title:'Capstone — Layla', detail:'Blues Book 3, Part 1, Ch. 3–4 + Ch. 5 (arpeggios in every position). Full run-throughs of all seven songs. Layla gets final attention — musical, not necessarily perfect.' },
+      { range:'Weeks 9–10', title:'Riff Architecture & Groove', detail:'Complete Blues Guitar (Book 1, Ch. 10–11). La Grange\'s intro riff is a masterclass in rhythmic placement — learning it analytically ties into the triplet feel work from Phase 1. Parallel: La Grange full song, begin Heartbreaker.' },
+      { range:'Weeks 11–12', title:'Playing the Changes — Guide Tones', detail:'Complete Blues Guitar (Book 3, Part 1, Ch. 1–2). Biggest conceptual leap of Phase 2 — targeting notes that change between chords rather than running patterns. This is what Layla demands. Parallel: Heartbreaker full song, begin Layla.' },
+      { range:'Weeks 13–14', title:'Capstone — Layla', detail:'Complete Blues Guitar (Book 3, Part 1, Ch. 3–4) + Ch. 5 (arpeggios in every position). Full run-throughs of all seven songs. Layla gets final attention — musical, not necessarily perfect.' },
     ]
   },
   {
@@ -1352,78 +1630,78 @@ const PHASES = [
     songs:[
       { num:1, title:'Since I\'ve Been Loving You', artist:'Led Zeppelin', tuning:'Standard',
         teaches:'Slow blues, guide tones applied under real emotional pressure, expressive bending as the primary vocabulary. Page\'s most nakedly blues-rooted solo.',
-        resources:'Blues Book 3, Part 2, Ch. 6. 300 Licks — Jimmy Page rock section.',
+        resources:'Complete Blues Guitar (Book 3, Part 2, Ch. 6). 300 Blues, Rock & Jazz Licks — Jimmy Page rock section.',
         weeksFocus:'Weeks 1–2',
         skills:['slow blues','guide tones','expressive bending'],
         status:'future' },
       { num:2, title:'Black Sabbath', artist:'Black Sabbath', tuning:'Eb (½ step down)',
         teaches:'Tritone interval as darkness, Locrian/Dorian color, modal atmosphere. The origin point of metal — understand it analytically.',
-        resources:'Metal Bible, Ch. 4 (Natural Minor/Aeolian). 300 Licks — Iommi rock section.',
+        resources:'Heavy Metal Bible (Ch. 4 — Natural Minor/Aeolian). 300 Blues, Rock & Jazz Licks — Iommi rock section.',
         weeksFocus:'Weeks 3–4',
         skills:['tritone','Locrian','Dorian','modal atmosphere'],
         status:'future' },
       { num:3, title:'War Pigs', artist:'Black Sabbath', tuning:'Eb (½ step down)',
         teaches:'Iommi riff architecture, natural minor at slow heavy tempo, pedal point riffs, how to make weight feel inevitable.',
-        resources:'Metal Bible, Ch. 4 & 6 (Riff Writing). 300 Licks — Iommi rock section.',
+        resources:'Heavy Metal Bible (Ch. 4 & 6 — Riff Writing). 300 Blues, Rock & Jazz Licks — Iommi rock section.',
         weeksFocus:'Weeks 3–6',
         skills:['natural minor','pedal point','riff architecture','slow groove'],
         status:'future' },
       { num:4, title:'Iron Man', artist:'Black Sabbath', tuning:'Eb (½ step down)',
         teaches:'Mid-tempo blues-metal riff, pentatonic rock solo, connecting blues vocabulary to heavy riff framework.',
-        resources:'Metal Bible, Ch. 1 & 4. 300 Licks — Iommi rock section.',
+        resources:'Heavy Metal Bible (Ch. 1 & 4). 300 Blues, Rock & Jazz Licks — Iommi rock section.',
         weeksFocus:'Weeks 5–6',
         skills:['blues-metal riff','pentatonic solo','mid-tempo'],
         status:'future' },
       { num:5, title:'The Trooper', artist:'Iron Maiden', tuning:'Standard',
         teaches:'NWOBHM alternate picking mechanics, gallop rhythm as a right-hand workout, melodic lead over driving rhythm. Nearly finished — clean completion target.',
-        resources:'Metal Bible, Ch. 3 (Picking Hand). Ben Eller picking mechanics YouTube.',
+        resources:'Heavy Metal Bible (Ch. 3 — Picking Hand). Ben Eller picking mechanics YouTube.',
         weeksFocus:'Weeks 7–8',
         skills:['alternate picking','gallop rhythm','NWOBHM','melodic lead'],
         status:'future' },
       { num:6, title:'Comfortably Numb', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Two contrasting solos: first is restrained and melodic, second is one of the great sustained statements in rock guitar. Scale choices over changing harmony.',
-        resources:'Blues Book 3, Part 2, Ch. 8 (V chord scale choices). 300 Licks — Gilmour rock section.',
+        resources:'Complete Blues Guitar (Book 3, Part 2, Ch. 8) (V chord scale choices). 300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'Weeks 9–10',
         skills:['sustained phrasing','scale choices','two-solo arc','dynamics'],
         status:'future' },
       { num:7, title:'Little Wing', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Chord-melody — rhythm and lead blurring into one continuous thing. Thumb-over voicings. Short solo packed with personality. The north star, earned.',
-        resources:'Hendrix Are You Experienced songbook. 300 Licks — Hendrix blues and rock. Paul Davids Little Wing YouTube breakdown.',
+        resources:'Hendrix Are You Experienced songbook. 300 Blues, Rock & Jazz Licks — Hendrix blues & rock sections. Paul Davids Little Wing YouTube breakdown.',
         weeksFocus:'Weeks 11–15 (capstone)',
         skills:['chord-melody','thumb voicings','Hendrix phrasing','fretboard freedom'],
         status:'future' },
       { num:8, title:'Carry On Wayward Son', artist:'Kansas', tuning:'Standard',
         teaches:'Precision picked chord intro, aggressive strumming approach, Kerry Livgren\'s pentatonic-with-chromatic-passing-tones solo vocabulary. First prog-rock flavor in the curriculum.',
-        resources:'300 Licks — rock sections for chromatic phrasing reference.',
+        resources:'300 Blues, Rock & Jazz Licks — rock sections for chromatic phrasing reference.',
         weeksFocus:'Alongside Sabbath/Maiden work',
         skills:['precision picking','chromatic phrasing','prog-rock','aggressive strumming'],
         status:'future' },
       { num:9, title:'Shine On You Crazy Diamond', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Economy and space as vocabulary — the four-note opening theme is one of rock\'s great lessons in restraint. Solo builds from almost nothing into a sustained melodic statement.',
-        resources:'300 Licks — Gilmour rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'Optional alongside or instead of Comfortably Numb',
         skills:['economy','space','sustained phrasing','Gilmour tone'],
         status:'future' },
       { num:10, title:'Money', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Gilmour navigating a 7/4 time signature so naturally you barely notice it. Odd-time feel, rhythmic awareness, Gilmour vocabulary in a different rhythmic context.',
-        resources:'300 Licks — Gilmour rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'Phase 3 later / Phase 4 entry',
         skills:['odd time','7/4','rhythmic awareness','Gilmour phrasing'],
         status:'future' },
       { num:11, title:'⚡ Technique Target: Transylvanian Hunger', artist:'Darkthrone', tuning:'Standard',
         teaches:'Tremolo picking endurance and consistency at extreme tempo over hypnotic repeating figures. A right-hand stamina drill disguised as a song. NGC-adjacent — reinforces picking mechanics from The Trooper.',
-        resources:'Ben Eller picking mechanics YouTube. Metal Bible Ch. 3 (Picking Hand Development).',
+        resources:'Ben Eller picking mechanics YouTube. Heavy Metal Bible (Ch. 3 — Picking Hand Development).',
         weeksFocus:'Parallel practice — not a curriculum song, a technique target',
         skills:['tremolo picking','right-hand stamina','extreme tempo','black metal mechanics'],
         status:'future' },
     ],
     weeks:[
-      { range:'Weeks 1–2', title:'Slow Blues Depth', detail:'Blues Book 3, Part 2, Ch. 6 (scale choices for I chord — Major Pentatonic and Mixolydian). Mixolydian enters here — the scale between major and minor, giving blues its bittersweet quality. Parallel: Since I\'ve Been Loving You, slow and deliberate. Don\'t rush it.' },
-      { range:'Weeks 3–4', title:'Dark Modal Vocabulary', detail:'Metal Bible, Ch. 4 — Natural Minor/Aeolian. The direct underpinning of Black Sabbath and War Pigs. Natural minor is the language of dread and weight. The tritone gets specific attention — it\'s already in your vocabulary from Purple Haze. Parallel: Black Sabbath full arrangement, begin War Pigs riff work.' },
-      { range:'Weeks 5–6', title:'Riff Architecture — Iommi', detail:'Metal Bible, Ch. 6 (Riff Writing — pedal point and sequencing). Blues Book 3, Part 2, Ch. 7 also enters here. Understanding pedal point riffs explains both War Pigs and Iron Man structurally. Parallel: War Pigs full song, Iron Man full song.' },
-      { range:'Weeks 7–8', title:'NWOBHM Picking — The Trooper', detail:'Metal Bible, Ch. 3 (Developing the Picking Hand). The Trooper\'s gallop is a right-hand workout disguised as a riff. Ben Eller picking mechanics is the YouTube companion. Parallel: The Trooper full song, finish War Pigs/Iron Man detail work.' },
-      { range:'Weeks 9–10', title:'Sustained Melodic Phrasing', detail:'Blues Book 3, Part 2, Ch. 8 & 9 (V chord scale choices and How to Practise). Gilmour\'s two solos are the practical exam for everything Blues Book 3 has been teaching. Week 9: solo one. Week 10: solo two.' },
-      { range:'Weeks 11–12', title:'Hendrix Chord Voicings — Little Wing Groundwork', detail:'Dedicated preparation block. Two targets: Hendrix\'s thumb-over-the-neck voicings (physical technique), and chord-melody concept. Paul Davids Little Wing breakdown + Are You Experienced songbook. 300 Licks Hendrix sections active throughout.' },
+      { range:'Weeks 1–2', title:'Slow Blues Depth', detail:'Complete Blues Guitar (Book 3, Part 2, Ch. 6) (scale choices for I chord — Major Pentatonic and Mixolydian). Mixolydian enters here — the scale between major and minor, giving blues its bittersweet quality. Parallel: Since I\'ve Been Loving You, slow and deliberate. Don\'t rush it.' },
+      { range:'Weeks 3–4', title:'Dark Modal Vocabulary', detail:'Heavy Metal Bible (Ch. 4) — Natural Minor/Aeolian. The direct underpinning of Black Sabbath and War Pigs. Natural minor is the language of dread and weight. The tritone gets specific attention — it\'s already in your vocabulary from Purple Haze. Parallel: Black Sabbath full arrangement, begin War Pigs riff work.' },
+      { range:'Weeks 5–6', title:'Riff Architecture — Iommi', detail:'Heavy Metal Bible (Ch. 6 — Riff Writing — pedal point and sequencing). Complete Blues Guitar (Book 3, Part 2, Ch. 7) also enters here. Understanding pedal point riffs explains both War Pigs and Iron Man structurally. Parallel: War Pigs full song, Iron Man full song.' },
+      { range:'Weeks 7–8', title:'NWOBHM Picking — The Trooper', detail:'Heavy Metal Bible (Ch. 3 — Developing the Picking Hand). The Trooper\'s gallop is a right-hand workout disguised as a riff. Ben Eller picking mechanics is the YouTube companion. Parallel: The Trooper full song, finish War Pigs/Iron Man detail work.' },
+      { range:'Weeks 9–10', title:'Sustained Melodic Phrasing', detail:'Complete Blues Guitar (Book 3, Part 2, Ch. 8) & 9 (V chord scale choices and How to Practise). Gilmour\'s two solos are the practical exam for everything Complete Blues Guitar (Book 3) has been teaching. Week 9: solo one. Week 10: solo two.' },
+      { range:'Weeks 11–12', title:'Hendrix Chord Voicings — Little Wing Groundwork', detail:'Dedicated preparation block. Two targets: Hendrix\'s thumb-over-the-neck voicings (physical technique), and chord-melody concept. Paul Davids Little Wing breakdown + Are You Experienced songbook. 300 Blues, Rock & Jazz Licks — Hendrix sections active throughout.' },
       { range:'Weeks 13–15', title:'Little Wing — Capstone', detail:'Three weeks because it deserves them. Week 13: intro and verse chord-melody passages at slow tempo, voicings and connections. Week 14: the solo — short but dense with personality. Week 15: full song run-throughs. Record yourself. This is graduation.' },
     ]
   },
@@ -1435,15 +1713,15 @@ const PHASES = [
     songs:[
       { num:1, title:'Whipping Post', artist:'Allman Brothers', tuning:'Standard',
         teaches:'Dorian mode, long-form improvisation, dual harmony thinking, open-ended song structure.',
-        resources:'300 Licks — Duane Allman rock section. Guitar Chords in Context.',
+        resources:'300 Blues, Rock & Jazz Licks — Duane Allman rock section. Guitar Chords in Context.',
         weeksFocus:'TBD', skills:['Dorian','long-form improv','dual harmony'], status:'future' },
       { num:2, title:'In Memory of Elizabeth Reed', artist:'Allman Brothers', tuning:'Standard',
         teaches:'Minor chord-melody, extended improvisation, conversation between guitar parts.',
-        resources:'300 Licks — Duane Allman. Guitar Chords in Context.',
+        resources:'300 Blues, Rock & Jazz Licks — Duane Allman section. Guitar Chords in Context.',
         weeksFocus:'TBD', skills:['chord-melody','minor','extended improv'], status:'future' },
       { num:3, title:'Manic Depression', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Odd time (3/4 feel), Hendrix vocabulary in a different rhythmic context, chromatic phrasing.',
-        resources:'Hendrix songbook. 300 Licks — Hendrix blues and rock.',
+        resources:'Hendrix songbook. 300 Blues, Rock & Jazz Licks — Hendrix blues & rock sections.',
         weeksFocus:'TBD', skills:['odd time','Hendrix','chromatic phrasing'], status:'future' },
       { num:4, title:'All Along the Watchtower', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Dylan\'s chord movement refracted through Hendrix phrasing, short-form completeness.',
@@ -1451,16 +1729,16 @@ const PHASES = [
         weeksFocus:'TBD', skills:['chord movement','Hendrix phrasing'], status:'future' },
       { num:5, title:'Stairway to Heaven (?)', artist:'Led Zeppelin', tuning:'Standard',
         teaches:'Acoustic fingerpicking, modal arc, full dynamic range. Natural phase capstone candidate.',
-        resources:'300 Licks — Jimmy Page. Robert Baker course.',
+        resources:'300 Blues, Rock & Jazz Licks — Jimmy Page section. Robert Baker course.',
         weeksFocus:'TBD — possible capstone', skills:['acoustic','modal arc','full dynamic range'], status:'future' },
       { num:6, title:'High Hopes', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Slide guitar vocabulary, sustained melodic lines over slow harmonic movement, late Floyd tone and atmosphere.',
-        resources:'300 Licks — Gilmour rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'TBD — alongside Allman Brothers slide work',
         skills:['slide guitar','sustained tone','late Floyd','harmonic movement'], status:'future' },
       { num:7, title:'Dogs', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Extended soloing over a Dorian vamp — long-form improvisation in the Allman Brothers tradition but with Gilmour\'s voice. Dark, demanding, and deeply musical.',
-        resources:'300 Licks — Gilmour rock section.',
+        resources:'300 Blues, Rock & Jazz Licks — Gilmour rock section.',
         weeksFocus:'TBD', skills:['Dorian vamp','long-form improv','Gilmour','extended soloing'], status:'future' },
     ],
     weeks:[]
@@ -1473,19 +1751,19 @@ const PHASES = [
     songs:[
       { num:1, title:'Master of Puppets', artist:'Metallica', tuning:'Eb (½ step down)',
         teaches:'Alternate picking at speed, harmonic minor, complex song structure.',
-        resources:'Metal Bible, Ch. 4 (Harmonic Minor).',
+        resources:'Heavy Metal Bible (Ch. 4 — Harmonic Minor).',
         weeksFocus:'TBD', skills:['harmonic minor','fast picking','complex structure'], status:'future' },
       { num:2, title:'Hallowed Be Thy Name', artist:'Iron Maiden', tuning:'Standard',
         teaches:'Full NWOBHM vocabulary, harmonic minor lead, epic song structure.',
-        resources:'Metal Bible lead sections.',
+        resources:'Heavy Metal Bible (lead sections).',
         weeksFocus:'TBD', skills:['NWOBHM','harmonic minor','epic structure'], status:'future' },
       { num:3, title:'Fade to Black', artist:'Metallica', tuning:'Eb (½ step down)',
         teaches:'Acoustic intro, emotional arc from delicate to full, extended solo.',
-        resources:'Metal Bible. 300 Licks.',
+        resources:'Heavy Metal Bible. 300 Blues, Rock & Jazz Licks.',
         weeksFocus:'TBD', skills:['acoustic intro','emotional arc','extended solo'], status:'future' },
       { num:4, title:'Inside-Outside Soloing', artist:'Oz Noy book', tuning:'Standard',
         teaches:'Mixolydian, whole tone, diminished, altered scale — the ceiling stretcher.',
-        resources:'Inside-Outside Guitar Soloing — Oz Noy.',
+        resources:'Inside-Outside Guitar Soloing (Oz Noy).',
         weeksFocus:'When vocabulary is solid',
         skills:['Mixolydian','whole tone','diminished','altered scale'], status:'future' },
     ],
@@ -1644,11 +1922,11 @@ const ACOUSTIC_SONGS = {
 };
 
 const WEEK_DATA = [
-  { weeks:'1-2', focus:'12-Bar Foundation', detail:'Blues Book 1, Ch. 1–2. 12-bar structure and open string riffs. Parallel: Purple Haze rhythm, Paranoid riff.' },
-  { weeks:'3-4', focus:'Dominant 7 Chords & Extensions', detail:'Blues Book 1, Ch. 3–4. Chord vocabulary upgrade. Parallel: Sunshine of Your Love rhythm, continue Purple Haze.' },
-  { weeks:'5-6', focus:'Turnarounds & Triplet Feel', detail:'Blues Book 1, Ch. 6–7. Turnarounds and triplet feel. Parallel: Back in Black full song, Hey Joe rhythm.' },
-  { weeks:'7-8', focus:'Soloing Basics, Bending & Vibrato', detail:'Blues Book 2, Ch. 1 + Appendices A & B. Intentional bending. Parallel: Purple Haze solo, Paranoid solo, Back in Black solo.' },
-  { weeks:'9-10', focus:'Melodic Fills & Rhythmic Divisions', detail:'Blues Book 1, Ch. 9 + Blues Book 2, Ch. 2. Phrasing vocabulary. Parallel: Hey Joe solo, Sunshine solo, Wish You Were Here.' },
+  { weeks:'1-2', focus:'12-Bar Foundation', detail:'Complete Blues Guitar (Book 1, Ch. 1–2). 12-bar structure and open string riffs. Parallel: Purple Haze rhythm, Paranoid riff.' },
+  { weeks:'3-4', focus:'Dominant 7 Chords & Extensions', detail:'Complete Blues Guitar (Book 1, Ch. 3–4). Chord vocabulary upgrade. Parallel: Sunshine of Your Love rhythm, continue Purple Haze.' },
+  { weeks:'5-6', focus:'Turnarounds & Triplet Feel', detail:'Complete Blues Guitar (Book 1, Ch. 6–7). Turnarounds and triplet feel. Parallel: Back in Black full song, Hey Joe rhythm.' },
+  { weeks:'7-8', focus:'Soloing Basics, Bending & Vibrato', detail:'Complete Blues Guitar (Book 2, Ch. 1 + Appendices A & B). Intentional bending. Parallel: Purple Haze solo, Paranoid solo, Back in Black solo.' },
+  { weeks:'9-10', focus:'Melodic Fills & Rhythmic Divisions', detail:'Complete Blues Guitar (Book 1, Ch. 9) + Complete Blues Guitar (Book 2, Ch. 2). Phrasing vocabulary. Parallel: Hey Joe solo, Sunshine solo, Wish You Were Here.' },
   { weeks:'11-12', focus:'Consolidation', detail:'No new material. Full run-throughs. Record yourself.' },
 ];
 
@@ -1772,33 +2050,64 @@ function toggleToneCard(el) { el.classList.toggle('expanded'); }
 function buildDashSongs() {
   const container = document.getElementById('dash-songs');
   if (!container) return;
-  // Use current phase (from week selector phase)
   const phaseNum = parseInt(localStorage.getItem('ngc-current-phase') || '1');
   const phase = PHASES.find(p => p.id === phaseNum) || PHASES[0];
   const state = getCurriculumState(phaseNum);
-  const mastered = getMasteredSongs();
+  const pm = PHASE_META[phaseNum] || PHASE_META[1];
   const titles = state.curriculum;
 
-  // Also update card title
+  // Update card title — back to standard accent color
   const titleEl = container.closest('.card')?.querySelector('.card-title');
-  if (titleEl) titleEl.textContent = `Phase ${phaseNum} Songs`;
+  if (titleEl) {
+    titleEl.textContent = `Phase ${phaseNum} Songs`;
+    titleEl.style.color = '';
+  }
 
   container.innerHTML = titles.map(title => {
     const song = phase.songs.find(s => s.title === title);
     const artist = song ? song.artist : '';
-    const isStretch = state.stretch === title;
-    const isMastered = mastered.has(title);
-    const isActive = song && song.status === 'active';
-    let badge = isActive
-      ? '<span class="badge badge-active">Active</span>'
-      : '<span class="badge badge-pending">Up Next</span>';
-    if (isMastered) badge = '<span class="badge badge-mastered">✓ Mastered</span>';
-    if (isStretch) badge += `<span class="badge badge-stretch" style="color:var(--p${phaseNum}c);border-color:var(--p${phaseNum}br);background:var(--p${phaseNum}b)">Stretch</span>`;
-    return `<div class="song-row ${isActive ? 'active-song' : ''}">
-      <div style="flex:1"><div class="song-title">${title}</div><div class="song-artist">${artist}</div></div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${badge}</div>
+    const isReach = state.stretch === title;
+    const status = getSongStatus(title);
+    const sc = statusClass(status);
+
+    const reachBadge = isReach
+      ? `<span class="badge-reach" style="color:${pm.color};border-color:${pm.border};background:${pm.bg}">🎯 Reach</span>`
+      : '';
+
+    return `<div class="song-row" style="cursor:pointer;border-left:3px solid var(--status-${sc})"
+      onclick="goToSongInLibrary('${title.replace(/'/g, "\\'")}', ${phaseNum})">
+      <div style="flex:1">
+        <div class="song-title">${title}</div>
+        <div class="song-artist">${artist}</div>
+      </div>
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        ${reachBadge}
+        ${statusIconHtml(status)}
+      </div>
     </div>`;
   }).join('') || '<div class="small muted">No songs in curriculum yet.</div>';
+}
+
+function goToSongInLibrary(title, phaseNum) {
+  // Switch to Song Library tab and open the correct phase
+  showPanel('swaps', null);
+  // Find and activate the correct phase tab in the song library
+  setTimeout(() => {
+    const phaseTabBtn = document.querySelector(`[onclick*="showSwapPhase(${phaseNum})"]`);
+    if (phaseTabBtn) phaseTabBtn.click();
+    // Try to highlight the card
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.sl-card');
+      for (const card of cards) {
+        if (card.dataset.title === title) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.add('drop-target');
+          setTimeout(() => card.classList.remove('drop-target'), 1800);
+          break;
+        }
+      }
+    }, 120);
+  }, 60);
 }
 
 // ═══════════════════════════════════════════
@@ -1970,20 +2279,64 @@ function saveCurriculumState(phaseNum, state) {
   localStorage.setItem(`ngc-curriculum-p${phaseNum}`, JSON.stringify(state));
 }
 
+// ─── Song Status Store ────────────────────────
+// Statuses: 'ns' | 'ip' | 'lrn' | 'itf'
+const SONG_STATUS_LABELS = {
+  ns:  'Not Started',
+  ip:  'In Progress',
+  lrn: 'Learned',
+  itf: 'In The Fingers',
+};
+
+const SONG_STATUS_ICONS = {
+  ns:  '○',
+  ip:  '◑',
+  lrn: '🎯',
+  itf: '💎',
+};
+
+function getAllSongStatuses() {
+  return JSON.parse(localStorage.getItem('ngc-song-status') || '{}');
+}
+
+function getSongStatus(title) {
+  const all = getAllSongStatuses();
+  return all[title] || 'ns';
+}
+
+function setSongStatus(title, status) {
+  const all = getAllSongStatuses();
+  all[title] = status;
+  localStorage.setItem('ngc-song-status', JSON.stringify(all));
+}
+
+function statusClass(status) {
+  return status || 'ns';
+}
+
+function statusDotHtml(status) {
+  return `<span class="status-dot ${statusClass(status)}"></span>`;
+}
+
+function statusBadgeHtml(status) {
+  const s = statusClass(status);
+  const icon = SONG_STATUS_ICONS[s];
+  const label = SONG_STATUS_LABELS[s];
+  return `<span class="status-badge ${s}">${icon} ${label}</span>`;
+}
+
+function statusIconHtml(status) {
+  // Icon-only compact version for tight spaces
+  const s = statusClass(status);
+  return `<span class="status-badge ${s}" title="${SONG_STATUS_LABELS[s]}">${SONG_STATUS_ICONS[s]}</span>`;
+}
+
+// Legacy compat — used in curriculum tab
 function getMasteredSongs() {
-  // Parse milestone state to get mastered song titles
-  const done = JSON.parse(localStorage.getItem('ngc-milestones') || '{}');
+  const all = getAllSongStatuses();
   const mastered = new Set();
-  Object.keys(done).forEach(key => {
-    if (done[key]) {
-      // Try to extract song title from milestone text (first part before " — " or "front to back")
-      const match = key.match(/^([^—]+?)(?:\s+front to back| —)/);
-      if (match) mastered.add(match[1].trim());
-      // Also add exact song titles from PHASES
-      PHASES.forEach(ph => ph.songs.forEach(s => {
-        if (key.includes(s.title)) mastered.add(s.title);
-      }));
-    }
+  Object.keys(all).forEach(title => {
+    if (all[title] === 'lrn' || all[title] === 'itf') mastered.add(title);
   });
   return mastered;
 }
@@ -2028,7 +2381,7 @@ function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
   // We keep it simple: options = everything not in curriculum
 
   container.innerHTML = `
-    <div class="small muted" style="margin-bottom:16px">Drag songs between columns to build your curriculum. Max 6 songs + 1 stretch (⭐ toggle). Changes sync across the site.</div>
+    <div class="small muted" style="margin-bottom:16px">Drag songs between columns to build your curriculum. Max 6 songs + 1 reach (🎯 toggle). Drag within the curriculum column to reorder. Changes sync across the site.</div>
     <div class="sl-layout" id="sl-layout-${phaseNum}">
       <div>
         <div class="sl-col-header">
@@ -2054,35 +2407,47 @@ function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
 
 function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
   const pm = PHASE_META[phaseNum] || PHASE_META[1];
-  const isStretch = state.stretch === title;
-  const isMastered = mastered.has(title);
+  const isReach = state.stretch === title;
+  const status = getSongStatus(title);
+  const sc = statusClass(status);
 
-  // Find func description — from phase songs or swap data
+  // Find func description
   const songObj = phase.songs.find(s => s.title === title);
   const swapObj = swapData ? swapData.find(s => s.song === title) : null;
   const func = swapObj ? swapObj.func : (songObj ? songObj.teaches.split(',')[0] : '');
 
-  const stretchStyle = isStretch
-    ? `background-color: ${pm.bg}; border-color: ${pm.border}; border-top-color: ${pm.color};`
-    : `border-top-color: ${pm.color};`;
+  const reachStyle = isReach
+    ? `background-color: ${pm.bg}; border-color: ${pm.border};`
+    : '';
 
-  const stretchBtnClass = isStretch ? 'sl-stretch-btn active' : 'sl-stretch-btn';
+  const reachBtnClass = isReach ? 'sl-reach-btn active' : 'sl-reach-btn';
 
   const badges = [];
-  if (isStretch) badges.push(`<span class="badge badge-stretch" style="color:${pm.color};border-color:${pm.border};background:${pm.bg}">Stretch</span>`);
-  if (isMastered) badges.push(`<span class="badge badge-mastered">✓ Mastered</span>`);
+  if (isReach) badges.push(`<span class="badge-reach" style="color:${pm.color};border-color:${pm.border};background:${pm.bg}">🎯 Reach</span>`);
 
-  return `<div class="sl-card" draggable="true"
+  // Status select options
+  const statusOpts = Object.entries(SONG_STATUS_LABELS).map(([val, label]) =>
+    `<option value="${val}" ${sc === val ? 'selected' : ''}>${label}</option>`
+  ).join('');
+
+  const safetitle = title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  return `<div class="sl-card status-${sc}" draggable="true"
     data-title="${title.replace(/"/g, '&quot;')}"
     data-phase="${phaseNum}"
     data-col="${col}"
-    style="${stretchStyle}">
+    style="${reachStyle}">
     <div class="sl-card-top">
       <div style="flex:1">
         <div class="sl-card-title">${title}</div>
         <div class="sl-card-artist">${songObj ? songObj.artist : ''}</div>
       </div>
-      ${col === 'curriculum' ? `<button class="${stretchBtnClass}" title="Toggle stretch" onclick="toggleStretch(event, ${phaseNum}, '${title.replace(/'/g, "\'")}')">⭐</button>` : ''}
+      <div style="display:flex;align-items:center;gap:4px">
+        <select class="status-select ${sc}" title="Song status"
+          onclick="event.stopPropagation()"
+          onchange="handleStatusChange(event, '${safetitle}', ${phaseNum})">${statusOpts}</select>
+        ${col === 'curriculum' ? `<button class="${reachBtnClass}" title="Toggle reach goal" onclick="toggleStretch(event, ${phaseNum}, '${safetitle}')">🎯</button>` : ''}
+      </div>
     </div>
     ${func ? `<div class="sl-card-func">${func}</div>` : ''}
     ${badges.length ? `<div class="sl-card-badges">${badges.join('')}</div>` : ''}
@@ -2103,7 +2468,7 @@ function initDragDrop(phaseNum) {
       if (!dragState) return;
       const isCurriculum = zone.dataset.col === 'curriculum';
       const state = getCurriculumState(phaseNum);
-      const wouldExceed = isCurriculum && !state.curriculum.includes(dragState.title) && state.curriculum.length >= 6;
+      const wouldExceed = isCurriculum && !state.curriculum.includes(dragState.title) && state.curriculum.length >= 7;
       zone.classList.toggle('drag-over', !wouldExceed);
       zone.classList.toggle('drop-blocked', wouldExceed);
     });
@@ -2119,22 +2484,52 @@ function initDragDrop(phaseNum) {
       zone.classList.remove('drag-over', 'drop-blocked');
       if (!dragState) return;
       const targetCol = zone.dataset.col;
-      if (dragState.col === targetCol) return; // same column, no-op
 
       const state = getCurriculumState(phaseNum);
-      if (targetCol === 'curriculum' && state.curriculum.length >= 6) return; // cap
 
-      // Move the song
-      if (targetCol === 'curriculum') {
-        state.curriculum.push(dragState.title);
-      } else {
-        state.curriculum = state.curriculum.filter(t => t !== dragState.title);
-        if (state.stretch === dragState.title) state.stretch = null;
+      // Cross-column move
+      if (dragState.col !== targetCol) {
+        if (targetCol === 'curriculum' && state.curriculum.length >= 7) return;
+        if (targetCol === 'curriculum') {
+          state.curriculum.push(dragState.title);
+        } else {
+          state.curriculum = state.curriculum.filter(t => t !== dragState.title);
+          if (state.stretch === dragState.title) state.stretch = null;
+        }
+        saveCurriculumState(phaseNum, state);
+        rebuildSwapPhase(phaseNum);
+        refreshSiteFromCurriculum();
+        return;
       }
 
-      saveCurriculumState(phaseNum, state);
-      rebuildSwapPhase(phaseNum);
-      refreshSiteFromCurriculum();
+      // Same-column reorder (curriculum only)
+      if (targetCol === 'curriculum') {
+        // Find drop position from pointer
+        const cards = [...zone.querySelectorAll('.sl-card:not(.dragging)')];
+        const dragIdx = state.curriculum.indexOf(dragState.title);
+        if (dragIdx === -1) return;
+
+        // Find which card we're hovering over
+        let dropIdx = state.curriculum.length;
+        for (let i = 0; i < cards.length; i++) {
+          const rect = cards[i].getBoundingClientRect();
+          if (e.clientY < rect.top + rect.height / 2) {
+            const hoveredTitle = cards[i].dataset.title;
+            const idx = state.curriculum.indexOf(hoveredTitle);
+            if (idx !== -1) { dropIdx = idx; break; }
+          }
+        }
+
+        // Reorder
+        const newOrder = [...state.curriculum];
+        newOrder.splice(dragIdx, 1);
+        const insertAt = dropIdx > dragIdx ? dropIdx - 1 : dropIdx;
+        newOrder.splice(insertAt, 0, dragState.title);
+        state.curriculum = newOrder;
+        saveCurriculumState(phaseNum, state);
+        rebuildSwapPhase(phaseNum);
+        refreshSiteFromCurriculum();
+      }
     });
   });
 
@@ -2150,6 +2545,21 @@ function initDragDrop(phaseNum) {
       document.querySelectorAll('.sl-drop-zone').forEach(z => z.classList.remove('drag-over', 'drop-blocked'));
     });
   });
+}
+
+function handleStatusChange(e, title, phaseNum) {
+  e.stopPropagation();
+  setSongStatus(title, e.target.value);
+  // Update the select's color class
+  e.target.className = `status-select ${e.target.value}`;
+  // Update card border class
+  const card = e.target.closest('.sl-card');
+  if (card) {
+    card.classList.remove('status-ns','status-ip','status-lrn','status-itf');
+    card.classList.add(`status-${e.target.value}`);
+  }
+  // Refresh dashboard and curriculum
+  refreshSiteFromCurriculum();
 }
 
 function toggleStretch(e, phaseNum, title) {
@@ -2291,6 +2701,213 @@ function buildAcousticSection(containerId) {
 }
 
 // ═══════════════════════════════════════════
+// PRACTICE TIMER
+// ═══════════════════════════════════════════
+const TIMER = {
+  segments: [],      // [{label, minutes}]
+  segIdx: 0,
+  totalSecs: 0,
+  remainSecs: 0,
+  running: false,
+  interval: null,
+  doneSegs: new Set(),
+};
+
+const CIRCUMFERENCE = 2 * Math.PI * 58; // 364.4
+
+function timerGetSessionSegs() {
+  // Read durations from whichever energy plan is active
+  const activePlan = document.querySelector('.session-plan.active');
+  if (!activePlan) return [];
+  const segs = [];
+  activePlan.querySelectorAll('.sblock').forEach(block => {
+    const timeEl = block.querySelector('.sblock-time');
+    const headEl = block.querySelector('.sblock-head');
+    if (!timeEl || !headEl) return;
+    const mins = parseInt(timeEl.textContent);
+    if (isNaN(mins)) return;
+    segs.push({ label: headEl.textContent.trim(), minutes: mins });
+  });
+  return segs;
+}
+
+function timerLoadSession() {
+  const segs = timerGetSessionSegs();
+  if (!segs.length) return;
+  timerStop();
+  TIMER.segments = segs;
+  TIMER.segIdx = 0;
+  TIMER.doneSegs.clear();
+  timerInitSeg();
+  timerRenderSegs();
+  document.getElementById('timer-mode-label').textContent = 'Session';
+}
+
+function timerLoadCustom() {
+  const val = parseInt(document.getElementById('timer-custom-min').value);
+  if (!val || val < 1) return;
+  timerStop();
+  TIMER.segments = [{ label: 'Practice', minutes: val }];
+  TIMER.segIdx = 0;
+  TIMER.doneSegs.clear();
+  timerInitSeg();
+  timerRenderSegs();
+  document.getElementById('timer-mode-label').textContent = 'Custom';
+}
+
+function timerInitSeg() {
+  const seg = TIMER.segments[TIMER.segIdx];
+  if (!seg) { timerDone(); return; }
+  TIMER.totalSecs = seg.minutes * 60;
+  TIMER.remainSecs = TIMER.totalSecs;
+  timerRender();
+}
+
+function timerToggle() {
+  if (!TIMER.segments.length) { timerLoadSession(); return; }
+  TIMER.running ? timerStop() : timerStart();
+}
+
+function timerStart() {
+  if (!TIMER.segments.length) return;
+  TIMER.running = true;
+  document.getElementById('timer-start-btn').textContent = 'Pause';
+  document.getElementById('timer-ring').classList.add('running');
+  TIMER.interval = setInterval(() => {
+    if (TIMER.remainSecs <= 0) {
+      timerSegComplete();
+    } else {
+      TIMER.remainSecs--;
+      timerRender();
+    }
+  }, 1000);
+}
+
+function timerStop() {
+  TIMER.running = false;
+  clearInterval(TIMER.interval);
+  document.getElementById('timer-start-btn').textContent = 'Start';
+  document.getElementById('timer-ring').classList.remove('running');
+}
+
+function timerReset() {
+  timerStop();
+  TIMER.segIdx = 0;
+  TIMER.doneSegs.clear();
+  if (TIMER.segments.length) timerInitSeg();
+  else {
+    document.getElementById('timer-digits').textContent = '00:00';
+    document.getElementById('timer-seg-label').textContent = '—';
+  }
+  timerRenderSegs();
+  document.getElementById('timer-ring').classList.remove('done');
+}
+
+function timerNextSeg() {
+  if (!TIMER.segments.length) return;
+  timerSegComplete();
+}
+
+function timerSegComplete() {
+  timerPing();
+  TIMER.doneSegs.add(TIMER.segIdx);
+  TIMER.segIdx++;
+  if (TIMER.segIdx >= TIMER.segments.length) {
+    timerDone();
+  } else {
+    timerInitSeg();
+    timerRenderSegs();
+    if (TIMER.running) {
+      // keep running into next seg
+    }
+  }
+}
+
+function timerDone() {
+  timerStop();
+  TIMER.remainSecs = 0;
+  document.getElementById('timer-digits').textContent = 'Done';
+  document.getElementById('timer-seg-label').textContent = 'Session complete';
+  document.getElementById('timer-ring').classList.remove('running');
+  document.getElementById('timer-ring').classList.add('done');
+  document.getElementById('timer-ring').style.strokeDashoffset = 0;
+  timerRenderSegs();
+  timerPing(true);
+}
+
+function timerRender() {
+  const m = Math.floor(TIMER.remainSecs / 60);
+  const s = TIMER.remainSecs % 60;
+  document.getElementById('timer-digits').textContent =
+    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const seg = TIMER.segments[TIMER.segIdx];
+  document.getElementById('timer-seg-label').textContent = seg ? seg.label : '—';
+  // Ring
+  const frac = TIMER.totalSecs > 0 ? TIMER.remainSecs / TIMER.totalSecs : 0;
+  const offset = CIRCUMFERENCE * (1 - frac);
+  document.getElementById('timer-ring').style.strokeDashoffset = offset;
+}
+
+function timerRenderSegs() {
+  const el = document.getElementById('timer-segments');
+  if (!el || !TIMER.segments.length) { if(el) el.innerHTML=''; return; }
+  el.innerHTML = TIMER.segments.map((seg, i) => {
+    let cls = 'timer-seg-row';
+    if (i === TIMER.segIdx) cls += ' active-seg';
+    if (TIMER.doneSegs.has(i)) cls += ' done-seg';
+    const total = TIMER.segments.reduce((a,b)=>a+b.minutes,0);
+    return `<div class="${cls}" onclick="timerJumpSeg(${i})">
+      <div class="timer-seg-dot"></div>
+      <div class="timer-seg-name">${seg.label}</div>
+      <div class="timer-seg-time">${seg.minutes} min</div>
+    </div>`;
+  }).join('');
+  // Show total
+  const total = TIMER.segments.reduce((a,b)=>a+b.minutes,0);
+  el.innerHTML += `<div style="text-align:right;margin-top:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px">TOTAL: ${total} MIN</div>`;
+}
+
+function timerJumpSeg(idx) {
+  timerStop();
+  TIMER.segIdx = idx;
+  TIMER.doneSegs.clear();
+  for(let i=0;i<idx;i++) TIMER.doneSegs.add(i);
+  timerInitSeg();
+  timerRenderSegs();
+}
+
+function timerPing(final=false) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const tones = final ? [523, 659, 784] : [660, 880];
+    tones.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.18;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+      gain.gain.linearRampToValueAtTime(0, t + 0.35);
+      osc.start(t); osc.stop(t + 0.4);
+    });
+  } catch(e) {}
+}
+
+// Hook: when energy tab changes, reload session segs if timer isn't running
+function setEnergyAndTimer(level) {
+  setEnergy(level);
+  if (!TIMER.running && TIMER.segments.length > 0) {
+    // auto-reload if timer was loaded from session
+    const modeLabel = document.getElementById('timer-mode-label').textContent;
+    if (modeLabel === 'Session') {
+      setTimeout(timerLoadSession, 50);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
 function init() {
@@ -2309,8 +2926,6 @@ function init() {
   buildCurriculum();
   buildMilestones();
   buildToneProfiles();
-  buildGiftPanel();
-  buildAcousticPanel();
   buildSwapTable('sw-phase1', SWAPS.phase1, false, 1);
   buildSwapTable('sw-phase2', SWAPS.phase2, false, 2);
   buildSwapTable('sw-phase3', SWAPS.phase3, false, 3);
