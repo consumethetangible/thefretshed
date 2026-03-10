@@ -533,7 +533,36 @@ body {
 }
 .timer-custom-input:focus { outline: none; border-color: var(--accent); }
 
-/* ─── SONGS CURRENT ───────────────────────── */
+/* ─── POINTER DRAG ───────────────────────── */
+.sl-card { touch-action: none; }
+.sl-card.dragging { opacity: 0.35; pointer-events: none; }
+.drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.88;
+  transform: rotate(2deg) scale(1.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  border-radius: 7px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 11px 13px;
+  min-width: 160px;
+  max-width: 240px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  transition: none;
+}
+.drag-insert-line {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  margin: 2px 4px;
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(196,144,96,0.5);
+}
 .song-row {
   display: flex;
   align-items: center;
@@ -2432,7 +2461,7 @@ function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
 
   const safetitle = title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-  return `<div class="sl-card status-${sc}" draggable="true"
+  return `<div class="sl-card status-${sc}"
     data-title="${title.replace(/"/g, '&quot;')}"
     data-phase="${phaseNum}"
     data-col="${col}"
@@ -2454,97 +2483,191 @@ function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
   </div>`;
 }
 
-// ─── Drag & Drop ──────────────────────────────
+// ─── Pointer-based Drag (works on iOS, Android, desktop) ──────────────
 let dragState = null;
+let dragGhost = null;
+let dragInsertLine = null;
+const DRAG_THRESHOLD = 6; // px movement before drag begins
 
 function initDragDrop(phaseNum) {
   const currZone = document.getElementById(`sl-curriculum-${phaseNum}`);
   const optsZone = document.getElementById(`sl-options-${phaseNum}`);
   if (!currZone || !optsZone) return;
 
-  [currZone, optsZone].forEach(zone => {
-    zone.addEventListener('dragover', e => {
-      e.preventDefault();
-      if (!dragState) return;
-      const isCurriculum = zone.dataset.col === 'curriculum';
-      const state = getCurriculumState(phaseNum);
-      const wouldExceed = isCurriculum && !state.curriculum.includes(dragState.title) && state.curriculum.length >= 7;
-      zone.classList.toggle('drag-over', !wouldExceed);
-      zone.classList.toggle('drop-blocked', wouldExceed);
-    });
+  document.querySelectorAll(
+    `#sl-curriculum-${phaseNum} .sl-card, #sl-options-${phaseNum} .sl-card`
+  ).forEach(card => attachPointerDrag(card, phaseNum));
+}
 
-    zone.addEventListener('dragleave', e => {
-      if (!zone.contains(e.relatedTarget)) {
-        zone.classList.remove('drag-over', 'drop-blocked');
+function attachPointerDrag(card, phaseNum) {
+  let startX, startY, moved = false;
+
+  card.addEventListener('pointerdown', e => {
+    // Don't initiate drag from interactive controls
+    if (e.target.closest('select, button')) return;
+    e.preventDefault();
+    card.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    startY = e.clientY;
+    moved = false;
+
+    card.addEventListener('pointermove', onMove);
+    card.addEventListener('pointerup', onUp);
+    card.addEventListener('pointercancel', onUp);
+
+    function onMove(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+
+      if (!moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+
+      if (!moved) {
+        // Begin drag
+        moved = true;
+        dragState = {
+          title: card.dataset.title,
+          col: card.dataset.col,
+          phase: phaseNum,
+          card,
+        };
+        card.classList.add('dragging');
+
+        // Create ghost
+        dragGhost = document.createElement('div');
+        dragGhost.className = 'drag-ghost';
+        dragGhost.textContent = card.dataset.title;
+        document.body.appendChild(dragGhost);
       }
-    });
 
-    zone.addEventListener('drop', e => {
-      e.preventDefault();
-      zone.classList.remove('drag-over', 'drop-blocked');
-      if (!dragState) return;
-      const targetCol = zone.dataset.col;
-
-      const state = getCurriculumState(phaseNum);
-
-      // Cross-column move
-      if (dragState.col !== targetCol) {
-        if (targetCol === 'curriculum' && state.curriculum.length >= 7) return;
-        if (targetCol === 'curriculum') {
-          state.curriculum.push(dragState.title);
-        } else {
-          state.curriculum = state.curriculum.filter(t => t !== dragState.title);
-          if (state.stretch === dragState.title) state.stretch = null;
-        }
-        saveCurriculumState(phaseNum, state);
-        rebuildSwapPhase(phaseNum);
-        refreshSiteFromCurriculum();
-        return;
+      // Move ghost
+      if (dragGhost) {
+        dragGhost.style.left = (ev.clientX - 20) + 'px';
+        dragGhost.style.top  = (ev.clientY - 20) + 'px';
       }
 
-      // Same-column reorder (curriculum only)
-      if (targetCol === 'curriculum') {
-        // Find drop position from pointer
-        const cards = [...zone.querySelectorAll('.sl-card:not(.dragging)')];
-        const dragIdx = state.curriculum.indexOf(dragState.title);
-        if (dragIdx === -1) return;
+      // Highlight target zone and show insert line
+      updateDropIndicators(ev.clientX, ev.clientY, phaseNum);
+    }
 
-        // Find which card we're hovering over
-        let dropIdx = state.curriculum.length;
-        for (let i = 0; i < cards.length; i++) {
-          const rect = cards[i].getBoundingClientRect();
-          if (e.clientY < rect.top + rect.height / 2) {
-            const hoveredTitle = cards[i].dataset.title;
-            const idx = state.curriculum.indexOf(hoveredTitle);
-            if (idx !== -1) { dropIdx = idx; break; }
-          }
-        }
+    function onUp(ev) {
+      card.removeEventListener('pointermove', onMove);
+      card.removeEventListener('pointerup', onUp);
+      card.removeEventListener('pointercancel', onUp);
 
-        // Reorder
-        const newOrder = [...state.curriculum];
-        newOrder.splice(dragIdx, 1);
-        const insertAt = dropIdx > dragIdx ? dropIdx - 1 : dropIdx;
-        newOrder.splice(insertAt, 0, dragState.title);
-        state.curriculum = newOrder;
-        saveCurriculumState(phaseNum, state);
-        rebuildSwapPhase(phaseNum);
-        refreshSiteFromCurriculum();
+      if (moved && dragState) {
+        commitDrop(ev.clientX, ev.clientY, phaseNum);
       }
-    });
-  });
 
-  // Card drag events
-  document.querySelectorAll(`#sl-curriculum-${phaseNum} .sl-card, #sl-options-${phaseNum} .sl-card`).forEach(card => {
-    card.addEventListener('dragstart', e => {
-      dragState = { title: card.dataset.title, col: card.dataset.col, phase: phaseNum };
-      setTimeout(() => card.classList.add('dragging'), 0);
-    });
-    card.addEventListener('dragend', () => {
+      // Cleanup
       card.classList.remove('dragging');
+      if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+      if (dragInsertLine) { dragInsertLine.remove(); dragInsertLine = null; }
+      document.querySelectorAll('.sl-drop-zone').forEach(z =>
+        z.classList.remove('drag-over', 'drop-blocked'));
       dragState = null;
-      document.querySelectorAll('.sl-drop-zone').forEach(z => z.classList.remove('drag-over', 'drop-blocked'));
-    });
+      moved = false;
+    }
   });
+}
+
+function getZoneAtPoint(x, y, phaseNum) {
+  const currZone = document.getElementById(`sl-curriculum-${phaseNum}`);
+  const optsZone = document.getElementById(`sl-options-${phaseNum}`);
+  for (const zone of [currZone, optsZone]) {
+    if (!zone) continue;
+    const r = zone.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return zone;
+  }
+  return null;
+}
+
+function updateDropIndicators(x, y, phaseNum) {
+  const currZone = document.getElementById(`sl-curriculum-${phaseNum}`);
+  const optsZone = document.getElementById(`sl-options-${phaseNum}`);
+  if (!currZone || !optsZone || !dragState) return;
+
+  const zone = getZoneAtPoint(x, y, phaseNum);
+
+  // Clear all zones first
+  [currZone, optsZone].forEach(z => z.classList.remove('drag-over', 'drop-blocked'));
+  if (dragInsertLine) { dragInsertLine.remove(); dragInsertLine = null; }
+
+  if (!zone) return;
+
+  const isCurriculum = zone.dataset.col === 'curriculum';
+  const state = getCurriculumState(phaseNum);
+  const wouldExceed = isCurriculum
+    && !state.curriculum.includes(dragState.title)
+    && state.curriculum.length >= 7;
+
+  if (wouldExceed) {
+    zone.classList.add('drop-blocked');
+    return;
+  }
+
+  zone.classList.add('drag-over');
+
+  // Show insert line for curriculum reorder
+  if (isCurriculum && dragState.col === 'curriculum') {
+    const insertIdx = getInsertIndex(x, y, zone, state.curriculum);
+    dragInsertLine = document.createElement('div');
+    dragInsertLine.className = 'drag-insert-line';
+    const cards = [...zone.querySelectorAll('.sl-card:not(.dragging)')];
+    if (insertIdx < cards.length) {
+      zone.insertBefore(dragInsertLine, cards[insertIdx]);
+    } else {
+      zone.appendChild(dragInsertLine);
+    }
+  }
+}
+
+function getInsertIndex(x, y, zone, curriculum) {
+  const cards = [...zone.querySelectorAll('.sl-card:not(.dragging)')];
+  for (let i = 0; i < cards.length; i++) {
+    const rect = cards[i].getBoundingClientRect();
+    if (y < rect.top + rect.height / 2) {
+      const title = cards[i].dataset.title;
+      const idx = curriculum.indexOf(title);
+      return idx !== -1 ? idx : i;
+    }
+  }
+  return curriculum.length;
+}
+
+function commitDrop(x, y, phaseNum) {
+  if (!dragState) return;
+  const zone = getZoneAtPoint(x, y, phaseNum);
+  if (!zone) return;
+
+  const targetCol = zone.dataset.col;
+  const state = getCurriculumState(phaseNum);
+
+  if (dragState.col !== targetCol) {
+    // Cross-column move
+    if (targetCol === 'curriculum' && state.curriculum.length >= 7) return;
+    if (targetCol === 'curriculum') {
+      state.curriculum.push(dragState.title);
+    } else {
+      state.curriculum = state.curriculum.filter(t => t !== dragState.title);
+      if (state.stretch === dragState.title) state.stretch = null;
+    }
+  } else if (targetCol === 'curriculum') {
+    // Same-column reorder
+    const dragIdx = state.curriculum.indexOf(dragState.title);
+    if (dragIdx === -1) return;
+    const dropIdx = getInsertIndex(x, y, zone, state.curriculum);
+    const newOrder = [...state.curriculum];
+    newOrder.splice(dragIdx, 1);
+    const insertAt = dropIdx > dragIdx ? dropIdx - 1 : dropIdx;
+    newOrder.splice(Math.max(0, insertAt), 0, dragState.title);
+    state.curriculum = newOrder;
+  } else {
+    return; // options → options, no-op
+  }
+
+  saveCurriculumState(phaseNum, state);
+  rebuildSwapPhase(phaseNum);
+  refreshSiteFromCurriculum();
 }
 
 function handleStatusChange(e, title, phaseNum) {
