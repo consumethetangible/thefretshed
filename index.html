@@ -35,7 +35,7 @@
   --p5c: #9278b0; --p5b: rgba(146,120,176,0.12); --p5br: rgba(146,120,176,0.28);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-html { font-size: 17px; }
+html { font-size: 18px; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -67,7 +67,7 @@ body {
 }
 .brand-sub {
   font-family: 'DM Mono', monospace;
-  font-size: 8px;
+  font-size: 10px;
   color: var(--text3);
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -78,7 +78,7 @@ body {
   border: none;
   color: var(--text3);
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 6px 12px;
@@ -739,6 +739,140 @@ body {
   .energy-tabs { width: 100%; }
   .etab { flex: 1; text-align: center; }
 }
+
+/* ─── SONG LIBRARY ───────────────────────────── */
+.sl-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.sl-col-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sl-col-header span { color: var(--text3); }
+.sl-col-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: var(--text3);
+}
+.sl-drop-zone {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  padding: 2px;
+}
+.sl-drop-zone.drag-over {
+  background: var(--accent-dim2);
+  outline: 1.5px dashed var(--border2);
+}
+.sl-drop-zone.drop-blocked {
+  background: rgba(184,104,96,0.06);
+  outline: 1.5px dashed var(--red);
+}
+.sl-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 11px 13px;
+  cursor: grab;
+  user-select: none;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+  border-top: 3px solid var(--border2);
+}
+.sl-card:active { cursor: grabbing; }
+.sl-card.dragging { opacity: 0.4; }
+.sl-card.drop-target { box-shadow: 0 0 0 2px var(--accent); }
+.sl-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.sl-card-title { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.3; }
+.sl-card-artist { font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.sl-card-func { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.sl-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.badge-stretch {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  border-style: dashed;
+  border-width: 1px;
+}
+.badge-mastered {
+  background: rgba(114,168,120,0.15);
+  color: var(--green);
+  border: 1px solid rgba(114,168,120,0.4);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.sl-stretch-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 3px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.sl-stretch-btn:hover { color: var(--text2); }
+.sl-stretch-btn.active { color: var(--accent2); }
+.sl-empty {
+  border: 1.5px dashed var(--border);
+  border-radius: 6px;
+  padding: 18px;
+  text-align: center;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+/* Metal itch phase-split diagonal border */
+.metal-song { position: relative; overflow: hidden; }
+.metal-song::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+@media (max-width: 768px) {
+  .sl-layout { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -753,9 +887,7 @@ body {
     <button class="nav-btn" onclick="showPanel('curriculum', event)">Curriculum</button>
     <button class="nav-btn" onclick="showPanel('milestones', event)">Milestones</button>
     <button class="nav-btn" onclick="showPanel('rig', event)">Rig & Tone</button>
-    <button class="nav-btn" onclick="showPanel('swaps', event)">Swaps</button>
-    <button class="nav-btn" onclick="showPanel('gift', event)">Personal</button>
-    <button class="nav-btn" onclick="showPanel('acoustic', event)">Acoustic</button>
+    <button class="nav-btn" onclick="showPanel('swaps', event)">Song Library</button>
   </nav>
   <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -767,9 +899,7 @@ body {
   <button class="nav-btn" onclick="showPanel('curriculum', event)">Curriculum</button>
   <button class="nav-btn" onclick="showPanel('milestones', event)">Milestones</button>
   <button class="nav-btn" onclick="showPanel('rig', event)">Rig & Tone</button>
-  <button class="nav-btn" onclick="showPanel('swaps', event)">Swaps</button>
-  <button class="nav-btn" onclick="showPanel('gift', event)">Personal</button>
-  <button class="nav-btn" onclick="showPanel('acoustic', event)">Acoustic</button>
+  <button class="nav-btn" onclick="showPanel('swaps', event)">Song Library</button>
 </div>
 
 <div class="main">
@@ -1058,11 +1188,15 @@ body {
     <button class="inner-tab" onclick="showInner('sw','phase2')">Phase 2</button>
     <button class="inner-tab" onclick="showInner('sw','phase3')">Phase 3</button>
     <button class="inner-tab" onclick="showInner('sw','metalitch')">Metal Itch</button>
+    <button class="inner-tab" onclick="showInner('sw','personal')">Personal</button>
+    <button class="inner-tab" onclick="showInner('sw','acoustic')">Acoustic</button>
   </div>
   <div id="sw-phase1" class="inner-panel active"></div>
   <div id="sw-phase2" class="inner-panel"></div>
   <div id="sw-phase3" class="inner-panel"></div>
   <div id="sw-metalitch" class="inner-panel"></div>
+  <div id="sw-personal" class="inner-panel"></div>
+  <div id="sw-acoustic" class="inner-panel"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -1558,6 +1692,9 @@ function toggleMobileNav() {
 function setWeek(w) {
   currentWeek = w;
   localStorage.setItem('ngc-week', w);
+  // Phase is always 1 for now (week 1-12); future phases will update this
+  const phaseNum = 1;
+  localStorage.setItem('ngc-current-phase', phaseNum);
   document.getElementById('current-week').textContent = w;
   document.querySelectorAll('[id^="wbtn-"]').forEach(b => {
     b.classList.remove('btn-ghost');
@@ -1634,14 +1771,34 @@ function toggleToneCard(el) { el.classList.toggle('expanded'); }
 // ═══════════════════════════════════════════
 function buildDashSongs() {
   const container = document.getElementById('dash-songs');
-  container.innerHTML = PHASES[0].songs.map(s => {
-    const badge = s.status === 'active'
+  if (!container) return;
+  // Use current phase (from week selector phase)
+  const phaseNum = parseInt(localStorage.getItem('ngc-current-phase') || '1');
+  const phase = PHASES.find(p => p.id === phaseNum) || PHASES[0];
+  const state = getCurriculumState(phaseNum);
+  const mastered = getMasteredSongs();
+  const titles = state.curriculum;
+
+  // Also update card title
+  const titleEl = container.closest('.card')?.querySelector('.card-title');
+  if (titleEl) titleEl.textContent = `Phase ${phaseNum} Songs`;
+
+  container.innerHTML = titles.map(title => {
+    const song = phase.songs.find(s => s.title === title);
+    const artist = song ? song.artist : '';
+    const isStretch = state.stretch === title;
+    const isMastered = mastered.has(title);
+    const isActive = song && song.status === 'active';
+    let badge = isActive
       ? '<span class="badge badge-active">Active</span>'
       : '<span class="badge badge-pending">Up Next</span>';
-    return `<div class="song-row ${s.status === 'active' ? 'active-song' : ''}">
-      <div><div class="song-title">${s.title}</div><div class="song-artist">${s.artist}</div></div>
-      ${badge}</div>`;
-  }).join('');
+    if (isMastered) badge = '<span class="badge badge-mastered">✓ Mastered</span>';
+    if (isStretch) badge += `<span class="badge badge-stretch" style="color:var(--p${phaseNum}c);border-color:var(--p${phaseNum}br);background:var(--p${phaseNum}b)">Stretch</span>`;
+    return `<div class="song-row ${isActive ? 'active-song' : ''}">
+      <div style="flex:1"><div class="song-title">${title}</div><div class="song-artist">${artist}</div></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${badge}</div>
+    </div>`;
+  }).join('') || '<div class="small muted">No songs in curriculum yet.</div>';
 }
 
 // ═══════════════════════════════════════════
@@ -1766,46 +1923,271 @@ function buildToneProfiles() {
 }
 
 // ═══════════════════════════════════════════
-// BUILD SWAP TABLES
+// SONG LIBRARY STATE
 // ═══════════════════════════════════════════
-function buildSwapTable(containerId, data, isMetalItch) {
-  const container = document.getElementById(containerId);
-  if (isMetalItch) {
-    container.innerHTML = `
-      <div class="small muted" style="margin-bottom:16px">Pre-vetted songs with documented curriculum fit. Phase 1 Quick Wins are short confidence builders — learn them whenever the itch hits. Higher-phase entries swap in for curriculum songs when the metal urge strikes.</div>
-      <div class="metal-itch-grid">
-        ${data.map(s => `<div class="metal-song">
-          <div class="metal-song-name">${s.song}</div>
-          <div class="metal-song-meta"><span class="badge badge-p3">${s.fits}</span></div>
-          <div class="metal-song-why">${s.why}</div>
-        </div>`).join('')}
-      </div>`;
-  } else {
-    container.innerHTML = `
-      <div class="small muted" style="margin-bottom:14px">Every song can be swapped for another serving the same primary teaching function. The function is preserved; the song changes.</div>
-      <table class="swap-table">
-        <thead><tr><th>Song</th><th>Primary Function</th><th>Swap Options</th></tr></thead>
-        <tbody>${data.map(s => `<tr>
-          <td><strong>${s.song}</strong></td>
-          <td class="muted small">${s.func}</td>
-          <td class="swap-options">${s.swaps}</td>
-        </tr>`).join('')}</tbody>
-      </table>`;
+const PHASE_META = {
+  1: { color:'#c06858', bg:'rgba(192,104,88,0.12)', border:'rgba(192,104,88,0.28)', badge:'badge-p1', label:'Phase 1', cssVar:'var(--p1c)' },
+  2: { color:'#b88448', bg:'rgba(184,132,72,0.12)',  border:'rgba(184,132,72,0.28)',  badge:'badge-p2', label:'Phase 2', cssVar:'var(--p2c)' },
+  3: { color:'#a89c50', bg:'rgba(168,156,80,0.12)',  border:'rgba(168,156,80,0.28)',  badge:'badge-p3', label:'Phase 3', cssVar:'var(--p3c)' },
+  4: { color:'#6090b8', bg:'rgba(96,144,184,0.12)',  border:'rgba(96,144,184,0.28)',  badge:'badge-p4', label:'Phase 4', cssVar:'var(--p4c)' },
+  5: { color:'#9278b0', bg:'rgba(146,120,176,0.12)', border:'rgba(146,120,176,0.28)', badge:'badge-p5', label:'Phase 5', cssVar:'var(--p5c)' },
+};
+
+// Parse "Phase X/Y" string into array of phase numbers
+function parsePhaseNums(fitsStr) {
+  const matches = fitsStr.match(/\d/g);
+  return matches ? [...new Set(matches.map(Number))].filter(n => n >= 1 && n <= 5) : [1];
+}
+
+function getPhaseTopBorder(fitsStr) {
+  const phases = parsePhaseNums(fitsStr);
+  if (phases.length === 1) {
+    return `border-top: 3px solid ${PHASE_META[phases[0]].cssVar};`;
   }
+  // Diagonal split for two phases
+  const c1 = PHASE_META[phases[0]].color;
+  const c2 = PHASE_META[phases[1]].color;
+  return `border-top: 3px solid transparent; background-image: linear-gradient(var(--bg3), var(--bg3)), linear-gradient(to right, ${c1} 50%, ${c2} 50%); background-origin: border-box; background-clip: padding-box, border-box;`;
+}
+
+function getPhaseBadgesHtml(fitsStr) {
+  const phases = parsePhaseNums(fitsStr);
+  return phases.map(p => `<span class="badge ${PHASE_META[p].badge}">${PHASE_META[p].label}</span>`).join(' ');
+}
+
+// Curriculum state per phase: { curriculum: [...songTitles], stretch: songTitle|null }
+function getCurriculumState(phaseNum) {
+  const key = `ngc-curriculum-p${phaseNum}`;
+  const saved = localStorage.getItem(key);
+  if (saved) return JSON.parse(saved);
+  // Default: use PHASES data
+  const phase = PHASES.find(p => p.id === phaseNum);
+  if (!phase) return { curriculum: [], stretch: null };
+  return { curriculum: phase.songs.map(s => s.title), stretch: null };
+}
+
+function saveCurriculumState(phaseNum, state) {
+  localStorage.setItem(`ngc-curriculum-p${phaseNum}`, JSON.stringify(state));
+}
+
+function getMasteredSongs() {
+  // Parse milestone state to get mastered song titles
+  const done = JSON.parse(localStorage.getItem('ngc-milestones') || '{}');
+  const mastered = new Set();
+  Object.keys(done).forEach(key => {
+    if (done[key]) {
+      // Try to extract song title from milestone text (first part before " — " or "front to back")
+      const match = key.match(/^([^—]+?)(?:\s+front to back| —)/);
+      if (match) mastered.add(match[1].trim());
+      // Also add exact song titles from PHASES
+      PHASES.forEach(ph => ph.songs.forEach(s => {
+        if (key.includes(s.title)) mastered.add(s.title);
+      }));
+    }
+  });
+  return mastered;
 }
 
 // ═══════════════════════════════════════════
-// BUILD GIFT / PERSONAL PANEL
+// BUILD SWAP TABLES (Song Library phases)
 // ═══════════════════════════════════════════
-function buildGiftPanel() {
-  const container = document.getElementById('gift-content');
+function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (isMetalItch) {
+    // Metal Itch — phase-colored cards with diagonal split for multi-phase
+    container.innerHTML = `
+      <div class="small muted" style="margin-bottom:16px">Pre-vetted songs with documented curriculum fit. Phase 1 Quick Wins are confidence builders — learn whenever the itch hits. Higher-phase entries swap in when the metal urge strikes.</div>
+      <div class="metal-itch-grid">
+        ${data.map(s => {
+          const topBorder = getPhaseTopBorder(s.fits);
+          const badgesHtml = getPhaseBadgesHtml(s.fits);
+          return `<div class="metal-song" style="${topBorder}">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">${badgesHtml}</div>
+            <div class="metal-song-name">${s.song}</div>
+            <div class="metal-song-why">${s.why}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    return;
+  }
+
+  // Phase swap — drag-drop two-column layout
+  const pm = PHASE_META[phaseNum] || PHASE_META[1];
+  const phase = PHASES.find(p => p.id === phaseNum);
+  if (!phase) return;
+
+  const state = getCurriculumState(phaseNum);
+  const mastered = getMasteredSongs();
+
+  // All known song titles for this phase (curriculum songs + swap options)
+  const curriculumTitles = state.curriculum;
+  const optionsTitles = phase.songs.map(s => s.title).filter(t => !curriculumTitles.includes(t));
+  // Also add swap song alternatives (just the song names parsed from swaps string)
+  // We keep it simple: options = everything not in curriculum
+
+  container.innerHTML = `
+    <div class="small muted" style="margin-bottom:16px">Drag songs between columns to build your curriculum. Max 6 songs + 1 stretch (⭐ toggle). Changes sync across the site.</div>
+    <div class="sl-layout" id="sl-layout-${phaseNum}">
+      <div>
+        <div class="sl-col-header">
+          Curriculum
+          <span class="sl-col-count" id="sl-count-${phaseNum}">${curriculumTitles.length}/6</span>
+        </div>
+        <div class="sl-drop-zone" id="sl-curriculum-${phaseNum}" data-phase="${phaseNum}" data-col="curriculum">
+          ${curriculumTitles.length === 0 ? '<div class="sl-empty">Drop songs here</div>' :
+            curriculumTitles.map(title => renderSlCard(title, phaseNum, 'curriculum', state, mastered, phase, data)).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="sl-col-header">Options</div>
+        <div class="sl-drop-zone" id="sl-options-${phaseNum}" data-phase="${phaseNum}" data-col="options">
+          ${optionsTitles.length === 0 ? '<div class="sl-empty">All songs in curriculum</div>' :
+            optionsTitles.map(title => renderSlCard(title, phaseNum, 'options', state, mastered, phase, data)).join('')}
+        </div>
+      </div>
+    </div>`;
+
+  initDragDrop(phaseNum);
+}
+
+function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
+  const pm = PHASE_META[phaseNum] || PHASE_META[1];
+  const isStretch = state.stretch === title;
+  const isMastered = mastered.has(title);
+
+  // Find func description — from phase songs or swap data
+  const songObj = phase.songs.find(s => s.title === title);
+  const swapObj = swapData ? swapData.find(s => s.song === title) : null;
+  const func = swapObj ? swapObj.func : (songObj ? songObj.teaches.split(',')[0] : '');
+
+  const stretchStyle = isStretch
+    ? `background-color: ${pm.bg}; border-color: ${pm.border}; border-top-color: ${pm.color};`
+    : `border-top-color: ${pm.color};`;
+
+  const stretchBtnClass = isStretch ? 'sl-stretch-btn active' : 'sl-stretch-btn';
+
+  const badges = [];
+  if (isStretch) badges.push(`<span class="badge badge-stretch" style="color:${pm.color};border-color:${pm.border};background:${pm.bg}">Stretch</span>`);
+  if (isMastered) badges.push(`<span class="badge badge-mastered">✓ Mastered</span>`);
+
+  return `<div class="sl-card" draggable="true"
+    data-title="${title.replace(/"/g, '&quot;')}"
+    data-phase="${phaseNum}"
+    data-col="${col}"
+    style="${stretchStyle}">
+    <div class="sl-card-top">
+      <div style="flex:1">
+        <div class="sl-card-title">${title}</div>
+        <div class="sl-card-artist">${songObj ? songObj.artist : ''}</div>
+      </div>
+      ${col === 'curriculum' ? `<button class="${stretchBtnClass}" title="Toggle stretch" onclick="toggleStretch(event, ${phaseNum}, '${title.replace(/'/g, "\'")}')">⭐</button>` : ''}
+    </div>
+    ${func ? `<div class="sl-card-func">${func}</div>` : ''}
+    ${badges.length ? `<div class="sl-card-badges">${badges.join('')}</div>` : ''}
+  </div>`;
+}
+
+// ─── Drag & Drop ──────────────────────────────
+let dragState = null;
+
+function initDragDrop(phaseNum) {
+  const currZone = document.getElementById(`sl-curriculum-${phaseNum}`);
+  const optsZone = document.getElementById(`sl-options-${phaseNum}`);
+  if (!currZone || !optsZone) return;
+
+  [currZone, optsZone].forEach(zone => {
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!dragState) return;
+      const isCurriculum = zone.dataset.col === 'curriculum';
+      const state = getCurriculumState(phaseNum);
+      const wouldExceed = isCurriculum && !state.curriculum.includes(dragState.title) && state.curriculum.length >= 6;
+      zone.classList.toggle('drag-over', !wouldExceed);
+      zone.classList.toggle('drop-blocked', wouldExceed);
+    });
+
+    zone.addEventListener('dragleave', e => {
+      if (!zone.contains(e.relatedTarget)) {
+        zone.classList.remove('drag-over', 'drop-blocked');
+      }
+    });
+
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over', 'drop-blocked');
+      if (!dragState) return;
+      const targetCol = zone.dataset.col;
+      if (dragState.col === targetCol) return; // same column, no-op
+
+      const state = getCurriculumState(phaseNum);
+      if (targetCol === 'curriculum' && state.curriculum.length >= 6) return; // cap
+
+      // Move the song
+      if (targetCol === 'curriculum') {
+        state.curriculum.push(dragState.title);
+      } else {
+        state.curriculum = state.curriculum.filter(t => t !== dragState.title);
+        if (state.stretch === dragState.title) state.stretch = null;
+      }
+
+      saveCurriculumState(phaseNum, state);
+      rebuildSwapPhase(phaseNum);
+      refreshSiteFromCurriculum();
+    });
+  });
+
+  // Card drag events
+  document.querySelectorAll(`#sl-curriculum-${phaseNum} .sl-card, #sl-options-${phaseNum} .sl-card`).forEach(card => {
+    card.addEventListener('dragstart', e => {
+      dragState = { title: card.dataset.title, col: card.dataset.col, phase: phaseNum };
+      setTimeout(() => card.classList.add('dragging'), 0);
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      dragState = null;
+      document.querySelectorAll('.sl-drop-zone').forEach(z => z.classList.remove('drag-over', 'drop-blocked'));
+    });
+  });
+}
+
+function toggleStretch(e, phaseNum, title) {
+  e.stopPropagation();
+  const state = getCurriculumState(phaseNum);
+  state.stretch = state.stretch === title ? null : title;
+  saveCurriculumState(phaseNum, state);
+  rebuildSwapPhase(phaseNum);
+  refreshSiteFromCurriculum();
+}
+
+function rebuildSwapPhase(phaseNum) {
+  const phase = PHASES.find(p => p.id === phaseNum);
+  if (!phase) return;
+  const containerId = `sw-phase${phaseNum}`;
+  const swapKey = `phase${phaseNum}`;
+  buildSwapTable(containerId, SWAPS[swapKey] || [], false, phaseNum);
+}
+
+// ─── Cross-site refresh ───────────────────────
+function refreshSiteFromCurriculum() {
+  buildDashSongs();       // Dashboard songs card
+  buildToneProfiles();    // Tone profiles (only show for current curriculum)
+}
+
+
+// ═══════════════════════════════════════════
+// BUILD PERSONAL SECTION (for Song Library)
+// ═══════════════════════════════════════════
+function buildPersonalSection(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
   container.innerHTML = `
     <div style="margin-bottom:20px">
       <div class="section-label">Personal Repertoire</div>
       <div class="small muted" style="margin-bottom:18px;max-width:600px;line-height:1.7">
-        Songs that live outside the curriculum phases — learned for personal reasons, emotional connection, or pure enjoyment.
-        No milestones attached. No phase assignment. No pressure. Work on these whenever the mood strikes,
-        alongside or between curriculum phases.
+        Songs outside the curriculum — learned for personal reasons, emotional connection, or pure enjoyment.
+        No milestones. No phase assignment. No pressure.
       </div>
       <div class="stack" style="gap:12px">
         ${GIFT_SONGS.map(s => `<div class="card" style="border-left:3px solid var(--accent)">
@@ -1821,48 +2203,49 @@ function buildGiftPanel() {
     </div>
     <div class="divider"></div>
     <div class="section-label" style="margin-top:16px">Add to Personal Repertoire</div>
-    <div class="small muted" style="margin-bottom:12px">Songs you want to remember for future sessions — not curriculum, just yours.</div>
+    <div class="small muted" style="margin-bottom:12px">Songs you want to remember — not curriculum, just yours.</div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input id="gift-input" type="text" placeholder="Song — Artist" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:8px 12px;outline:none;" />
-      <button class="btn btn-sm" onclick="addGiftSong()">Add</button>
+      <input id="lib-gift-input" type="text" placeholder="Song — Artist" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:8px 12px;outline:none;" />
+      <button class="btn btn-sm" onclick="addLibGiftSong()">Add</button>
     </div>
-    <div id="gift-user-list" style="display:flex;flex-direction:column;gap:6px"></div>`;
-  renderUserGiftSongs();
+    <div id="lib-gift-user-list" style="display:flex;flex-direction:column;gap:6px"></div>`;
+  renderLibGiftSongs();
 }
 
-function addGiftSong() {
-  const input = document.getElementById('gift-input');
+function addLibGiftSong() {
+  const input = document.getElementById('lib-gift-input');
   const val = input.value.trim();
   if (!val) return;
   const list = JSON.parse(localStorage.getItem('ngc-gift-songs') || '[]');
   list.push(val);
   localStorage.setItem('ngc-gift-songs', JSON.stringify(list));
   input.value = '';
-  renderUserGiftSongs();
+  renderLibGiftSongs();
 }
-function removeGiftSong(idx) {
+function removeLibGiftSong(idx) {
   const list = JSON.parse(localStorage.getItem('ngc-gift-songs') || '[]');
   list.splice(idx, 1);
   localStorage.setItem('ngc-gift-songs', JSON.stringify(list));
-  renderUserGiftSongs();
+  renderLibGiftSongs();
 }
-function renderUserGiftSongs() {
-  const container = document.getElementById('gift-user-list');
+function renderLibGiftSongs() {
+  const container = document.getElementById('lib-gift-user-list');
   if (!container) return;
   const list = JSON.parse(localStorage.getItem('ngc-gift-songs') || '[]');
   if (!list.length) { container.innerHTML = ''; return; }
   container.innerHTML = list.map((s, i) => `
     <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:5px">
       <span style="flex:1;font-size:13px">${s}</span>
-      <button onclick="removeGiftSong(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;">×</button>
+      <button onclick="removeLibGiftSong(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;">×</button>
     </div>`).join('');
 }
 
 // ═══════════════════════════════════════════
-// BUILD ACOUSTIC PANEL
+// BUILD ACOUSTIC SECTION (for Song Library)
 // ═══════════════════════════════════════════
-function buildAcousticPanel() {
-  const container = document.getElementById('acoustic-content');
+function buildAcousticSection(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
   const tierColors = ['var(--green)', 'var(--accent)', 'var(--p5c)'];
   const tierBorderColors = ['rgba(114,168,120,0.35)', 'rgba(196,144,96,0.35)', 'rgba(146,120,176,0.35)'];
   const tierBg = ['rgba(114,168,120,0.06)', 'rgba(196,144,96,0.06)', 'rgba(146,120,176,0.06)'];
@@ -1928,10 +2311,12 @@ function init() {
   buildToneProfiles();
   buildGiftPanel();
   buildAcousticPanel();
-  buildSwapTable('sw-phase1', SWAPS.phase1, false);
-  buildSwapTable('sw-phase2', SWAPS.phase2, false);
-  buildSwapTable('sw-phase3', SWAPS.phase3, false);
-  buildSwapTable('sw-metalitch', SWAPS.metalitch, true);
+  buildSwapTable('sw-phase1', SWAPS.phase1, false, 1);
+  buildSwapTable('sw-phase2', SWAPS.phase2, false, 2);
+  buildSwapTable('sw-phase3', SWAPS.phase3, false, 3);
+  buildSwapTable('sw-metalitch', SWAPS.metalitch, true, null);
+  buildPersonalSection('sw-personal');
+  buildAcousticSection('sw-acoustic');
 
   const savedNotes = localStorage.getItem('ngc-notes');
   if (savedNotes) document.getElementById('session-notes').value = savedNotes;
