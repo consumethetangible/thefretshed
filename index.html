@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* ── Backgrounds: cool-warm charcoal, like aged slate with a hint of warmth ── */
+  /* ── Backgrounds: page darker, cards lighter for more contrast ── */
   --bg:  #161819;
   --bg2: #23272f;
   --bg3: #2d3139;
@@ -15,23 +15,19 @@
   --border:  #3d4250;
   --border2: #4e5566;
 
-  /* ── Text: cool cream, slightly desaturated ── */
   --text:  #e8e6e1;
   --text2: #9fa099;
   --text3: #636870;
 
-  /* ── Accent: muted amber with a cooler undertone — old studio console ── */
   --accent:  #c49060;
   --accent2: #d8aa7a;
   --accent-dim:  rgba(196,144,96,0.12);
   --accent-dim2: rgba(196,144,96,0.06);
 
-  /* ── Utility ── */
   --red:   #b86860;
   --green: #72a878;
   --blue:  #6090b8;
 
-  /* ── Phase colors: cooler, faded print ── */
   --p1c: #c06858; --p1b: rgba(192,104,88,0.12);  --p1br: rgba(192,104,88,0.28);
   --p2c: #b88448; --p2b: rgba(184,132,72,0.12);  --p2br: rgba(184,132,72,0.28);
   --p3c: #a89c50; --p3b: rgba(168,156,80,0.12);  --p3br: rgba(168,156,80,0.28);
@@ -94,8 +90,52 @@ body {
 .nav-btn:hover { color: var(--text); background: var(--bg3); }
 .nav-btn.active { color: var(--accent); background: var(--accent-dim); }
 
+/* ─── HAMBURGER ──────────────────────────── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text2);
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 56px;
+  left: 0; right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  z-index: 199;
+  padding: 8px 12px;
+  flex-direction: column;
+  gap: 2px;
+}
+.mobile-nav.open { display: flex; }
+.mobile-nav .nav-btn {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  border-radius: 5px;
+}
+
 /* ─── LAYOUT ─────────────────────────────── */
-.main { padding: 24px 20px; max-width: 1080px; margin: 0 auto; }
+.main { padding: 24px 20px; max-width: 1400px; margin: 0 auto; }
 .panel { display: none; }
 .panel.active { display: block; }
 
@@ -650,6 +690,32 @@ body {
 .inner-panel { display: none; }
 .inner-panel.active { display: block; }
 
+/* ─── DESKTOP (1200px+) ──────────────────── */
+@media (min-width: 1200px) {
+  .dash-grid {
+    grid-template-columns: 1fr 1fr 340px;
+    grid-template-rows: auto auto;
+  }
+  .dash-left { display: contents; }
+  .dash-right { display: contents; }
+  .phase-hero { grid-column: 1; grid-row: 1; }
+  .session-card { grid-column: 2; grid-row: 1 / 3; }
+  .week-selector-card { grid-column: 1; grid-row: 2; }
+  .dash-right > *:nth-child(1) { grid-column: 3; grid-row: 1; }
+  .dash-right > *:nth-child(2) { grid-column: 3; grid-row: 2; }
+  .dash-right > *:nth-child(3) { grid-column: 3; grid-row: 3; }
+  .gear-grid { grid-template-columns: repeat(4, 1fr); }
+  .metal-itch-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ─── TABLET LANDSCAPE (900px–1199px) ────── */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .dash-grid { grid-template-columns: 1fr 300px; }
+  .gear-grid { grid-template-columns: repeat(3, 1fr); }
+  .metal-itch-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── TABLET PORTRAIT / SMALL (≤768px) ───── */
 @media (max-width: 768px) {
   .dash-grid { grid-template-columns: 1fr; }
   .gear-grid { grid-template-columns: 1fr 1fr; }
@@ -657,23 +723,53 @@ body {
   .metal-itch-grid { grid-template-columns: 1fr; }
   .nav-btn { padding: 6px 8px; font-size: 9px; }
 }
+
+/* ─── IPHONE / SMALL MOBILE (≤600px) ──────── */
+@media (max-width: 600px) {
+  .nav { display: none; }
+  .hamburger { display: flex; }
+  .brand-sub { display: none; }
+  .main { padding: 16px 14px; }
+  .header { padding: 0 14px; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .gear-grid { grid-template-columns: 1fr 1fr; }
+  .song-detail-grid { grid-template-columns: 1fr; }
+  .metal-itch-grid { grid-template-columns: 1fr; }
+  .session-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .energy-tabs { width: 100%; }
+  .etab { flex: 1; text-align: center; }
+}
 </style>
 </head>
 <body>
+
 <div class="header">
   <div class="brand">
     <div class="brand-logo">THE SHED</div>
     <div class="brand-sub">Chris's Practice Room</div>
   </div>
   <nav class="nav">
-    <button class="nav-btn active" onclick="showPanel('dashboard')">Dashboard</button>
-    <button class="nav-btn" onclick="showPanel('curriculum')">Curriculum</button>
-    <button class="nav-btn" onclick="showPanel('milestones')">Milestones</button>
-    <button class="nav-btn" onclick="showPanel('rig')">Rig & Tone</button>
-    <button class="nav-btn" onclick="showPanel('swaps')">Swaps</button>
-    <button class="nav-btn" onclick="showPanel('gift')">Personal</button>
-    <button class="nav-btn" onclick="showPanel('acoustic')">Acoustic</button>
+    <button class="nav-btn active" onclick="showPanel('dashboard', event)">Dashboard</button>
+    <button class="nav-btn" onclick="showPanel('curriculum', event)">Curriculum</button>
+    <button class="nav-btn" onclick="showPanel('milestones', event)">Milestones</button>
+    <button class="nav-btn" onclick="showPanel('rig', event)">Rig & Tone</button>
+    <button class="nav-btn" onclick="showPanel('swaps', event)">Swaps</button>
+    <button class="nav-btn" onclick="showPanel('gift', event)">Personal</button>
+    <button class="nav-btn" onclick="showPanel('acoustic', event)">Acoustic</button>
   </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+
+<div class="mobile-nav" id="mobile-nav">
+  <button class="nav-btn" onclick="showPanel('dashboard', event)">Dashboard</button>
+  <button class="nav-btn" onclick="showPanel('curriculum', event)">Curriculum</button>
+  <button class="nav-btn" onclick="showPanel('milestones', event)">Milestones</button>
+  <button class="nav-btn" onclick="showPanel('rig', event)">Rig & Tone</button>
+  <button class="nav-btn" onclick="showPanel('swaps', event)">Swaps</button>
+  <button class="nav-btn" onclick="showPanel('gift', event)">Personal</button>
+  <button class="nav-btn" onclick="showPanel('acoustic', event)">Acoustic</button>
 </div>
 
 <div class="main">
@@ -691,7 +787,7 @@ body {
           <span class="badge badge-p1">Phase 1 — Active</span>
           <span class="mono small dimmed">Wk <span id="current-week">1</span> / 12</span>
         </div>
-        <div class="phase-hero-name" style="color:var(--p1c)">Consolidate & Connect</div>
+        <div class="phase-hero-name" style="color:var(--p1c)">Consolidate &amp; Connect</div>
         <div class="phase-hero-desc">Take what you partially know and own it front to back. Build the 12-bar foundation. Make bends land in tune.</div>
         <div class="week-label">This week's focus</div>
         <div class="week-focus" id="week-focus-text">12-Bar Foundation — Blues Book 1, Ch. 1–2. Learn the basic structure and open string riffs. Parallel: Purple Haze rhythm parts + Paranoid riff to full song.</div>
@@ -799,10 +895,9 @@ body {
       </div>
 
       <!-- Week Selector -->
-      <div class="card">
+      <div class="card week-selector-card">
         <div class="card-title">Week Selector</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="week-btn-row">
-        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="week-btn-row"></div>
         <div class="divider"></div>
         <div id="week-detail-text" class="small muted" style="line-height:1.7">
           <strong style="color:var(--text)">Weeks 1–2:</strong> 12-Bar Foundation — Blues Book 1 Ch. 1–2. Learn the basic 12-bar structure and open string riffs. This is the framework underlying nearly everything on your song list. Parallel: Purple Haze rhythm parts and Paranoid riff to full song.
@@ -816,9 +911,7 @@ body {
       <!-- Current Songs -->
       <div class="card">
         <div class="card-title">Phase 1 Songs</div>
-        <div class="stack" style="gap:8px" id="dash-songs">
-          <!-- injected by JS -->
-        </div>
+        <div class="stack" style="gap:8px" id="dash-songs"></div>
       </div>
 
       <!-- Quick Notes -->
@@ -849,7 +942,7 @@ body {
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="check-label small">Technique Book 1 — Routines 1 & 3</div>
+            <div class="check-label small">Technique Book 1 — Routines 1 &amp; 3</div>
           </div>
           <div class="check-row" onclick="toggleCheck(this)">
             <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -874,13 +967,11 @@ body {
     <button class="inner-tab active" onclick="showInner('cur','songs')">Songs</button>
     <button class="inner-tab" onclick="showInner('cur','weeks')">Week Map</button>
   </div>
-
-  <div id="cur-songs" class="inner-panel active" id="cur-songs">
-    <div id="curriculum-songs"><!-- injected --></div>
+  <div id="cur-songs" class="inner-panel active">
+    <div id="curriculum-songs"></div>
   </div>
-
   <div id="cur-weeks" class="inner-panel">
-    <div id="curriculum-weeks"><!-- injected --></div>
+    <div id="curriculum-weeks"></div>
   </div>
 </div>
 
@@ -888,7 +979,7 @@ body {
      MILESTONES
 ════════════════════════════════════════════ -->
 <div id="panel-milestones" class="panel">
-  <div id="milestones-content"><!-- injected --></div>
+  <div id="milestones-content"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -944,7 +1035,7 @@ body {
     <div class="divider"></div>
     <div class="section-label">Plugins (Recording)</div>
     <div style="display:flex;flex-wrap:wrap;gap:6px">
-      <span class="tag">Amplitube 4 & 5</span>
+      <span class="tag">Amplitube 4 &amp; 5</span>
       <span class="tag">BIAS FX 2 (Hendrix pack)</span>
       <span class="tag">STL Tones</span>
       <span class="tag">Neural DSP Rabea</span>
@@ -954,7 +1045,7 @@ body {
 
   <div id="rig-tones" class="inner-panel">
     <div class="section-label" style="margin-bottom:10px">Per-song rig and tone suggestions from your gear. Placeholder profiles — to be filled in.</div>
-    <div id="tone-profiles-list"><!-- injected --></div>
+    <div id="tone-profiles-list"></div>
   </div>
 </div>
 
@@ -978,14 +1069,14 @@ body {
      PERSONAL REPERTOIRE
 ════════════════════════════════════════════ -->
 <div id="panel-gift" class="panel">
-  <div id="gift-content"><!-- injected --></div>
+  <div id="gift-content"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════
      ACOUSTIC
 ════════════════════════════════════════════ -->
 <div id="panel-acoustic" class="panel">
-  <div id="acoustic-content"><!-- injected --></div>
+  <div id="acoustic-content"></div>
 </div>
 
 </div><!-- /.main -->
@@ -1103,7 +1194,6 @@ const PHASES = [
         skills:['arpeggiated riff','melodic minor','clean tone','minor key phrasing'],
         status:'future' },
       { num:9, title:'Time', artist:'Pink Floyd', tuning:'Standard',
-
         teaches:'Gilmour\'s pentatonic vocabulary at its most urgent — fast bends, rhythmic placement, blues-derived phrasing applied to rock. Pairs with Wish You Were Here as a Gilmour one-two.',
         resources:'300 Licks — Gilmour rock section.',
         weeksFocus:'Alongside Wish You Were Here or after',
@@ -1212,45 +1302,32 @@ const PHASES = [
       { num:1, title:'Whipping Post', artist:'Allman Brothers', tuning:'Standard',
         teaches:'Dorian mode, long-form improvisation, dual harmony thinking, open-ended song structure.',
         resources:'300 Licks — Duane Allman rock section. Guitar Chords in Context.',
-        weeksFocus:'TBD',
-        skills:['Dorian','long-form improv','dual harmony'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['Dorian','long-form improv','dual harmony'], status:'future' },
       { num:2, title:'In Memory of Elizabeth Reed', artist:'Allman Brothers', tuning:'Standard',
         teaches:'Minor chord-melody, extended improvisation, conversation between guitar parts.',
         resources:'300 Licks — Duane Allman. Guitar Chords in Context.',
-        weeksFocus:'TBD',
-        skills:['chord-melody','minor','extended improv'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['chord-melody','minor','extended improv'], status:'future' },
       { num:3, title:'Manic Depression', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Odd time (3/4 feel), Hendrix vocabulary in a different rhythmic context, chromatic phrasing.',
         resources:'Hendrix songbook. 300 Licks — Hendrix blues and rock.',
-        weeksFocus:'TBD',
-        skills:['odd time','Hendrix','chromatic phrasing'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['odd time','Hendrix','chromatic phrasing'], status:'future' },
       { num:4, title:'All Along the Watchtower', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Dylan\'s chord movement refracted through Hendrix phrasing, short-form completeness.',
         resources:'Hendrix songbook.',
-        weeksFocus:'TBD',
-        skills:['chord movement','Hendrix phrasing'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['chord movement','Hendrix phrasing'], status:'future' },
       { num:5, title:'Stairway to Heaven (?)', artist:'Led Zeppelin', tuning:'Standard',
         teaches:'Acoustic fingerpicking, modal arc, full dynamic range. Natural phase capstone candidate.',
         resources:'300 Licks — Jimmy Page. Robert Baker course.',
-        weeksFocus:'TBD — possible capstone',
-        skills:['acoustic','modal arc','full dynamic range'],
-        status:'future' },
+        weeksFocus:'TBD — possible capstone', skills:['acoustic','modal arc','full dynamic range'], status:'future' },
       { num:6, title:'High Hopes', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Slide guitar vocabulary, sustained melodic lines over slow harmonic movement, late Floyd tone and atmosphere.',
         resources:'300 Licks — Gilmour rock section.',
         weeksFocus:'TBD — alongside Allman Brothers slide work',
-        skills:['slide guitar','sustained tone','late Floyd','harmonic movement'],
-        status:'future' },
+        skills:['slide guitar','sustained tone','late Floyd','harmonic movement'], status:'future' },
       { num:7, title:'Dogs', artist:'Pink Floyd', tuning:'Standard',
         teaches:'Extended soloing over a Dorian vamp — long-form improvisation in the Allman Brothers tradition but with Gilmour\'s voice. Dark, demanding, and deeply musical.',
         resources:'300 Licks — Gilmour rock section.',
-        weeksFocus:'TBD',
-        skills:['Dorian vamp','long-form improv','Gilmour','extended soloing'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['Dorian vamp','long-form improv','Gilmour','extended soloing'], status:'future' },
     ],
     weeks:[]
   },
@@ -1263,27 +1340,20 @@ const PHASES = [
       { num:1, title:'Master of Puppets', artist:'Metallica', tuning:'Eb (½ step down)',
         teaches:'Alternate picking at speed, harmonic minor, complex song structure.',
         resources:'Metal Bible, Ch. 4 (Harmonic Minor).',
-        weeksFocus:'TBD',
-        skills:['harmonic minor','fast picking','complex structure'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['harmonic minor','fast picking','complex structure'], status:'future' },
       { num:2, title:'Hallowed Be Thy Name', artist:'Iron Maiden', tuning:'Standard',
         teaches:'Full NWOBHM vocabulary, harmonic minor lead, epic song structure.',
         resources:'Metal Bible lead sections.',
-        weeksFocus:'TBD',
-        skills:['NWOBHM','harmonic minor','epic structure'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['NWOBHM','harmonic minor','epic structure'], status:'future' },
       { num:3, title:'Fade to Black', artist:'Metallica', tuning:'Eb (½ step down)',
         teaches:'Acoustic intro, emotional arc from delicate to full, extended solo.',
         resources:'Metal Bible. 300 Licks.',
-        weeksFocus:'TBD',
-        skills:['acoustic intro','emotional arc','extended solo'],
-        status:'future' },
+        weeksFocus:'TBD', skills:['acoustic intro','emotional arc','extended solo'], status:'future' },
       { num:4, title:'Inside-Outside Soloing', artist:'Oz Noy book', tuning:'Standard',
         teaches:'Mixolydian, whole tone, diminished, altered scale — the ceiling stretcher.',
         resources:'Inside-Outside Guitar Soloing — Oz Noy.',
         weeksFocus:'When vocabulary is solid',
-        skills:['Mixolydian','whole tone','diminished','altered scale'],
-        status:'future' },
+        skills:['Mixolydian','whole tone','diminished','altered scale'], status:'future' },
     ],
     weeks:[]
   }
@@ -1350,11 +1420,11 @@ const SWAPS = {
     { song:'Crossroads (live)', func:'Connected pentatonic positions at rock tempo', swaps:'Further On Up the Road (Clapton — similar tempo and phrasing vocabulary) / Seek & Destroy (Metallica — same blues-at-tempo intensity, heavier context)' },
     { song:'Whole Lotta Love', func:'Riff economy, placed pentatonic solo, wah/sustain', swaps:'Communication Breakdown (Zeppelin — faster, rawer, same riff economy lesson) / Round and Round (Ratt — different flavor, same riff economy and melodic lead vocabulary)' },
     { song:'La Grange', func:'Boogie-blues riff architecture, groove, minimalism', swaps:'Tush (ZZ Top — simpler boogie, same Gibbons vocabulary) / Seek & Destroy (Metallica — groove and riff economy in a heavier frame)' },
-    { song:'Heartbreaker', func:'Unaccompanied solo, multiple positions, legato', swaps:'Bring It On Home (Zeppelin — simpler solo, still Page vocabulary) / Sweet Child O\' Mine solo section (Slash — similar multi-position pentatonic ambition)' },
+    { song:'Heartbreaker', func:'Unaccompanied solo, multiple positions, legato', swaps:'Bring It On Home (Zeppelin — simpler solo, still Page vocabulary) / Sweet Child O\'Mine solo section (Slash — similar multi-position pentatonic ambition)' },
     { song:'Layla', func:'Guide tones, playing the changes, slow blues feel', swaps:'Have You Ever Loved a Woman (Clapton/Freddie King — pure slow blues, same lesson)' },
-    { song:'Don\'t Fear the Reaper', func:'Arpeggiated riff, melodic minor key soloing, clean tone', swaps:'All Along the Watchtower (Hendrix — same minor key clean melodic world) / Sweet Child O\' Mine intro (Slash — arpeggiated clean, different flavor)' },
+    { song:'Don\'t Fear the Reaper', func:'Arpeggiated riff, melodic minor key soloing, clean tone', swaps:'All Along the Watchtower (Hendrix — same minor key clean melodic world) / Sweet Child O\'Mine intro (Slash — arpeggiated clean, different flavor)' },
     { song:'Time', func:'Gilmour pentatonic urgency, fast bends, rhythmic placement', swaps:'Another Brick in the Wall Pt. 2 (Gilmour — similar vocabulary, simpler) / Comfortably Numb moved earlier if ready' },
-    { song:'Sweet Child O\' Mine', func:'Arpeggiated intro, Slash pentatonic phrasing, blues-rock vocabulary in an 80s context', swaps:'Mr. Crowley (Rhoads — similar melodic minor ambition) / Don\'t Fear the Reaper (cleaner, same arpeggiated world)' },
+    { song:'Sweet Child O\'Mine', func:'Arpeggiated intro, Slash pentatonic phrasing, blues-rock vocabulary in an 80s context', swaps:'Mr. Crowley (Rhoads — similar melodic minor ambition) / Don\'t Fear the Reaper (cleaner, same arpeggiated world)' },
     { song:'Seek & Destroy', func:'Mid-tempo riff economy, pentatonic groove, thrash restraint', swaps:'La Grange (ZZ Top — same groove-and-space lesson, bluesier) / For Whom the Bell Tolls (Metallica — heavier, same mid-tempo riff DNA)' },
     { song:'Round and Round', func:'DeMartini rhythm sophistication, connected pentatonic lead, melodic phrasing', swaps:'Mr. Crowley (Rhoads — similar melodic ambition, more classical flavor) / Whole Lotta Love (same riff economy lesson, different era)' },
     { song:'Creeping Death', func:'Gallop rhythm at tempo, pentatonic soloing under pressure, picking stamina', swaps:'The Trooper moved earlier (Maiden — same gallop mechanics) / Aces High (harder, same territory)' },
@@ -1380,7 +1450,7 @@ const SWAPS = {
     { song:'Number of the Beast', fits:'Phase 3/4', why:'Harmonic minor intro, gallop rhythm, extended lead work' },
     { song:'Crazy Train', fits:'Phase 3', why:'Natural minor riff, pentatonic solo — sits between Iron Man and Trooper' },
     { song:'For Whom the Bell Tolls', fits:'Phase 2/3', why:'Bass-driven riff, heavy groove — swaps for War Pigs or La Grange' },
-    { song:'Sweet Child O\' Mine', fits:'Phase 2', why:'Eb tuning. Arpeggiated intro is a clean-tone fingerpicking gem; Slash\'s pentatonic solo has real phrasing depth. Swaps for Heartbreaker or Don\'t Fear the Reaper.' },
+    { song:'Sweet Child O\'Mine', fits:'Phase 2', why:'Eb tuning. Arpeggiated intro is a clean-tone fingerpicking gem; Slash\'s pentatonic solo has real phrasing depth. Swaps for Heartbreaker or Don\'t Fear the Reaper.' },
     { song:'Seek & Destroy', fits:'Phase 2', why:'Mid-tempo riff economy and pentatonic groove — direct parallel to La Grange\'s space-and-restraint lesson in a thrash frame. Accessible entry point into early Metallica.' },
     { song:'Round and Round', fits:'Phase 2', why:'Warren DeMartini\'s rhythm sophistication is underrated. Melodic connected pentatonic lead vocabulary, sits well alongside Whole Lotta Love or Heartbreaker.' },
     { song:'Creeping Death', fits:'Phase 2/3', why:'Gallop rhythm at tempo with pentatonic soloing under pressure — bridges Phase 2 blues-at-tempo work into Phase 3 picking mechanics. Harder than Seek & Destroy, softer entry to thrash.' },
@@ -1394,61 +1464,46 @@ const SWAPS = {
 };
 
 const GIFT_SONGS = [
-  {
-    title:'Truly Forgotten',
-    artist:'Radio Company (Jensen Ackles)',
+  { title:'Truly Forgotten', artist:'Radio Company (Jensen Ackles)',
     why:'Personal resonance outside the curriculum framework. Work on it at your own pace, for your own reasons.',
     notes:'No phase assignment. No milestone attached. Just yours.',
-    skills:['personal repertoire','feel','Americana']
-  },
-  {
-    title:'Cover Me Up',
-    artist:'Jason Isbell',
+    skills:['personal repertoire','feel','Americana'] },
+  { title:'Cover Me Up', artist:'Jason Isbell',
     why:'Emotionally devastating acoustic performance rooted in Americana and country-soul. The power is entirely in feel, fingerpicking, and restraint — not blues-rock vocabulary.',
     notes:'Fingerpicking patterns directly reinforce Wish You Were Here and Babe I\'m Gonna Leave You technique, so time spent here isn\'t wasted on the curriculum. But that\'s a bonus — learn it because it matters to you.',
-    skills:['fingerpicking','Americana','feel','restraint']
-  },
+    skills:['fingerpicking','Americana','feel','restraint'] },
 ];
 
 const ACOUSTIC_SONGS = {
   intro: 'The Martin is a different instrument that rewards a different mindset — no amp, no pedals, just you and the room. This section is a detour, not a destination. Pick it up when you want strummy, social, or quiet. No phases, no milestones. Capo noted where standard.',
   tiers: [
-    {
-      tier: 1,
-      label: 'Tier 1 — Grab & Play',
-      desc: 'Open chords, minimal or no capo, three to four chord songs. Learn one and you can play it tonight.',
-      songs: [
-        { title: 'Wonderwall', artist: 'Oasis', capo: 'Capo 2', chords: 'Em7, G, Dsus4, A7sus4', teaches: 'THE campfire song. Capo 2 open chord shapes that feel great on acoustic. The strumming pattern is iconic and slightly syncopated — nail the rhythm and you\'re done.', vibe: 'Strummy / Crowd-pleaser' },
-        { title: 'Don\'t Look Back in Anger', artist: 'Oasis', capo: 'Capo 2', chords: 'C, G, Am, E, F', teaches: 'More chord movement than Wonderwall but the same Oasis vocabulary. The descending bass line in the verse is a great detail to learn. Pairs naturally with Wonderwall.', vibe: 'Strummy / Singalong' },
-        { title: 'Knockin\' on Heaven\'s Door', artist: 'Bob Dylan', capo: 'No capo', chords: 'G, D, Am, C', teaches: 'Three chords, universally known, the definition of timeless simplicity. Dylan\'s original is slower and more bare than the GNR version — both are worth knowing.', vibe: 'Strummy / Timeless' },
-        { title: 'Blowin\' in the Wind', artist: 'Bob Dylan', capo: 'No capo', chords: 'G, C, D', teaches: 'Three chords. Every person who has ever held an acoustic guitar has played this. The phrasing is natural and conversational — good early practice matching strumming to vocal rhythm.', vibe: 'Strummy / Folk essential' },
-        { title: 'Horse With No Name', artist: 'America', capo: 'No capo', chords: 'Em, D6/9', teaches: 'Two chords for the entire song. Yes, two. The D6/9 voicing is slightly unusual but not hard. An exercise in groove and feel over a hypnotically minimal harmonic canvas.', vibe: 'Strummy / Minimal' },
+    { tier:1, label:'Tier 1 — Grab & Play', desc:'Open chords, minimal or no capo, three to four chord songs. Learn one and you can play it tonight.',
+      songs:[
+        { title:'Wonderwall', artist:'Oasis', capo:'Capo 2', chords:'Em7, G, Dsus4, A7sus4', teaches:'THE campfire song. Capo 2 open chord shapes that feel great on acoustic. The strumming pattern is iconic and slightly syncopated — nail the rhythm and you\'re done.', vibe:'Strummy / Crowd-pleaser' },
+        { title:'Don\'t Look Back in Anger', artist:'Oasis', capo:'Capo 2', chords:'C, G, Am, E, F', teaches:'More chord movement than Wonderwall but the same Oasis vocabulary. The descending bass line in the verse is a great detail to learn. Pairs naturally with Wonderwall.', vibe:'Strummy / Singalong' },
+        { title:'Knockin\' on Heaven\'s Door', artist:'Bob Dylan', capo:'No capo', chords:'G, D, Am, C', teaches:'Three chords, universally known, the definition of timeless simplicity. Dylan\'s original is slower and more bare than the GNR version — both are worth knowing.', vibe:'Strummy / Timeless' },
+        { title:'Blowin\' in the Wind', artist:'Bob Dylan', capo:'No capo', chords:'G, C, D', teaches:'Three chords. Every person who has ever held an acoustic guitar has played this. The phrasing is natural and conversational — good early practice matching strumming to vocal rhythm.', vibe:'Strummy / Folk essential' },
+        { title:'Horse With No Name', artist:'America', capo:'No capo', chords:'Em, D6/9', teaches:'Two chords for the entire song. Yes, two. The D6/9 voicing is slightly unusual but not hard. An exercise in groove and feel over a hypnotically minimal harmonic canvas.', vibe:'Strummy / Minimal' },
       ]
     },
-    {
-      tier: 2,
-      label: 'Tier 2 — Worth the Work',
-      desc: 'More chord movement, fingerpicking patterns, or rhythmic nuance. Satisfying payoff for an evening\'s work.',
-      songs: [
-        { title: 'Heart of Gold', artist: 'Neil Young', capo: 'Capo 2', chords: 'Em, C, G, D', teaches: 'One of Young\'s most iconic acoustic performances. Capo 2, open chord shapes, great strumming feel. The harmonica parts are optional. A natural companion to Old Man.', vibe: 'Strummy / Iconic' },
-        { title: 'Old Man', artist: 'Neil Young', capo: 'Capo 2', chords: 'Dm, G, D, Am, C, E', teaches: 'Fingerpicked intro with a more complex open-chord vocabulary than Tier 1. The feel is everything here — deliberate, unhurried, intimate. Technique crossover with Cover Me Up and Wish You Were Here.', vibe: 'Fingerpicked / Intimate' },
-        { title: 'The Times They Are A-Changin\'', artist: 'Bob Dylan', capo: 'Capo 2', chords: 'G, C, D, Em, Am', teaches: 'Deliberate fingerpicking pattern, slightly modal-feeling chord movement. One of his most architecturally satisfying acoustic songs. The strumming version also works and is simpler.', vibe: 'Fingerpicked / Anthemic' },
-        { title: 'More Than Words', artist: 'Extreme', capo: 'No capo', chords: 'G, G/B, Cadd9, Am, C, D, Em', teaches: 'Fingerpicking with hybrid strumming — the most technically satisfying song in Tier 2. The chord voicings are beautiful and the picking pattern locks in quickly. Impressive payoff to audience ratio.', vibe: 'Fingerpicked / Impressive' },
-        { title: 'Blackbird', artist: 'The Beatles', capo: 'No capo', chords: 'G-based moving chords', teaches: 'Travis-style alternating bass fingerpicking. The pattern is the whole lesson — once you have it, the song flows. Directly reinforces the fingerpicking work in Cover Me Up and Babe I\'m Gonna Leave You. McCartney at his most elegant.', vibe: 'Fingerpicked / Classic' },
-        { title: 'Fast Car', artist: 'Tracy Chapman', capo: 'Capo 2', chords: 'C, G, Am, F', teaches: 'Four-chord loop with an iconic fingerpicked groove that feels deceptively simple. The right-hand pattern and the rhythmic drive are the whole challenge. One of the most emotionally direct songs on the list.', vibe: 'Fingerpicked / Groove' },
-        { title: 'Romeo and Juliet', artist: 'Dire Straits', capo: 'No capo', chords: 'F, Bb, C, Dm, Am', teaches: 'Knopfler fingerstyle — no pick, thumb and fingers. The intro arpeggio is one of rock\'s great acoustic moments. A different right-hand technique world than the rest of this list. Worth learning just for that opening.', vibe: 'Fingerstyle / Knopfler technique' },
+    { tier:2, label:'Tier 2 — Worth the Work', desc:'More chord movement, fingerpicking patterns, or rhythmic nuance. Satisfying payoff for an evening\'s work.',
+      songs:[
+        { title:'Heart of Gold', artist:'Neil Young', capo:'Capo 2', chords:'Em, C, G, D', teaches:'One of Young\'s most iconic acoustic performances. Capo 2, open chord shapes, great strumming feel. The harmonica parts are optional. A natural companion to Old Man.', vibe:'Strummy / Iconic' },
+        { title:'Old Man', artist:'Neil Young', capo:'Capo 2', chords:'Dm, G, D, Am, C, E', teaches:'Fingerpicked intro with a more complex open-chord vocabulary than Tier 1. The feel is everything here — deliberate, unhurried, intimate. Technique crossover with Cover Me Up and Wish You Were Here.', vibe:'Fingerpicked / Intimate' },
+        { title:'The Times They Are A-Changin\'', artist:'Bob Dylan', capo:'Capo 2', chords:'G, C, D, Em, Am', teaches:'Deliberate fingerpicking pattern, slightly modal-feeling chord movement. One of his most architecturally satisfying acoustic songs. The strumming version also works and is simpler.', vibe:'Fingerpicked / Anthemic' },
+        { title:'More Than Words', artist:'Extreme', capo:'No capo', chords:'G, G/B, Cadd9, Am, C, D, Em', teaches:'Fingerpicking with hybrid strumming — the most technically satisfying song in Tier 2. The chord voicings are beautiful and the picking pattern locks in quickly. Impressive payoff to audience ratio.', vibe:'Fingerpicked / Impressive' },
+        { title:'Blackbird', artist:'The Beatles', capo:'No capo', chords:'G-based moving chords', teaches:'Travis-style alternating bass fingerpicking. The pattern is the whole lesson — once you have it, the song flows. Directly reinforces the fingerpicking work in Cover Me Up and Babe I\'m Gonna Leave You. McCartney at his most elegant.', vibe:'Fingerpicked / Classic' },
+        { title:'Fast Car', artist:'Tracy Chapman', capo:'Capo 2', chords:'C, G, Am, F', teaches:'Four-chord loop with an iconic fingerpicked groove that feels deceptively simple. The right-hand pattern and the rhythmic drive are the whole challenge. One of the most emotionally direct songs on the list.', vibe:'Fingerpicked / Groove' },
+        { title:'Romeo and Juliet', artist:'Dire Straits', capo:'No capo', chords:'F, Bb, C, Dm, Am', teaches:'Knopfler fingerstyle — no pick, thumb and fingers. The intro arpeggio is one of rock\'s great acoustic moments. A different right-hand technique world than the rest of this list. Worth learning just for that opening.', vibe:'Fingerstyle / Knopfler technique' },
       ]
     },
-    {
-      tier: 3,
-      label: 'Tier 3 — The Deep Cuts',
-      desc: 'More complex harmony, advanced fingerpicking, or songs that demand real time to absorb. Tangled Up in Blue is the anchor — treat it like a curriculum song.',
-      songs: [
-        { title: '⭐ Tangled Up in Blue', artist: 'Bob Dylan', capo: 'Capo 2 (or 5 for Nashville tuning feel)', chords: 'A, G, F#m, E, D, Bm', teaches: 'The essential. Dylan\'s chord movement here is more sophisticated than it appears — the verse changes shape subtly across different parts of the song. The storytelling strumming rhythm has a conversational push-pull that takes time to internalize. Master this one front to back like a curriculum song. The harmonic vocabulary will feed directly back into your electric playing.', vibe: 'Strummy / Deep study', essential: true },
-        { title: 'Mr. Tambourine Man', artist: 'Bob Dylan', capo: 'Capo 4', chords: 'D, G, A, Em', teaches: 'Beautiful, flowing chord movement with a capo 4 position that gives it a bright, ringing quality. The longer verse structure makes it a memory and arrangement challenge. One of his most melodically graceful songs.', vibe: 'Strummy / Melodic' },
-        { title: 'Dust in the Wind', artist: 'Kansas', capo: 'No capo', chords: 'C, Am, G, Dm', teaches: 'The fingerpicking pattern IS the song. Once you have the Travis-pick pattern locked, the chord changes are simple. But getting that pattern clean and automatic takes focused repetition. A right-hand technique workout in disguise.', vibe: 'Fingerpicked / Pattern study' },
-        { title: 'The Needle and the Damage Done', artist: 'Neil Young', capo: 'No capo', chords: 'D, Dsus2, G, C, A, Am', teaches: 'Delicate open-position fingerpicking, very sparse, very unforgiving of sloppy technique. Every note is exposed. Young\'s most nakedly intimate acoustic performance — quiet intensity is the whole lesson here.', vibe: 'Fingerpicked / Exposed technique' },
-        { title: 'Pink Moon', artist: 'Nick Drake', capo: 'Capo 2', chords: 'D-based open chord shapes', teaches: 'Hauntingly simple on the surface, technically subtle underneath. Nick Drake\'s right-hand touch is almost orchestral in its control of dynamics. A masterclass in the space between notes. The hardest thing here is making it sound effortless.', vibe: 'Fingerpicked / Dynamics & space' },
+    { tier:3, label:'Tier 3 — The Deep Cuts', desc:'More complex harmony, advanced fingerpicking, or songs that demand real time to absorb. Tangled Up in Blue is the anchor — treat it like a curriculum song.',
+      songs:[
+        { title:'⭐ Tangled Up in Blue', artist:'Bob Dylan', capo:'Capo 2 (or 5 for Nashville tuning feel)', chords:'A, G, F#m, E, D, Bm', teaches:'The essential. Dylan\'s chord movement here is more sophisticated than it appears — the verse changes shape subtly across different parts of the song. The storytelling strumming rhythm has a conversational push-pull that takes time to internalize. Master this one front to back like a curriculum song. The harmonic vocabulary will feed directly back into your electric playing.', vibe:'Strummy / Deep study', essential:true },
+        { title:'Mr. Tambourine Man', artist:'Bob Dylan', capo:'Capo 4', chords:'D, G, A, Em', teaches:'Beautiful, flowing chord movement with a capo 4 position that gives it a bright, ringing quality. The longer verse structure makes it a memory and arrangement challenge. One of his most melodically graceful songs.', vibe:'Strummy / Melodic' },
+        { title:'Dust in the Wind', artist:'Kansas', capo:'No capo', chords:'C, Am, G, Dm', teaches:'The fingerpicking pattern IS the song. Once you have the Travis-pick pattern locked, the chord changes are simple. But getting that pattern clean and automatic takes focused repetition. A right-hand technique workout in disguise.', vibe:'Fingerpicked / Pattern study' },
+        { title:'The Needle and the Damage Done', artist:'Neil Young', capo:'No capo', chords:'D, Dsus2, G, C, A, Am', teaches:'Delicate open-position fingerpicking, very sparse, very unforgiving of sloppy technique. Every note is exposed. Young\'s most nakedly intimate acoustic performance — quiet intensity is the whole lesson here.', vibe:'Fingerpicked / Exposed technique' },
+        { title:'Pink Moon', artist:'Nick Drake', capo:'Capo 2', chords:'D-based open chord shapes', teaches:'Hauntingly simple on the surface, technically subtle underneath. Nick Drake\'s right-hand touch is almost orchestral in its control of dynamics. A masterclass in the space between notes. The hardest thing here is making it sound effortless.', vibe:'Fingerpicked / Dynamics & space' },
       ]
     }
   ]
@@ -1473,11 +1528,15 @@ let milestonesDone = JSON.parse(localStorage.getItem('ngc-milestones') || '{}');
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
-function showPanel(id) {
+function showPanel(id, e) {
+  const ev = e || event;
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
-  event.target.classList.add('active');
+  ev.target.classList.add('active');
+  // close mobile nav
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
 }
 
 function showInner(prefix, id) {
@@ -1486,6 +1545,11 @@ function showInner(prefix, id) {
   parent.querySelectorAll('.inner-tab').forEach(b => b.classList.remove('active'));
   document.getElementById(prefix + '-' + id).classList.add('active');
   event.target.classList.add('active');
+}
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
 }
 
 // ═══════════════════════════════════════════
@@ -1501,14 +1565,10 @@ function setWeek(w) {
   });
   const btn = document.getElementById('wbtn-' + w);
   if (btn) { btn.classList.remove('btn-ghost'); }
-
-  // Update week focus text
   const wf = WEEK_DATA[Math.min(Math.floor((w-1)/2), WEEK_DATA.length-1)];
   document.getElementById('week-focus-text').textContent = wf.detail;
   document.getElementById('week-detail-text').innerHTML =
     `<strong style="color:var(--text)">${wf.weeks === '11-12' ? 'Weeks 11–12' : 'Weeks ' + wf.weeks.replace('-','–')}:</strong> ${wf.focus} — ${wf.detail}`;
-
-  // Update progress
   const pct = Math.round((w / 12) * 100);
   document.getElementById('phase-progress').style.width = pct + '%';
 }
@@ -1561,41 +1621,26 @@ function saveNotes() {
   document.getElementById('notes-saved').textContent = 'saved';
   setTimeout(() => { document.getElementById('notes-saved').textContent = ''; }, 1500);
 }
-
 function clearNotes() {
   document.getElementById('session-notes').value = '';
   localStorage.removeItem('ngc-notes');
 }
 
-// ═══════════════════════════════════════════
-// SONG CARD TOGGLE
-// ═══════════════════════════════════════════
-function toggleSongCard(el) {
-  el.classList.toggle('expanded');
-}
-
-function toggleToneCard(el) {
-  el.classList.toggle('expanded');
-}
+function toggleSongCard(el) { el.classList.toggle('expanded'); }
+function toggleToneCard(el) { el.classList.toggle('expanded'); }
 
 // ═══════════════════════════════════════════
 // BUILD DASHBOARD SONGS
 // ═══════════════════════════════════════════
 function buildDashSongs() {
-  const phase1songs = PHASES[0].songs;
   const container = document.getElementById('dash-songs');
-  container.innerHTML = phase1songs.map((s, i) => {
-    const statusBadge = s.status === 'active'
+  container.innerHTML = PHASES[0].songs.map(s => {
+    const badge = s.status === 'active'
       ? '<span class="badge badge-active">Active</span>'
       : '<span class="badge badge-pending">Up Next</span>';
-    return `
-      <div class="song-row ${s.status === 'active' ? 'active-song' : ''}">
-        <div>
-          <div class="song-title">${s.title}</div>
-          <div class="song-artist">${s.artist}</div>
-        </div>
-        ${statusBadge}
-      </div>`;
+    return `<div class="song-row ${s.status === 'active' ? 'active-song' : ''}">
+      <div><div class="song-title">${s.title}</div><div class="song-artist">${s.artist}</div></div>
+      ${badge}</div>`;
   }).join('');
 }
 
@@ -1624,31 +1669,21 @@ function buildCurriculum() {
         </div>
         <div class="song-card-body">
           <div class="song-detail-grid">
-            <div>
-              <div class="song-detail-label">What It Teaches</div>
-              <div class="song-detail-value">${s.teaches}</div>
-            </div>
-            <div>
-              <div class="song-detail-label">Resources</div>
-              <div class="song-detail-value">${s.resources}</div>
-            </div>
+            <div><div class="song-detail-label">What It Teaches</div><div class="song-detail-value">${s.teaches}</div></div>
+            <div><div class="song-detail-label">Resources</div><div class="song-detail-value">${s.resources}</div></div>
           </div>
           <div class="song-tags">${s.skills.map(sk => `<span class="tag">${sk}</span>`).join('')}</div>
         </div>
       </div>`).join('');
-
-    return `
-      <div class="phase-section">
-        <div class="phase-header">
-          <span class="badge badge-p${phase.id}">${phase.label}</span>
-          <div class="phase-header-title" style="color:${colors[pi]}">${phase.name}</div>
-          <div class="phase-meta">
-            <span class="mono small dimmed">${phase.duration}</span>
-          </div>
-        </div>
-        <div class="small muted" style="margin-bottom:14px">${phase.desc}</div>
-        <div class="stack" style="gap:8px">${songCards}</div>
-      </div>`;
+    return `<div class="phase-section">
+      <div class="phase-header">
+        <span class="badge badge-p${phase.id}">${phase.label}</span>
+        <div class="phase-header-title" style="color:${colors[pi]}">${phase.name}</div>
+        <div class="phase-meta"><span class="mono small dimmed">${phase.duration}</span></div>
+      </div>
+      <div class="small muted" style="margin-bottom:14px">${phase.desc}</div>
+      <div class="stack" style="gap:8px">${songCards}</div>
+    </div>`;
   }).join('');
 
   weeksContainer.innerHTML = PHASES.filter(p => p.weeks.length > 0).map((phase, pi) => `
@@ -1676,34 +1711,25 @@ function buildMilestones() {
   const container = document.getElementById('milestones-content');
   const colors = ['var(--p1c)','var(--p2c)','var(--p3c)'];
   const badges = ['badge-p1','badge-p2','badge-p3'];
-
   container.innerHTML = MILESTONES.map((group, gi) => {
     const total = group.items.length;
     const done = group.items.filter(item => milestonesDone[item]).length;
-
-    return `
-      <div class="milestone-group">
-        <div class="milestone-group-header">
-          <span class="badge ${badges[gi]}">${group.label}</span>
-          <div class="milestone-group-title" style="color:${colors[gi]}">${group.label} Milestones</div>
-          <span class="mono small dimmed" id="mcount-${group.phase}">${done} / ${total}</span>
-        </div>
-        <div class="prog-bar" style="margin-bottom:14px">
-          <div class="prog-fill green" id="mprog-${group.phase}" style="width:${Math.round((done/total)*100)}%"></div>
-        </div>
-        <div>
-          ${group.items.map(item => `
-            <div class="milestone-item ${milestonesDone[item] ? 'done' : ''}" onclick="toggleMilestone(this)">
-              <div class="milestone-icon">
-                <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-              <div>
-                <div class="milestone-text">${item}</div>
-              </div>
-            </div>`).join('')}
-        </div>
-        ${gi < MILESTONES.length - 1 ? '<div class="divider"></div>' : ''}
-      </div>`;
+    return `<div class="milestone-group">
+      <div class="milestone-group-header">
+        <span class="badge ${badges[gi]}">${group.label}</span>
+        <div class="milestone-group-title" style="color:${colors[gi]}">${group.label} Milestones</div>
+        <span class="mono small dimmed" id="mcount-${group.phase}">${done} / ${total}</span>
+      </div>
+      <div class="prog-bar" style="margin-bottom:14px">
+        <div class="prog-fill green" id="mprog-${group.phase}" style="width:${Math.round((done/total)*100)}%"></div>
+      </div>
+      <div>${group.items.map(item => `
+        <div class="milestone-item ${milestonesDone[item] ? 'done' : ''}" onclick="toggleMilestone(this)">
+          <div class="milestone-icon"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <div><div class="milestone-text">${item}</div></div>
+        </div>`).join('')}</div>
+      ${gi < MILESTONES.length - 1 ? '<div class="divider"></div>' : ''}
+    </div>`;
   }).join('');
 }
 
@@ -1713,32 +1739,29 @@ function buildMilestones() {
 function buildToneProfiles() {
   const container = document.getElementById('tone-profiles-list');
   const phaseBadges = ['badge-p1','badge-p2','badge-p3'];
-  const phases = [1,2,3];
-
-  container.innerHTML = phases.map((ph, pi) => {
+  container.innerHTML = [1,2,3].map((ph, pi) => {
     const profiles = TONE_PROFILES.filter(t => t.phase === ph);
-    return `
-      <div style="margin-bottom:20px">
-        <div class="section-label" style="margin-bottom:8px">Phase ${ph}</div>
-        ${profiles.map(t => `
-          <div class="tone-profile-card" onclick="toggleToneCard(this)">
-            <div class="tone-profile-header">
-              <span class="badge ${phaseBadges[pi]}">P${ph}</span>
-              <div class="tone-profile-name">${t.song}</div>
-              <div class="song-card-chevron">▼</div>
-            </div>
-            <div class="tone-profile-body">
-              <div class="song-detail-label" style="margin-top:12px">Guitar</div>
-              <div class="song-detail-value">${t.guitar}</div>
-              <div class="song-detail-label" style="margin-top:8px">Amp</div>
-              <div class="song-detail-value">${t.amp}</div>
-              <div class="song-detail-label" style="margin-top:8px">Signal Chain Notes</div>
-              <div class="chain">${t.chain.map(c => `<span class="chain-item">${c}</span>`).join('<span class="chain-arrow">→</span>')}</div>
-              <div class="song-detail-label">Notes</div>
-              <div class="tone-placeholder">${t.notes}</div>
-            </div>
-          </div>`).join('')}
-      </div>`;
+    return `<div style="margin-bottom:20px">
+      <div class="section-label" style="margin-bottom:8px">Phase ${ph}</div>
+      ${profiles.map(t => `
+        <div class="tone-profile-card" onclick="toggleToneCard(this)">
+          <div class="tone-profile-header">
+            <span class="badge ${phaseBadges[pi]}">P${ph}</span>
+            <div class="tone-profile-name">${t.song}</div>
+            <div class="song-card-chevron">▼</div>
+          </div>
+          <div class="tone-profile-body">
+            <div class="song-detail-label" style="margin-top:12px">Guitar</div>
+            <div class="song-detail-value">${t.guitar}</div>
+            <div class="song-detail-label" style="margin-top:8px">Amp</div>
+            <div class="song-detail-value">${t.amp}</div>
+            <div class="song-detail-label" style="margin-top:8px">Signal Chain Notes</div>
+            <div class="chain">${t.chain.map(c => `<span class="chain-item">${c}</span>`).join('<span class="chain-arrow">→</span>')}</div>
+            <div class="song-detail-label">Notes</div>
+            <div class="tone-placeholder">${t.notes}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
   }).join('');
 }
 
@@ -1751,32 +1774,22 @@ function buildSwapTable(containerId, data, isMetalItch) {
     container.innerHTML = `
       <div class="small muted" style="margin-bottom:16px">Pre-vetted songs with documented curriculum fit. Phase 1 Quick Wins are short confidence builders — learn them whenever the itch hits. Higher-phase entries swap in for curriculum songs when the metal urge strikes.</div>
       <div class="metal-itch-grid">
-        ${data.map(s => `
-          <div class="metal-song">
-            <div class="metal-song-name">${s.song}</div>
-            <div class="metal-song-meta"><span class="badge badge-p3">${s.fits}</span></div>
-            <div class="metal-song-why">${s.why}</div>
-          </div>`).join('')}
+        ${data.map(s => `<div class="metal-song">
+          <div class="metal-song-name">${s.song}</div>
+          <div class="metal-song-meta"><span class="badge badge-p3">${s.fits}</span></div>
+          <div class="metal-song-why">${s.why}</div>
+        </div>`).join('')}
       </div>`;
   } else {
     container.innerHTML = `
       <div class="small muted" style="margin-bottom:14px">Every song can be swapped for another serving the same primary teaching function. The function is preserved; the song changes.</div>
       <table class="swap-table">
-        <thead>
-          <tr>
-            <th>Song</th>
-            <th>Primary Function</th>
-            <th>Swap Options</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${data.map(s => `
-            <tr>
-              <td><strong>${s.song}</strong></td>
-              <td class="muted small">${s.func}</td>
-              <td class="swap-options">${s.swaps}</td>
-            </tr>`).join('')}
-        </tbody>
+        <thead><tr><th>Song</th><th>Primary Function</th><th>Swap Options</th></tr></thead>
+        <tbody>${data.map(s => `<tr>
+          <td><strong>${s.song}</strong></td>
+          <td class="muted small">${s.func}</td>
+          <td class="swap-options">${s.swaps}</td>
+        </tr>`).join('')}</tbody>
       </table>`;
   }
 }
@@ -1795,18 +1808,15 @@ function buildGiftPanel() {
         alongside or between curriculum phases.
       </div>
       <div class="stack" style="gap:12px">
-        ${GIFT_SONGS.map(s => `
-          <div class="card" style="border-left:3px solid var(--accent)">
-            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px">
-              <div style="font-size:15px;font-weight:500">${s.title}</div>
-              <div class="small dimmed">${s.artist}</div>
-            </div>
-            <div class="small muted" style="margin-bottom:8px;line-height:1.6">${s.why}</div>
-            <div class="small" style="color:var(--text3);font-style:italic;margin-bottom:10px">${s.notes}</div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px">
-              ${s.skills.map(sk => `<span class="tag">${sk}</span>`).join('')}
-            </div>
-          </div>`).join('')}
+        ${GIFT_SONGS.map(s => `<div class="card" style="border-left:3px solid var(--accent)">
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px">
+            <div style="font-size:15px;font-weight:500">${s.title}</div>
+            <div class="small dimmed">${s.artist}</div>
+          </div>
+          <div class="small muted" style="margin-bottom:8px;line-height:1.6">${s.why}</div>
+          <div class="small" style="color:var(--text3);font-style:italic;margin-bottom:10px">${s.notes}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">${s.skills.map(sk => `<span class="tag">${sk}</span>`).join('')}</div>
+        </div>`).join('')}
       </div>
     </div>
     <div class="divider"></div>
@@ -1816,8 +1826,7 @@ function buildGiftPanel() {
       <input id="gift-input" type="text" placeholder="Song — Artist" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:8px 12px;outline:none;" />
       <button class="btn btn-sm" onclick="addGiftSong()">Add</button>
     </div>
-    <div id="gift-user-list" style="display:flex;flex-direction:column;gap:6px"></div>
-  `;
+    <div id="gift-user-list" style="display:flex;flex-direction:column;gap:6px"></div>`;
   renderUserGiftSongs();
 }
 
@@ -1831,14 +1840,12 @@ function addGiftSong() {
   input.value = '';
   renderUserGiftSongs();
 }
-
 function removeGiftSong(idx) {
   const list = JSON.parse(localStorage.getItem('ngc-gift-songs') || '[]');
   list.splice(idx, 1);
   localStorage.setItem('ngc-gift-songs', JSON.stringify(list));
   renderUserGiftSongs();
 }
-
 function renderUserGiftSongs() {
   const container = document.getElementById('gift-user-list');
   if (!container) return;
@@ -1850,7 +1857,6 @@ function renderUserGiftSongs() {
       <button onclick="removeGiftSong(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;">×</button>
     </div>`).join('');
 }
-
 
 // ═══════════════════════════════════════════
 // BUILD ACOUSTIC PANEL
@@ -1864,33 +1870,28 @@ function buildAcousticPanel() {
   const tiersHTML = ACOUSTIC_SONGS.tiers.map((tier, ti) => {
     const songsHTML = tier.songs.map(s => {
       const isEssential = s.essential;
-      const borderColor = isEssential ? 'var(--accent2)' : tierColors[ti];
-      const borderWidth = isEssential ? '3px' : '2px';
-      return `
-        <div class="card" style="border-left:${borderWidth} solid ${borderColor};margin-bottom:10px;">
-          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
-            <div style="font-size:15px;font-weight:500;color:var(--text)">${s.title}</div>
-            <div class="small dimmed">${s.artist}</div>
-            ${s.capo !== 'No capo' ? `<span class="tag" style="background:rgba(96,144,184,0.15);color:var(--blue);border-color:rgba(96,144,184,0.3)">${s.capo}</span>` : ''}
-            ${isEssential ? `<span class="tag" style="background:rgba(196,144,96,0.2);color:var(--accent2);border-color:rgba(196,144,96,0.4);font-weight:600">ESSENTIAL</span>` : ''}
-          </div>
-          <div class="small" style="color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.5px;margin-bottom:8px">${s.chords}</div>
-          <div class="small muted" style="line-height:1.65;margin-bottom:8px">${s.teaches}</div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase">Vibe</span>
-            <span class="tag">${s.vibe}</span>
-          </div>
-        </div>`;
-    }).join('');
-
-    return `
-      <div style="margin-bottom:28px;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;padding:10px 14px;background:${tierBg[ti]};border:1px solid ${tierBorderColors[ti]};border-radius:6px;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:${tierColors[ti]}">${tier.label}</div>
+      return `<div class="card" style="border-left:${isEssential ? '3px' : '2px'} solid ${isEssential ? 'var(--accent2)' : tierColors[ti]};margin-bottom:10px;">
+        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+          <div style="font-size:15px;font-weight:500;color:var(--text)">${s.title}</div>
+          <div class="small dimmed">${s.artist}</div>
+          ${s.capo !== 'No capo' ? `<span class="tag" style="background:rgba(96,144,184,0.15);color:var(--blue);border-color:rgba(96,144,184,0.3)">${s.capo}</span>` : ''}
+          ${isEssential ? `<span class="tag" style="background:rgba(196,144,96,0.2);color:var(--accent2);border-color:rgba(196,144,96,0.4);font-weight:600">ESSENTIAL</span>` : ''}
         </div>
-        <div class="small muted" style="margin-bottom:14px;padding:0 2px;line-height:1.65">${tier.desc}</div>
-        ${songsHTML}
+        <div class="small" style="color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.5px;margin-bottom:8px">${s.chords}</div>
+        <div class="small muted" style="line-height:1.65;margin-bottom:8px">${s.teaches}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase">Vibe</span>
+          <span class="tag">${s.vibe}</span>
+        </div>
       </div>`;
+    }).join('');
+    return `<div style="margin-bottom:28px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;padding:10px 14px;background:${tierBg[ti]};border:1px solid ${tierBorderColors[ti]};border-radius:6px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:${tierColors[ti]}">${tier.label}</div>
+      </div>
+      <div class="small muted" style="margin-bottom:14px;padding:0 2px;line-height:1.65">${tier.desc}</div>
+      ${songsHTML}
+    </div>`;
   }).join('');
 
   container.innerHTML = `
@@ -1903,12 +1904,13 @@ function buildAcousticPanel() {
         ${ACOUSTIC_SONGS.intro}
       </div>
     </div>
-    ${tiersHTML}
-  `;
+    ${tiersHTML}`;
 }
 
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
 function init() {
-  // Build week buttons
   const wbr = document.getElementById('week-btn-row');
   if (wbr) {
     for (let i = 1; i <= 12; i++) {
@@ -1920,7 +1922,6 @@ function init() {
       wbr.appendChild(b);
     }
   }
-
   buildDashSongs();
   buildCurriculum();
   buildMilestones();
@@ -1932,13 +1933,9 @@ function init() {
   buildSwapTable('sw-phase3', SWAPS.phase3, false);
   buildSwapTable('sw-metalitch', SWAPS.metalitch, true);
 
-  // Restore state
   const savedNotes = localStorage.getItem('ngc-notes');
   if (savedNotes) document.getElementById('session-notes').value = savedNotes;
-
   setWeek(currentWeek);
-
-  // Restore check states
   document.querySelectorAll('.check-row').forEach(row => {
     const key = row.querySelector('.check-label').textContent;
     if (checkedItems[key]) row.classList.add('done');
