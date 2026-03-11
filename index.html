@@ -318,6 +318,141 @@ body {
 .gear-item-cat { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
 .gear-item-name { font-size: 12px; font-weight: 500; }
 .gear-item-sub { font-size: 11px; color: var(--text3); }
+
+/* ─── GEAR IMAGE CARDS ───────────────────── */
+.gear-img-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.gear-img-grid-amps {
+  grid-template-columns: repeat(3, 1fr);
+}
+.gear-img-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.gear-img-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+.gear-img-wrap {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--bg4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.gear-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+  display: block;
+  transition: transform 0.3s;
+}
+.gear-img-card:hover .gear-img { transform: scale(1.04); }
+.gear-img-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.gear-img-placeholder::before { content: '🎸'; font-size: 22px; opacity: 0.25; }
+.gear-img-placeholder-amp::before { content: '🔊'; }
+.gear-img-info {
+  padding: 10px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gear-img-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.gear-img-card:hover .gear-img-link { opacity: 1; }
+.gear-url-editor {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.gear-url-editor-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.gear-url-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 1fr auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.gear-url-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gear-url-input {
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  outline: none;
+  width: 100%;
+}
+.gear-url-input:focus { border-color: var(--accent); }
+.gear-url-btn {
+  background: var(--accent-dim);
+  border: 1px solid rgba(196,144,96,0.3);
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (max-width: 1100px) { .gear-img-grid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 600px)  { .gear-img-grid { grid-template-columns: repeat(2,1fr); } .gear-url-row { grid-template-columns: 1fr; } }
 .tone-profile-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
 .tone-profile-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
 .tone-profile-name { font-size: 14px; font-weight: 500; flex: 1; }
@@ -743,20 +878,135 @@ body {
     <button class="inner-tab" onclick="showInner('rig','tones')">Tone Profiles</button>
   </div>
   <div id="rig-gear" class="inner-panel active">
+
+    <!-- GUITARS -->
     <div class="section-label">Guitars</div>
-    <div class="gear-grid" style="grid-template-columns:1fr 1fr;">
-      <div class="gear-item"><div class="gear-item-cat">Single Coil</div><div class="gear-item-name">Fender American Stratocaster</div></div>
-      <div class="gear-item"><div class="gear-item-cat">Mini Humbuckers</div><div class="gear-item-name">Gibson Les Paul Deluxe 70s</div></div>
-      <div class="gear-item"><div class="gear-item-cat">Full Humbuckers</div><div class="gear-item-name">Chapman Bea Sig. T-style</div></div>
-      <div class="gear-item"><div class="gear-item-cat">HH / P90</div><div class="gear-item-name">Yamaha Pacifica</div></div>
-      <div class="gear-item"><div class="gear-item-cat">Acoustic / Electric</div><div class="gear-item-name">Martin GPC-10E Special</div><div class="gear-item-sub">Grand Performance + Capo</div></div>
+    <div class="gear-img-grid" id="guitar-grid">
+      <a class="gear-img-card" id="card-strat" href="https://www.fender.com/products/american-professional-ii-stratocaster?variant=45940642447582" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Fender American Stratocaster" class="gear-img" id="img-strat" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder" id="ph-strat">Fender Strat</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Single Coil</div>
+          <div class="gear-item-name">Fender American Stratocaster</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-lp" href="https://www.sweetwater.com/store/detail/LPDx70GT--gibson-les-paul-deluxe-70s-electric-guitar-goldtop?serial=221850227" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Gibson Les Paul Deluxe 70s" class="gear-img" id="img-lp" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder" id="ph-lp">LP Deluxe 70s</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Mini Humbuckers</div>
+          <div class="gear-item-name">Gibson Les Paul Deluxe 70s</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-lpstudio" href="https://reverb.com/p/gibson-les-paul-studio-faded-t-2016" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Gibson Les Paul Studio" class="gear-img" id="img-lpstudio" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder" id="ph-lpstudio">LP Studio</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Humbuckers</div>
+          <div class="gear-item-name">Gibson Les Paul Studio</div>
+          <div class="gear-item-sub">Faded T 2016</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-chapman" href="https://reverb.com/item/83100645-chapman-ml3-pro-bea" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Chapman Bea Signature" class="gear-img" id="img-chapman" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder" id="ph-chapman">Chapman Bea</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Full Humbuckers</div>
+          <div class="gear-item-name">Chapman Bea Sig. T-style</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-pacifica" href="https://www.sweetwater.com/store/detail/PAC611HFMTBK--yamaha-pac611hfm-pacifica-translucent-black" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Yamaha Pacifica" class="gear-img" id="img-pacifica" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder" id="ph-pacifica">Yamaha Pacifica</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">HH / P90</div>
+          <div class="gear-item-name">Yamaha Pacifica 611</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-martin" href="https://www.sweetwater.com/store/detail/SC10E02--martin-sc10e-02-acoustic-electric-guitar" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Martin SC-10E" class="gear-img" id="img-martin" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder gear-img-placeholder-amp" id="ph-martin">Martin SC-10E</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Acoustic / Electric</div>
+          <div class="gear-item-name">Martin SC-10E</div>
+          <div class="gear-item-sub">+ Capo</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
     </div>
+    <div class="gear-url-editor">
+      <div class="gear-url-editor-label">Add Guitar Images — right-click product photo → Copy Image Address, paste below</div>
+      <div class="gear-url-row"><span class="gear-url-label">Strat</span><input class="gear-url-input" id="ui-strat" type="text" placeholder="Image URL (.jpg / .png / .webp)"><button class="gear-url-btn" onclick="setGearUrl('strat')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">LP Deluxe 70s</span><input class="gear-url-input" id="ui-lp" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('lp')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">LP Studio</span><input class="gear-url-input" id="ui-lpstudio" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('lpstudio')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">Chapman Bea</span><input class="gear-url-input" id="ui-chapman" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('chapman')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">Pacifica</span><input class="gear-url-input" id="ui-pacifica" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('pacifica')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">Martin</span><input class="gear-url-input" id="ui-martin" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('martin')">Set</button></div>
+    </div>
+
     <div class="divider"></div>
+
+    <!-- AMPS -->
     <div class="section-label">Amps</div>
-    <div class="gear-grid" style="grid-template-columns:1fr 1fr 1fr;">
-      <div class="gear-item"><div class="gear-item-cat">Tweed / Vintage</div><div class="gear-item-name">Fender Blues Jr. 4</div><div class="gear-item-sub">Tweed Edition</div></div>
-      <div class="gear-item"><div class="gear-item-cat">Modelling</div><div class="gear-item-name">Boss Katana Mk1</div><div class="gear-item-sub">100W Combo</div></div>
-      <div class="gear-item"><div class="gear-item-cat">British</div><div class="gear-item-name">Marshall DSL40CR</div></div>
+    <div class="gear-img-grid gear-img-grid-amps">
+      <a class="gear-img-card" id="card-bluesjr" href="#" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Fender Blues Jr 4" class="gear-img" id="img-bluesjr" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder gear-img-placeholder-amp" id="ph-bluesjr">Blues Jr. 4</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Tweed / Vintage</div>
+          <div class="gear-item-name">Fender Blues Jr. 4</div>
+          <div class="gear-item-sub">Tweed Edition</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-katana" href="#" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Boss Katana Mk1" class="gear-img" id="img-katana" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder gear-img-placeholder-amp" id="ph-katana">Katana Mk1</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">Modelling</div>
+          <div class="gear-item-name">Boss Katana Mk1</div>
+          <div class="gear-item-sub">100W Combo</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+      <a class="gear-img-card" id="card-marshall" href="#" target="_blank" rel="noopener">
+        <div class="gear-img-wrap">
+          <img src="" alt="Marshall DSL40CR" class="gear-img" id="img-marshall" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="gear-img-placeholder gear-img-placeholder-amp" id="ph-marshall">Marshall DSL40CR</div>
+        </div>
+        <div class="gear-img-info">
+          <div class="gear-item-cat">British</div>
+          <div class="gear-item-name">Marshall DSL40CR</div>
+          <div class="gear-img-link">View ↗</div>
+        </div>
+      </a>
+    </div>
+    <div class="gear-url-editor">
+      <div class="gear-url-editor-label">Add Amp Images</div>
+      <div class="gear-url-row"><span class="gear-url-label">Blues Jr. 4</span><input class="gear-url-input" id="ui-bluesjr" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('bluesjr')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">Katana Mk1</span><input class="gear-url-input" id="ui-katana" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('katana')">Set</button></div>
+      <div class="gear-url-row"><span class="gear-url-label">Marshall DSL40CR</span><input class="gear-url-input" id="ui-marshall" type="text" placeholder="Image URL"><button class="gear-url-btn" onclick="setGearUrl('marshall')">Set</button></div>
     </div>
     <div class="divider"></div>
     <div class="section-label">Active Pedalboard Signal Chain</div>
@@ -1254,6 +1504,50 @@ function buildHeatmap(daySet) {
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// GEAR IMAGE URL MANAGEMENT
+// ═══════════════════════════════════════════
+function getGearUrls() { return JSON.parse(localStorage.getItem('ngc-gear-urls') || '{}'); }
+function saveGearUrls(u) { localStorage.setItem('ngc-gear-urls', JSON.stringify(u)); }
+
+function setGearUrl(id) {
+  const imgEl = document.getElementById('ui-' + id);
+  const imgUrl = imgEl ? imgEl.value.trim() : '';
+  if (!imgUrl) return;
+  const urls = getGearUrls();
+  urls[id] = imgUrl;
+  saveGearUrls(urls);
+  applyGearUrl(id, imgUrl);
+  // Visual feedback
+  const btn = imgEl.nextElementSibling;
+  if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = 'Set'; }, 1500); }
+}
+
+function applyGearUrl(id, imgUrl) {
+  const imgTag = document.getElementById('img-' + id);
+  const phTag  = document.getElementById('ph-' + id);
+  if (!imgTag || !imgUrl) return;
+  imgTag.onload = () => { if (phTag) phTag.style.display = 'none'; };
+  imgTag.onerror = () => {
+    imgTag.style.display = 'none';
+    if (phTag) phTag.style.display = 'flex';
+  };
+  imgTag.src = imgUrl;
+  imgTag.style.display = 'block';
+}
+
+function applyAllGearUrls() {
+  const urls = getGearUrls();
+  const ids = ['strat','lp','lpstudio','chapman','pacifica','martin','bluesjr','katana','marshall'];
+  ids.forEach(id => {
+    const imgUrl = urls[id];
+    if (!imgUrl) return;
+    const imgInput = document.getElementById('ui-' + id);
+    if (imgInput) imgInput.value = imgUrl;
+    applyGearUrl(id, imgUrl);
+  });
+}
+
 function showPanel(id, e) {
   const ev = e || event;
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2062,6 +2356,8 @@ function init() {
   buildStreakCard();
   // Restore completion banner if today was already done
   checkSessionComplete();
+  // Restore gear image URLs
+  applyAllGearUrls();
 }
 
 document.addEventListener('DOMContentLoaded', init);
