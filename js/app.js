@@ -573,6 +573,23 @@ function statusBadgeHtml(status) { const s = statusClass(status); return `<span 
 function statusIconHtml(status) { const s = statusClass(status); return `<span class="status-badge ${s}" title="${SONG_STATUS_LABELS[s]}">${SONG_STATUS_ICONS[s]}</span>`; }
 function getMasteredSongs() { const all = getAllSongStatuses(); const m = new Set(); Object.keys(all).forEach(t => { if (all[t]==='lrn'||all[t]==='itf') m.add(t); }); return m; }
 
+function handleMIStatusChange(event, songTitle) {
+  event.stopPropagation();
+  const select = event.target;
+  const newStatus = select.value;
+  setSongStatus(songTitle, newStatus);
+  select.className = 'status-select ' + newStatus;
+  buildSwapTable('sw-metalitch', SWAPS.metalitch, true, null);
+}
+
+function handleExtraStatusChange(event, songTitle) {
+  event.stopPropagation();
+  const select = event.target;
+  const newStatus = select.value;
+  setSongStatus(songTitle, newStatus);
+  select.className = 'status-select ' + newStatus;
+}
+
 // ═══════════════════════════════════════════
 // BUILD SWAP TABLES
 // ═══════════════════════════════════════════
@@ -581,19 +598,75 @@ function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
   if (!container) return;
 
   if (isMetalItch) {
-    container.innerHTML = `
-      <div class="small muted" style="margin-bottom:16px">Pre-vetted songs with documented curriculum fit. Phase 1 Quick Wins are confidence builders.</div>
-      <div class="metal-itch-grid">
-        ${data.map(s => {
-          const topBorder = getPhaseTopBorder(s.fits);
-          const badgesHtml = getPhaseBadgesHtml(s.fits);
-          return `<div class="metal-song" style="${topBorder}">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">${badgesHtml}</div>
-            <div class="metal-song-name">${s.song}</div>
-            <div class="metal-song-why">${s.why}</div>
-          </div>`;
-        }).join('')}
+    // Group songs by their primary phase
+    const phaseGroups = {};
+    const PHASE_ORDER = [1, 2, 3, 4, 5];
+    PHASE_ORDER.forEach(p => phaseGroups[p] = []);
+    data.forEach(s => {
+      const phases = parsePhaseNums(s.fits);
+      const primary = phases[0] || 1;
+      phaseGroups[primary].push(s);
+    });
+
+    const allStatuses = getAllSongStatuses();
+
+    const sectionsHtml = PHASE_ORDER.filter(p => phaseGroups[p].length > 0).map(p => {
+      const pm = PHASE_META[p];
+      const songs = phaseGroups[p];
+      const doneCount = songs.filter(s => {
+        const st = allStatuses[s.song] || 'ns';
+        return st === 'lrn' || st === 'itf';
+      }).length;
+      const inProgCount = songs.filter(s => (allStatuses[s.song] || 'ns') === 'ip').length;
+      const pct = Math.round((doneCount / songs.length) * 100);
+
+      const statusOpts = Object.entries(SONG_STATUS_LABELS)
+        .map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
+
+      const cardsHtml = songs.map(s => {
+        const topBorder = getPhaseTopBorder(s.fits);
+        const badgesHtml = getPhaseBadgesHtml(s.fits);
+        const status = allStatuses[s.song] || 'ns';
+        const safeName = s.song.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        const statusOptsWithSel = Object.entries(SONG_STATUS_LABELS)
+          .map(([val, label]) => `<option value="${val}" ${status===val?'selected':''}>${label}</option>`).join('');
+        return `<div class="metal-song" style="${topBorder}" data-mi-song="${safeName}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${badgesHtml}</div>
+            <select class="status-select ${status}" onchange="handleMIStatusChange(event,'${safeName}')">${statusOptsWithSel}</select>
+          </div>
+          <div class="metal-song-name">${s.song}</div>
+          <div class="metal-song-why">${s.why}</div>
+        </div>`;
+      }).join('');
+
+      const phaseObj = PHASES.find(ph => ph.id === p);
+      const phaseName = phaseObj ? phaseObj.name : '';
+      const phaseDesc = phaseObj ? phaseObj.desc : '';
+      return `<div class="mi-phase-section" style="margin-bottom:28px">
+        <div class="mi-phase-header" style="border-left:3px solid ${pm.color};padding-left:12px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <span class="badge ${pm.badge}">${pm.label}</span>
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:${pm.color}">${phaseName}</span>
+              <span class="badge badge-pending">${songs.length} song${songs.length!==1?'s':''}</span>
+              ${inProgCount > 0 ? `<span class="badge badge-active">${inProgCount} in progress</span>` : ''}
+              ${doneCount > 0 ? `<span class="badge badge-done">${doneCount} learned</span>` : ''}
+            </div>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:${pm.color};letter-spacing:1px;flex-shrink:0">${pct}%</span>
+          </div>
+          ${phaseDesc ? `<div class="small muted" style="margin-bottom:8px">${phaseDesc}</div>` : ''}
+          <div class="prog-bar" style="height:3px">
+            <div class="prog-fill" style="width:${pct}%;background:${pm.color}"></div>
+          </div>
+        </div>
+        <div class="metal-itch-grid">${cardsHtml}</div>
       </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="small muted" style="margin-bottom:20px">Pre-vetted songs grouped by phase fit. Use the status selector on each song to track progress.</div>
+      ${sectionsHtml}`;
     return;
   }
 
@@ -606,14 +679,31 @@ function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
   const curriculumTitles = state.curriculum;
   const optionsTitles = phase.songs.map(s => s.title).filter(t => !curriculumTitles.includes(t));
 
+  const allStatSL = getAllSongStatuses();
+  const slDone   = curriculumTitles.filter(t => { const s = allStatSL[t]||'ns'; return s==='lrn'||s==='itf'; }).length;
+  const slInProg = curriculumTitles.filter(t => (allStatSL[t]||'ns')==='ip').length;
+  const coreSongs = Math.min(curriculumTitles.length, 6);
+  const slPct    = coreSongs > 0 ? Math.round((slDone / coreSongs) * 100) : 0;
+
   container.innerHTML = `
+    <div style="border-left:3px solid ${pm.color};padding-left:12px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="badge ${pm.badge}">${pm.label}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:${pm.color}">${phase.name}</span>
+          <span class="badge badge-pending" id="sl-count-${phaseNum}">${coreSongs} song${coreSongs!==1?'s':''} in curriculum${curriculumTitles.length > 6 ? ' + reach' : ''}</span>
+          ${slInProg > 0 ? `<span class="badge badge-active">${slInProg} in progress</span>` : ''}
+          ${slDone   > 0 ? `<span class="badge badge-done">${slDone} learned</span>` : ''}
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:${pm.color};letter-spacing:1px;flex-shrink:0">${slPct}%</span>
+      </div>
+      <div class="small muted" style="margin-bottom:8px">${phase.desc}</div>
+      <div class="prog-bar" style="height:3px"><div class="prog-fill" style="width:${slPct}%;background:${pm.color}"></div></div>
+    </div>
     <div class="small muted" style="margin-bottom:16px">Drag songs between columns to build your curriculum. Max 6 core songs + 1 reach slot (🎯). Drag within curriculum to reorder.</div>
     <div class="sl-layout" id="sl-layout-${phaseNum}">
       <div>
-        <div class="sl-col-header">
-          Curriculum
-          <span class="sl-col-count" id="sl-count-${phaseNum}">${Math.min(curriculumTitles.length,6)}/6${curriculumTitles.length > 6 ? ' + reach' : ''}</span>
-        </div>
+        <div class="sl-col-header">Curriculum</div>
         <div class="sl-drop-zone" id="sl-curriculum-${phaseNum}" data-phase="${phaseNum}" data-col="curriculum">
           ${curriculumTitles.length === 0 ? '<div class="sl-empty">Drop songs here</div>' :
             curriculumTitles.map((title, i) => {
@@ -811,17 +901,31 @@ function refreshSiteFromCurriculum() {
 function buildPersonalSection(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
+  const statusOpts = Object.entries(SONG_STATUS_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
   container.innerHTML = `
     <div style="margin-bottom:20px">
       <div class="section-label">Personal Repertoire</div>
       <div class="small muted" style="margin-bottom:18px;max-width:600px;line-height:1.7">Songs outside the curriculum — learned for personal reasons. No milestones. No phase assignment. No pressure.</div>
       <div class="stack" style="gap:12px">
-        ${GIFT_SONGS.map(s => `<div class="card" style="border-left:3px solid var(--accent)">
-          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px"><div style="font-size:15px;font-weight:500">${s.title}</div><div class="small dimmed">${s.artist}</div></div>
-          <div class="small muted" style="margin-bottom:8px;line-height:1.6">${s.why}</div>
-          <div class="small" style="color:var(--text3);font-style:italic;margin-bottom:10px">${s.notes}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px">${s.skills.map(sk => `<span class="tag">${sk}</span>`).join('')}</div>
-        </div>`).join('')}
+        ${GIFT_SONGS.map(s => {
+          const status = getSongStatus(s.title);
+          const safeName = s.title.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+          const statusOptsWithSel = Object.entries(SONG_STATUS_LABELS).map(([val, label]) => `<option value="${val}" ${status===val?'selected':''}>${label}</option>`).join('');
+          return `<div class="card" style="border-left:3px solid var(--accent)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+              <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                <div style="font-size:15px;font-weight:500">${s.title}</div>
+                <div class="small dimmed">${s.artist}</div>
+                ${s.capo && s.capo !== 'No capo' ? `<span class="tag" style="background:rgba(96,144,184,0.15);color:var(--blue);border-color:rgba(96,144,184,0.3)">${s.capo}</span>` : ''}
+              </div>
+              <select class="status-select ${status}" onchange="handleExtraStatusChange(event,'${safeName}')">${statusOptsWithSel}</select>
+            </div>
+            ${s.chords ? `<div class="small" style="color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.5px;margin-bottom:8px">${s.chords}</div>` : ''}
+            <div class="small muted" style="margin-bottom:8px;line-height:1.6">${s.why}</div>
+            <div class="small" style="color:var(--text3);font-style:italic;margin-bottom:10px">${s.notes}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">${s.skills.map(sk => `<span class="tag">${sk}</span>`).join('')}</div>
+          </div>`;
+        }).join('')}
       </div>
     </div>
     <div class="divider"></div>
@@ -871,12 +975,18 @@ function buildAcousticSection(containerId) {
   const tiersHTML = ACOUSTIC_SONGS.tiers.map((tier, ti) => {
     const songsHTML = tier.songs.map(s => {
       const isEssential = s.essential;
+      const status = getSongStatus(s.title);
+      const safeName = s.title.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      const statusOptsWithSel = Object.entries(SONG_STATUS_LABELS).map(([val, label]) => `<option value="${val}" ${status===val?'selected':''}>${label}</option>`).join('');
       return `<div class="card" style="border-left:${isEssential ? '3px' : '2px'} solid ${isEssential ? 'var(--accent2)' : tierColors[ti]};margin-bottom:10px;">
-        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
-          <div style="font-size:15px;font-weight:500;color:var(--text)">${s.title}</div>
-          <div class="small dimmed">${s.artist}</div>
-          ${s.capo !== 'No capo' ? `<span class="tag" style="background:rgba(96,144,184,0.15);color:var(--blue);border-color:rgba(96,144,184,0.3)">${s.capo}</span>` : ''}
-          ${isEssential ? `<span class="tag" style="background:rgba(196,144,96,0.2);color:var(--accent2);border-color:rgba(196,144,96,0.4);font-weight:600">ESSENTIAL</span>` : ''}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <div style="font-size:15px;font-weight:500;color:var(--text)">${s.title}</div>
+            <div class="small dimmed">${s.artist}</div>
+            ${s.capo !== 'No capo' ? `<span class="tag" style="background:rgba(96,144,184,0.15);color:var(--blue);border-color:rgba(96,144,184,0.3)">${s.capo}</span>` : ''}
+            ${isEssential ? `<span class="tag" style="background:rgba(196,144,96,0.2);color:var(--accent2);border-color:rgba(196,144,96,0.4);font-weight:600">ESSENTIAL</span>` : ''}
+          </div>
+          <select class="status-select ${status}" onchange="handleExtraStatusChange(event,'${safeName}')">${statusOptsWithSel}</select>
         </div>
         <div class="small" style="color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.5px;margin-bottom:8px">${s.chords}</div>
         <div class="small muted" style="line-height:1.65;margin-bottom:8px">${s.teaches}</div>
@@ -1050,6 +1160,8 @@ function init() {
   buildSwapTable('sw-phase1', SWAPS.phase1, false, 1);
   buildSwapTable('sw-phase2', SWAPS.phase2, false, 2);
   buildSwapTable('sw-phase3', SWAPS.phase3, false, 3);
+  buildSwapTable('sw-phase4', SWAPS.phase4 || [], false, 4);
+  buildSwapTable('sw-phase5', SWAPS.phase5 || [], false, 5);
   buildSwapTable('sw-metalitch', SWAPS.metalitch, true, null);
   buildPersonalSection('sw-personal');
   buildAcousticSection('sw-acoustic');
