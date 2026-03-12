@@ -384,13 +384,11 @@ function buildDashSongs() {
   container.innerHTML = titles.map(title => {
     const song = phase.songs.find(s => s.title === title);
     const artist = song ? song.artist : '';
-    const isReach = state.stretch === title;
     const status = getSongStatus(title);
     const sc = statusClass(status);
-    const reachBadge = isReach ? `<span class="badge-reach" style="color:${pm.color};border-color:${pm.border};background:${pm.bg}">🎯 Reach</span>` : '';
     return `<div class="song-row" style="cursor:pointer;border-left:3px solid var(--status-${sc})" onclick="goToSongInLibrary('${title.replace(/'/g, "\\'")}', ${phaseNum})">
       <div style="flex:1"><div class="song-title">${title}</div><div class="song-artist">${artist}</div></div>
-      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${reachBadge}${statusIconHtml(status)}</div>
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${statusIconHtml(status)}</div>
     </div>`;
   }).join('') || '<div class="small muted">No songs in curriculum yet.</div>';
 }
@@ -570,7 +568,7 @@ function getSongStatus(title) { return getAllSongStatuses()[title] || 'ns'; }
 function setSongStatus(title, status) { const all = getAllSongStatuses(); all[title] = status; localStorage.setItem('ngc-song-status', JSON.stringify(all)); }
 function statusClass(status) { return status || 'ns'; }
 function statusBadgeHtml(status) { const s = statusClass(status); return `<span class="status-badge ${s}">${SONG_STATUS_ICONS[s]} ${SONG_STATUS_LABELS[s]}</span>`; }
-function statusIconHtml(status) { const s = statusClass(status); return `<span class="status-badge ${s}" title="${SONG_STATUS_LABELS[s]}">${SONG_STATUS_ICONS[s]}</span>`; }
+function statusIconHtml(status) { const s = statusClass(status); if (s === 'ns') return ''; return `<span class="status-badge ${s}" title="${SONG_STATUS_LABELS[s]}">${SONG_STATUS_ICONS[s]}</span>`; }
 function getMasteredSongs() { const all = getAllSongStatuses(); const m = new Set(); Object.keys(all).forEach(t => { if (all[t]==='lrn'||all[t]==='itf') m.add(t); }); return m; }
 
 function handleMIStatusChange(event, songTitle) {
@@ -726,25 +724,20 @@ function buildSwapTable(containerId, data, isMetalItch, phaseNum) {
 
 function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
   const pm = PHASE_META[phaseNum] || PHASE_META[1];
-  const isReach = state.stretch === title;
   const status = getSongStatus(title);
   const sc = statusClass(status);
   const songObj = phase.songs.find(s => s.title === title);
   const swapObj = swapData ? swapData.find(s => s.song === title) : null;
   const func = swapObj ? swapObj.func : (songObj ? songObj.teaches.split(',')[0] : '');
-  const reachStyle = isReach ? `background-color: ${pm.bg}; border-color: ${pm.border};` : '';
-  const reachBtnClass = isReach ? 'sl-reach-btn active' : 'sl-reach-btn';
-  const cardClass = `sl-card status-${sc}${isReach ? ' is-reach' : ''}`;
-  const canToggleReach = col === 'curriculum' && (sc === 'lrn' || isReach);
+  const cardClass = `sl-card status-${sc}`;
   const statusOpts = Object.entries(SONG_STATUS_LABELS).map(([val, label]) => `<option value="${val}" ${sc === val ? 'selected' : ''}>${label}</option>`).join('');
   const safetitle = title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  return `<div class="${cardClass}" data-title="${title.replace(/"/g, '&quot;')}" data-phase="${phaseNum}" data-col="${col}" style="${reachStyle}">
+  return `<div class="${cardClass}" data-title="${title.replace(/"/g, '&quot;')}" data-phase="${phaseNum}" data-col="${col}">
     <div class="sl-card-top">
       <div style="flex:1"><div class="sl-card-title">${title}</div><div class="sl-card-artist">${songObj ? songObj.artist : ''}</div></div>
-      <div style="display:flex;align-items:center;gap:4px">
-        ${isReach ? `<span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:${pm.color};opacity:0.85">🎯 REACH</span>` : ''}
+      <div style="display:flex;align-items:center;gap:6px">
+        ${statusIconHtml(status)}
         <select class="status-select ${sc}" onclick="event.stopPropagation()" onchange="handleStatusChange(event, '${safetitle}', ${phaseNum})">${statusOpts}</select>
-        ${canToggleReach ? `<button class="${reachBtnClass}" onclick="toggleStretch(event, ${phaseNum}, '${safetitle}')">🎯</button>` : ''}
       </div>
     </div>
     ${func ? `<div class="sl-card-func">${func}</div>` : ''}
@@ -868,10 +861,25 @@ function commitDrop(x, y, phaseNum) {
 
 function handleStatusChange(e, title, phaseNum) {
   e.stopPropagation();
-  setSongStatus(title, e.target.value);
-  e.target.className = `status-select ${e.target.value}`;
+  const newStatus = e.target.value;
+  setSongStatus(title, newStatus);
+  e.target.className = `status-select ${newStatus}`;
   const card = e.target.closest('.sl-card');
-  if (card) { card.classList.remove('status-ns','status-ip','status-lrn','status-itf'); card.classList.add(`status-${e.target.value}`); }
+  if (card) {
+    card.classList.remove('status-ns','status-ip','status-lrn','status-itf');
+    card.classList.add(`status-${newStatus}`);
+    // Update the status icon in the card
+    const iconSpan = card.querySelector('.status-badge');
+    const newIcon = statusIconHtml(newStatus);
+    if (iconSpan) {
+      iconSpan.outerHTML = newIcon;
+    } else if (newIcon) {
+      const iconSlot = card.querySelector('.sl-card-top > div:last-child');
+      if (iconSlot) iconSlot.insertAdjacentHTML('afterbegin', newIcon);
+    }
+  }
+  // Rebuild phase header stats and progress bar
+  rebuildPhaseHeader(phaseNum);
   refreshSiteFromCurriculum();
 }
 
@@ -888,6 +896,42 @@ function rebuildSwapPhase(phaseNum) {
   const phase = PHASES.find(p => p.id === phaseNum);
   if (!phase) return;
   buildSwapTable(`sw-phase${phaseNum}`, SWAPS[`phase${phaseNum}`] || [], false, phaseNum);
+}
+
+function rebuildPhaseHeader(phaseNum) {
+  const pm = PHASE_META[phaseNum] || PHASE_META[1];
+  const state = getCurriculumState(phaseNum);
+  const curriculumTitles = state.curriculum;
+  const allStatSL = getAllSongStatuses();
+  const slDone   = curriculumTitles.filter(t => { const s = allStatSL[t]||'ns'; return s==='lrn'||s==='itf'; }).length;
+  const slInProg = curriculumTitles.filter(t => (allStatSL[t]||'ns')==='ip').length;
+  const coreSongs = Math.min(curriculumTitles.length, 6);
+  const slPct = coreSongs > 0 ? Math.round((slDone / coreSongs) * 100) : 0;
+
+  // Update progress bar fill
+  const layout = document.getElementById(`sl-layout-${phaseNum}`);
+  if (!layout) return;
+  const header = layout.closest('.inner-panel')?.previousElementSibling || layout.parentElement?.querySelector('[style*="prog-bar"]');
+  // Find prog-fill within the phase header (sibling of sl-layout)
+  const container = document.getElementById(`sw-phase${phaseNum}`);
+  if (!container) return;
+  const progFill = container.querySelector('.prog-fill');
+  if (progFill) progFill.style.width = slPct + '%';
+  // Update percentage text
+  const pctEl = container.querySelector(`[style*="DM Mono"][style*="letter-spacing:1px"]`);
+  if (pctEl) pctEl.textContent = slPct + '%';
+  // Update in-progress and learned badges
+  const headerDiv = container.querySelector('[style*="border-left"]');
+  if (headerDiv) {
+    const badgeRow = headerDiv.querySelector('[style*="align-items:center"][style*="gap:10px"]');
+    if (badgeRow) {
+      // Remove old dynamic badges
+      badgeRow.querySelectorAll('.badge-active, .badge-done').forEach(b => b.remove());
+      // Add updated ones
+      if (slInProg > 0) badgeRow.insertAdjacentHTML('beforeend', `<span class="badge badge-active">${slInProg} in progress</span>`);
+      if (slDone   > 0) badgeRow.insertAdjacentHTML('beforeend', `<span class="badge badge-done">${slDone} learned</span>`);
+    }
+  }
 }
 
 function refreshSiteFromCurriculum() {
@@ -1013,7 +1057,7 @@ function buildAcousticSection(containerId) {
 // PRACTICE TIMER
 // ═══════════════════════════════════════════
 const TIMER = { segments:[], segIdx:0, totalSecs:0, remainSecs:0, running:false, interval:null, doneSegs:new Set() };
-const CIRCUMFERENCE = 2 * Math.PI * 58;
+const CIRCUMFERENCE = 2 * Math.PI * 54;
 
 function timerGetSessionSegs() {
   const activePlan = document.querySelector('.session-plan.active');
@@ -1038,12 +1082,24 @@ function timerLoadSession() {
   document.getElementById('timer-mode-label').textContent = 'Session';
 }
 
+function timerToggleCustom() {
+  const expand = document.getElementById('timer-custom-expand');
+  const btn = document.getElementById('timer-custom-toggle');
+  const isOpen = expand.classList.contains('open');
+  expand.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+  if (!isOpen) setTimeout(() => document.getElementById('timer-custom-min').focus(), 50);
+}
+
 function timerLoadCustom() {
   const val = parseInt(document.getElementById('timer-custom-min').value);
   if (!val || val < 1) return;
   timerStop(); TIMER.segments = [{label:'Practice', minutes:val}]; TIMER.segIdx = 0; TIMER.doneSegs.clear();
   timerInitSeg(); timerRenderSegs();
   document.getElementById('timer-mode-label').textContent = 'Custom';
+  // Close the expand panel
+  document.getElementById('timer-custom-expand').classList.remove('open');
+  document.getElementById('timer-custom-toggle').classList.remove('active');
 }
 
 function timerInitSeg() {
@@ -1181,6 +1237,8 @@ function init() {
   checkSessionComplete();
   // Restore gear image URLs
   applyAllGearUrls();
+  // Load session timer by default
+  setTimeout(timerLoadSession, 100);
 }
 
 document.addEventListener('DOMContentLoaded', init);

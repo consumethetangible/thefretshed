@@ -162,6 +162,43 @@
             <div class="sblock-check" onclick="toggleBlockComplete('weekend',3)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
           </div>
         </div>
+
+        <!-- Timer — integrated into session card -->
+        <div class="session-timer-divider">
+          <span>Practice Timer</span>
+          <div class="timer-mode-label" id="timer-mode-label">Session</div>
+        </div>
+        <div class="session-timer-body">
+          <div class="session-timer-left">
+            <div class="timer-ring-wrap" style="margin-bottom:10px">
+              <svg width="130" height="130" viewBox="0 0 130 130">
+                <circle class="timer-ring-bg" cx="65" cy="65" r="54" fill="none" stroke-width="6"/>
+                <circle class="timer-ring-fill" id="timer-ring" cx="65" cy="65" r="54" fill="none" stroke-width="6" stroke-dasharray="339.3" stroke-dashoffset="0"/>
+              </svg>
+              <div class="timer-display">
+                <div class="timer-digits" id="timer-digits">00:00</div>
+                <div class="timer-seg-label" id="timer-seg-label">—</div>
+              </div>
+            </div>
+            <div class="timer-controls">
+              <button class="timer-btn timer-btn-secondary" onclick="timerReset()">Reset</button>
+              <button class="timer-btn timer-btn-primary" id="timer-start-btn" onclick="timerToggle()">Start</button>
+              <button class="timer-btn timer-btn-secondary" onclick="timerNextSeg()">Skip</button>
+            </div>
+            <div class="timer-custom-row">
+              <button class="timer-btn timer-btn-ghost" id="timer-custom-toggle" onclick="timerToggleCustom()">Custom</button>
+              <button class="timer-btn timer-btn-ghost" onclick="timerLoadSession()">Session</button>
+            </div>
+            <div class="timer-custom-expand" id="timer-custom-expand">
+              <span class="timer-custom-label">Minutes</span>
+              <input class="timer-custom-input" id="timer-custom-min" type="number" min="1" max="120" value="20" onkeydown="if(event.key==='Enter')timerLoadCustom()">
+              <button class="timer-btn timer-btn-primary timer-custom-go" onclick="timerLoadCustom()">Go</button>
+            </div>
+          </div>
+          <div class="session-timer-right">
+            <div class="timer-segments" id="timer-segments"></div>
+          </div>
+        </div>
       </div>
 
       <div class="card week-selector-card">
@@ -219,35 +256,6 @@
           </div>
         </div>
         <button class="log-today-btn" id="log-today-btn" onclick="logPracticeDay(false)">✓ Log Today's Practice</button>
-      </div>
-
-      <!-- Practice Timer -->
-      <div class="timer-card">
-        <div class="timer-header">
-          <div class="timer-title">Practice Timer</div>
-          <div class="timer-mode-label" id="timer-mode-label">Session</div>
-        </div>
-        <div class="timer-ring-wrap">
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <circle class="timer-ring-bg" cx="70" cy="70" r="58" fill="none" stroke-width="7"/>
-            <circle class="timer-ring-fill" id="timer-ring" cx="70" cy="70" r="58" fill="none" stroke-width="7" stroke-dasharray="364.4" stroke-dashoffset="0"/>
-          </svg>
-          <div class="timer-display">
-            <div class="timer-digits" id="timer-digits">00:00</div>
-            <div class="timer-seg-label" id="timer-seg-label">—</div>
-          </div>
-        </div>
-        <div class="timer-controls">
-          <button class="timer-btn" onclick="timerReset()">Reset</button>
-          <button class="timer-btn primary" id="timer-start-btn" onclick="timerToggle()">Start</button>
-          <button class="timer-btn" onclick="timerNextSeg()">Skip →</button>
-        </div>
-        <div class="timer-custom-row">
-          <input class="timer-custom-input" id="timer-custom-min" type="number" min="1" max="120" value="20" placeholder="min">
-          <button class="timer-btn" style="flex:1" onclick="timerLoadCustom()">Custom Timer</button>
-          <button class="timer-btn" onclick="timerLoadSession()">Load Session</button>
-        </div>
-        <div class="timer-segments" id="timer-segments"></div>
       </div>
 
       <!-- Resources -->
