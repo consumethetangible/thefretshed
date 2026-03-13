@@ -23,7 +23,7 @@ the-woodshed/
 
 **Deployment:** GitHub Pages. Changes go live automatically on push to `main`.
 
-**Workflow:** Download current `index.html` / `css/styles.css` / `js/app.js` → make changes → upload to replace existing files via the GitHub web editor.
+**Workflow:** Download current files as a zip → replace existing files via the GitHub web editor. The zip unpacks into `shed_package/` containing `index.html`, `css/`, and `js/` ready to drag-replace.
 
 ---
 
@@ -31,9 +31,9 @@ the-woodshed/
 
 ### Dashboard
 Session overview for the current week. Includes:
+- **Phase hero card** — phase name, description, weekly focus text, progress bar, and a 2×6 week selector grid. All in one card, no separate week selector.
 - **Session blocks** with per-block checkboxes (reset daily), progress timer, and "Session complete" banner
-- **Practice timer** with circular countdown ring, session-aware segment labels, audio pings, and custom duration support. Auto-pauses between blocks and pulses the Start button — hit Start when ready for the next block.
-- **Metronome** with BPM display, ±1/±5 nudge buttons, tap tempo, and Web Audio API scheduling
+- **Practice timer** with circular countdown ring, session-aware segment labels, audio pings, and custom duration support
 - **Streak & heatmap** showing current streak, longest streak, total days practiced, and a 14-week GitHub-style contribution grid
 
 ### Curriculum
@@ -48,25 +48,40 @@ Five-phase structured learning plan with weekly focus areas, song assignments, a
 | 5 | Integration | Purple `#9278b0` |
 
 ### Song Library
-Drag-and-drop song cards across two columns: **Curriculum** (phase-tagged) and **Personal Repertoire**. Four-state status system with color-coded card borders:
+Drag-and-drop song cards across two columns: **Curriculum** (phase-tagged) and **Personal Repertoire**. Four-state status system with color-coded card borders and a 15% left-side status gradient on each card:
 
 | Status | Color |
 |--------|-------|
-| Not Started | Muted border |
+| Not Started | Muted grey |
 | In Progress | Amber |
 | Learned | Green |
-| In The Fingers | Blue |
+| In The Fingers | Blue (glow) |
 
-Cards are draggable on both desktop (pointer events) and iOS Safari. An insert line shows drop position.
+Cards are draggable on both desktop (pointer events) and iOS Safari. An insert line shows drop position. Status shading also appears on dashboard song rows.
 
 ### Rig & Tone
 Guitar cards with images, signal chain visualization, and full pedal collection with categorized color-matched tags.
 
 ---
 
+## Header Metronome
+
+A compact metronome strip sits in the header at all times:
+
+```
+METRONOME | [BPM input] BPM | Tap | Start
+```
+
+- BPM input is always directly typeable — no click-to-edit toggle
+- Tap tempo averages the last 6 taps
+- Input turns amber when running
+- Web Audio API scheduling for tight timing
+
+---
+
 ## Theme System
 
-The app has five themes, each with four named presets, managed through a settings drawer (gear icon in the header).
+The app has five themes, each with four named presets. The **Mode button** opens the theme picker drawer. The **gear icon** opens the settings drawer (separate).
 
 | Theme | Presets |
 |-------|---------|
@@ -76,14 +91,37 @@ The app has five themes, each with four named presets, managed through a setting
 | Cool | North Atlantic, Slate, Glacial, Midnight Steel |
 | Psych | Black Light, Void Purple, Acid, Fever Dream |
 
-**How it works:** CSS variables are defined in `:root` as dark defaults. On load (and on theme switch), `applyThemeVars()` writes the active preset's values directly to `document.documentElement.style`, overriding `:root`. No `[data-theme]` CSS blocks — all palette logic lives in `THEME_DEFAULTS` in `app.js`.
+**How it works:** CSS variables are defined in `:root` as dark defaults. On load (and on theme switch), `applyThemeVars()` writes the active preset's values directly to `document.documentElement.style`. All palette logic lives in `THEME_DEFAULTS` in `app.js`.
 
-**Settings drawer:** Slides in from the right. Clicking a theme row switches immediately. "Edit ▾" expands the preset picker inline. Save writes to `localStorage`; Reset clears custom values back to defaults.
+**Settings drawer** (gear icon): Data Management (export, clear streak, reset curriculum/statuses), Display Preferences (compact dashboard toggle), App Info.
 
 **localStorage keys:**
-- `ngc-theme` — active theme key (`dark` / `light` / `warm` / `cool` / `psych`)
+- `ngc-theme` — active theme key
 - `ngc-preset-{key}` — active preset name for a theme
-- `ngc-custom-{key}` — JSON of custom-saved CSS variable overrides for a theme
+- `ngc-custom-{key}` — JSON of custom-saved CSS variable overrides
+- `ngc-pref-compact` — compact dashboard display preference
+
+---
+
+## localStorage Reference
+
+| Key | Purpose |
+|-----|---------|
+| `ngc-theme` | Active theme key |
+| `ngc-preset-{key}` | Active preset per theme |
+| `ngc-custom-{key}` | Custom CSS var overrides per theme |
+| `ngc-week` | Current week (1–12) |
+| `ngc-current-phase` | Active phase number |
+| `ngc-practice-days` | Array of YYYY-MM-DD strings |
+| `ngc-song-status` | Object: title → status string |
+| `ngc-curriculum-p{n}` | Phase curriculum state JSON |
+| `ngc-notes` | Session notes text |
+| `ngc-gear-urls` | Object: gear id → image URL |
+| `ngc-checks` | Resource checklist state |
+| `ngc-milestones` | Milestone completion state |
+| `ngc-block-{date}-{plan}-{idx}` | Per-day session block completion |
+| `ngc-pref-compact` | Compact dashboard display preference |
+| `ngc-gift-songs` | User-added personal repertoire songs |
 
 ---
 
@@ -254,3 +292,4 @@ Referenced throughout `data.js` for week-by-week assignments:
 - Continued song additions across all phases
 - Amp profiler/modeler evaluation (Tonex vs. Kemper — pending)
 - Delay pedal upgrade research (Thermae, Polymoon — pending)
+- Mobile layout review for header metronome
