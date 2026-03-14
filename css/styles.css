@@ -997,3 +997,86 @@ body {
 @keyframes pulse-waiting {
   0%, 100% { opacity: 1; } 50% { opacity: 0.65; }
 }
+
+/* ── Spotify Player ─────────────────────────────── */
+.spotify-player {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.spotify-player-loading,
+.spotify-player-notfound {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+}
+.spotify-player-collapsed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  transition: border-color 0.15s, background 0.15s;
+}
+.spotify-player-collapsed:hover {
+  border-color: #1db954;
+  background: rgba(29,185,84,0.07);
+}
+.spotify-icon {
+  width: 16px; height: 16px;
+  fill: #1db954;
+  flex-shrink: 0;
+}
+.spotify-track-name {
+  font-size: 12px;
+  color: var(--text1);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+.spotify-track-artist {
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.spotify-expand-hint {
+  font-size: 10px;
+  color: #1db954;
+  font-family: 'DM Mono', monospace;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.spotify-embed-container {
+  margin-top: 8px;
+}
+.spotify-embed-container iframe {
+  border-radius: 8px;
+  display: block;
+}
+.spotify-collapse-btn {
+  margin-top: 6px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0;
+  letter-spacing: 0.5px;
+}
+.spotify-collapse-btn:hover { color: var(--text1); }
+
+/* Spotify connect button connected state */
+#spotify-connect-btn.connected .settings-action-label::before {
+  content: '✓ ';
+  color: #1db954;
+}
