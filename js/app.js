@@ -243,7 +243,7 @@ function buildSettingsDrawer() {
       <div class="settings-section-label">App Info</div>
       <div class="settings-info-row">
         <span class="settings-info-key">App</span>
-        <span class="settings-info-val">The Shed</span>
+        <span class="settings-info-val">The Fret Shed</span>
       </div>
       <div class="settings-info-row">
         <span class="settings-info-key">Version</span>
@@ -953,7 +953,7 @@ function getCurriculumState(phaseNum) {
   if (saved) return JSON.parse(saved);
   const phase = PHASES.find(p => p.id === phaseNum);
   if (!phase) return { curriculum: [], stretch: null };
-  return { curriculum: phase.songs.map(s => s.title), stretch: null };
+  return { curriculum: phase.songs.filter(s => !s.inOptions).map(s => s.title), stretch: null };
 }
 
 function saveCurriculumState(phaseNum, state) {
