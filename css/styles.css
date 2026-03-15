@@ -1080,3 +1080,41 @@ body {
   content: '✓ ';
   color: #1db954;
 }
+
+/* ── Drawer overlay (click outside to close) ── */
+#drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+#drawer-overlay.active { display: block; }
+
+/* ── Spotify connected state ─────────────────── */
+.spotify-btn {
+  transition: background 0.2s, border-color 0.2s;
+}
+.spotify-btn.connected {
+  background: rgba(29,185,84,0.12) !important;
+  border-color: #1db954 !important;
+}
+.spotify-btn.connected .spotify-btn-icon svg { fill: #1db954; }
+.spotify-btn.connected .spotify-btn-label { color: #1db954; }
+.spotify-btn.connected .spotify-btn-sub { color: var(--text3); }
+
+/* ── Settings mode button ────────────────────── */
+.settings-mode-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.settings-mode-btn:hover { border-color: var(--accent); background: var(--bg4); }
