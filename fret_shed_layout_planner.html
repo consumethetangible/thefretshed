@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fret Shed — Layout Planner</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #242424;
+    --bg-card: #2a2a2a;
+    --border: rgba(255,255,255,0.12);
+    --border-strong: rgba(255,255,255,0.25);
+    --text-primary: #f0ede6;
+    --text-secondary: #888;
+    --accent: #c8a84b;
+    --accent-dim: rgba(200,168,75,0.15);
+    --blue: #378ADD;
+    --blue-dim: rgba(55,138,221,0.15);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+  }
+  body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 24px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; letter-spacing: 0.5px; }
+  #toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  button { font-family: 'DM Mono', monospace; font-size: 11px; padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg-card); color: var(--text-primary); cursor: pointer; transition: background 0.15s, border-color 0.15s; letter-spacing: 0.3px; }
+  button:hover { background: var(--bg-secondary); border-color: var(--accent); }
+  button.primary { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  button.danger { color: #e2534a; border-color: rgba(226,83,74,0.4); }
+  button.danger:hover { background: rgba(226,83,74,0.1); }
+  button#snap-toggle.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  button.layer-btn { border-color: rgba(55,138,221,0.4); color: var(--blue); }
+  button.layer-btn:hover { background: var(--blue-dim); }
+  #canvas-wrap { display: flex; gap: 12px; align-items: flex-start; }
+  #canvas { position: relative; flex: 1; min-height: 640px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-secondary); overflow: hidden; }
+  .grid-line { position: absolute; background: rgba(255,255,255,0.04); pointer-events: none; }
+  .card-block { position: absolute; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg-card); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; user-select: none; padding: 6px 8px; }
+  .card-block:active { cursor: grabbing; }
+  .card-block.selected { border-color: var(--blue) !important; border-width: 2px !important; box-shadow: 0 0 0 2px rgba(55,138,221,0.25); }
+  .card-label { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; text-align: center; color: var(--text-primary); pointer-events: none; line-height: 1.3; }
+  .card-sub { font-size: 10px; color: var(--text-secondary); text-align: center; pointer-events: none; margin-top: 3px; }
+  .resize-handle { position: absolute; bottom: 3px; right: 5px; font-size: 9px; color: var(--text-secondary); cursor: se-resize; line-height: 1; }
+  .layer-badge { position: absolute; top: 3px; left: 5px; font-size: 9px; color: var(--text-secondary); font-family: 'DM Mono', monospace; pointer-events: none; opacity: 0.6; }
+  #side-panel { width: 210px; flex-shrink: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); display: none; }
+  #side-panel h3 { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; }
+  #side-panel label { font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 3px; margin-top: 8px; }
+  #side-panel input[type=text], #side-panel input[type=number] { font-family: 'DM Mono', monospace; font-size: 12px; width: 100%; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); padding: 5px 8px; outline: none; }
+  #side-panel input[type=number] { width: 80px; }
+  #side-panel input:focus { border-color: var(--accent); }
+  .dim-row { display: flex; gap: 8px; align-items: flex-end; }
+  .dim-row > div { flex: 1; }
+  .color-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); transition: transform 0.1s; }
+  .color-dot:hover { transform: scale(1.15); }
+  .color-dot.active { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .panel-divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .opacity-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+  .opacity-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .opacity-val { font-size: 11px; color: var(--text-secondary); min-width: 28px; font-family: 'DM Mono', monospace; }
+  #hint { font-size: 11px; color: var(--text-secondary); margin-top: 8px; line-height: 1.5; }
+  .z-row { display: flex; gap: 6px; margin-top: 4px; }
+  .z-row button { flex: 1; font-size: 11px; padding: 4px 6px; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<h1>THE FRET SHED</h1>
+<p class="subtitle">DASHBOARD LAYOUT PLANNER</p>
+
+<div id="toolbar">
+  <button class="primary" onclick="addCard()">+ Add block</button>
+  <button id="snap-toggle" class="active" onclick="toggleSnap()">Grid snap: ON</button>
+  <button class="layer-btn" onclick="bringForward()">Bring forward</button>
+  <button class="layer-btn" onclick="sendBackward()">Send back</button>
+  <button onclick="saveLayout()">Save layout</button>
+  <button onclick="loadLayout()">Load layout</button>
+  <button onclick="exportLayout()">Copy layout</button>
+  <button class="danger" onclick="clearAll()">Clear all</button>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas"></div>
+  <div id="side-panel">
+    <h3>Edit block</h3>
+    <label>Label</label>
+    <input type="text" id="edit-label" oninput="updateSelected('label', this.value)" />
+    <label>Sub-label</label>
+    <input type="text" id="edit-sub" oninput="updateSelected('sub', this.value)" placeholder="optional" />
+    <div class="dim-row" style="margin-top:8px;">
+      <div><label>Width</label><input type="number" id="edit-w" oninput="updateSelected('w', +this.value)" /></div>
+      <div><label>Height</label><input type="number" id="edit-h" oninput="updateSelected('h', +this.value)" /></div>
+    </div>
+    <label>Opacity</label>
+    <div class="opacity-row">
+      <input type="range" min="10" max="100" step="5" id="edit-opacity" oninput="updateSelected('opacity', +this.value / 100)" />
+      <span class="opacity-val" id="opacity-val">100%</span>
+    </div>
+    <label>Layer (z-index)</label>
+    <div class="z-row">
+      <button class="layer-btn" onclick="bringForward()">▲ Forward</button>
+      <button class="layer-btn" onclick="sendBackward()">▼ Back</button>
+    </div>
+    <label>Color</label>
+    <div class="color-row" id="color-row"></div>
+    <div class="panel-divider"></div>
+    <button class="danger" style="width:100%;" onclick="deleteSelected()">Delete block</button>
+  </div>
+</div>
+
+<p id="hint">Click a block to select &amp; edit. Drag to move. Drag ⤡ to resize. Overlap blocks freely to show merged cards.</p>
+
+<script>
+const COLORS = [
+  {name:'default', bg:'#2a2a2a',  border:'rgba(255,255,255,0.25)'},
+  {name:'blue',    bg:'#0c2a3f',  border:'#378ADD'},
+  {name:'amber',   bg:'#2e1f05',  border:'#c8a84b'},
+  {name:'teal',    bg:'#083020',  border:'#1D9E75'},
+  {name:'coral',   bg:'#2e1008',  border:'#D85A30'},
+  {name:'purple',  bg:'#1e1535',  border:'#7F77DD'},
+  {name:'green',   bg:'#122008',  border:'#639922'},
+  {name:'gray',    bg:'#222220',  border:'#888780'},
+];
+
+let snapOn = true;
+const GRID = 20;
+let cards = [];
+let selectedId = null;
+let dragging = null, resizing = null;
+let offsetX = 0, offsetY = 0;
+let startW = 0, startH = 0, startMX = 0, startMY = 0;
+
+const canvas = document.getElementById('canvas');
+const panel = document.getElementById('side-panel');
+
+const defaultCards = [
+  {id:1, label:'Phase / Week',       sub:'hero card',         x:20,  y:20,  w:260, h:100, colorIdx:1, z:1, opacity:1},
+  {id:2, label:"Tonight's Session",  sub:'blocks + checklist', x:300, y:20,  w:260, h:160, colorIdx:2, z:1, opacity:1},
+  {id:3, label:'Practice Timer',     sub:'',                  x:300, y:200, w:125, h:100, colorIdx:0, z:1, opacity:1},
+  {id:4, label:'Metronome',          sub:'',                  x:445, y:200, w:115, h:100, colorIdx:0, z:1, opacity:1},
+  {id:5, label:'Phase 1 Songs',      sub:'song list',         x:580, y:20,  w:180, h:160, colorIdx:4, z:1, opacity:1},
+  {id:6, label:'Session Notes',      sub:'',                  x:580, y:200, w:180, h:120, colorIdx:0, z:1, opacity:1},
+  {id:7, label:'Practice Streak',    sub:'+ heatmap',         x:20,  y:140, w:260, h:140, colorIdx:3, z:1, opacity:1},
+  {id:8, label:'Active Resources',   sub:'book checklist',    x:20,  y:300, w:260, h:120, colorIdx:5, z:1, opacity:1},
+];
+
+function snap(v) { return snapOn ? Math.round(v / GRID) * GRID : v; }
+
+function toggleSnap() {
+  snapOn = !snapOn;
+  const btn = document.getElementById('snap-toggle');
+  btn.textContent = 'Grid snap: ' + (snapOn ? 'ON' : 'OFF');
+  btn.classList.toggle('active', snapOn);
+  renderAll();
+}
+
+function renderAll() {
+  canvas.innerHTML = '';
+  if (snapOn) drawGrid();
+  const sorted = [...cards].sort((a, b) => (a.z||1) - (b.z||1));
+  sorted.forEach(renderCard);
+}
+
+function drawGrid() {
+  const W = canvas.offsetWidth || 800;
+  const H = canvas.offsetHeight || 640;
+  for (let x = 0; x < W; x += GRID) {
+    const l = document.createElement('div');
+    l.className = 'grid-line';
+    l.style.cssText = `left:${x}px;top:0;width:0.5px;height:100%;`;
+    canvas.appendChild(l);
+  }
+  for (let y = 0; y < H; y += GRID) {
+    const l = document.createElement('div');
+    l.className = 'grid-line';
+    l.style.cssText = `top:${y}px;left:0;height:0.5px;width:100%;`;
+    canvas.appendChild(l);
+  }
+}
+
+function renderCard(c) {
+  const col = COLORS[c.colorIdx || 0];
+  const el = document.createElement('div');
+  el.className = 'card-block' + (c.id === selectedId ? ' selected' : '');
+  el.id = 'card-' + c.id;
+  el.style.cssText = `left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;background:${col.bg};border-color:${col.border};z-index:${c.z||1};opacity:${c.opacity !== undefined ? c.opacity : 1};`;
+  el.innerHTML = `<div class="layer-badge">z${c.z||1}</div><div class="card-label">${c.label}</div>${c.sub ? `<div class="card-sub">${c.sub}</div>` : ''}<div class="resize-handle">⤡</div>`;
+
+  el.addEventListener('pointerdown', e => {
+    if (e.target.classList.contains('resize-handle')) {
+      resizing = c;
+      startW = c.w; startH = c.h; startMX = e.clientX; startMY = e.clientY;
+      e.preventDefault(); return;
+    }
+    selectCard(c.id);
+    dragging = c;
+    const rect = canvas.getBoundingClientRect();
+    offsetX = e.clientX - rect.left - c.x;
+    offsetY = e.clientY - rect.top - c.y;
+    e.preventDefault();
+  });
+
+  canvas.appendChild(el);
+}
+
+function selectCard(id) {
+  selectedId = id;
+  const c = cards.find(x => x.id === id);
+  if (!c) return;
+  panel.style.display = 'block';
+  document.getElementById('edit-label').value = c.label;
+  document.getElementById('edit-sub').value = c.sub || '';
+  document.getElementById('edit-w').value = c.w;
+  document.getElementById('edit-h').value = c.h;
+  const op = Math.round((c.opacity !== undefined ? c.opacity : 1) * 100);
+  document.getElementById('edit-opacity').value = op;
+  document.getElementById('opacity-val').textContent = op + '%';
+  buildColorRow(c);
+  renderAll();
+}
+
+function buildColorRow(c) {
+  const row = document.getElementById('color-row');
+  row.innerHTML = '';
+  COLORS.forEach((col, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot' + (i === (c.colorIdx || 0) ? ' active' : '');
+    dot.style.background = col.bg;
+    dot.style.borderColor = col.border;
+    dot.title = col.name;
+    dot.onclick = () => { c.colorIdx = i; buildColorRow(c); renderAll(); };
+    row.appendChild(dot);
+  });
+}
+
+function updateSelected(field, val) {
+  const c = cards.find(x => x.id === selectedId);
+  if (!c) return;
+  if (field === 'label') c.label = val;
+  if (field === 'sub') c.sub = val;
+  if (field === 'w' && val > 20) c.w = val;
+  if (field === 'h' && val > 20) c.h = val;
+  if (field === 'opacity') {
+    c.opacity = val;
+    const pct = Math.round(val * 100);
+    document.getElementById('edit-opacity').value = pct;
+    document.getElementById('opacity-val').textContent = pct + '%';
+  }
+  renderAll();
+}
+
+function bringForward() {
+  const c = cards.find(x => x.id === selectedId);
+  if (!c) return;
+  c.z = (c.z || 1) + 1;
+  renderAll();
+}
+
+function sendBackward() {
+  const c = cards.find(x => x.id === selectedId);
+  if (!c) return;
+  c.z = Math.max(1, (c.z || 1) - 1);
+  renderAll();
+}
+
+function deleteSelected() {
+  cards = cards.filter(x => x.id !== selectedId);
+  selectedId = null;
+  panel.style.display = 'none';
+  renderAll();
+}
+
+document.addEventListener('pointermove', e => {
+  if (dragging) {
+    const rect = canvas.getBoundingClientRect();
+    dragging.x = snap(Math.max(0, e.clientX - rect.left - offsetX));
+    dragging.y = snap(Math.max(0, e.clientY - rect.top - offsetY));
+    renderAll();
+  }
+  if (resizing) {
+    resizing.w = snap(Math.max(60, startW + (e.clientX - startMX)));
+    resizing.h = snap(Math.max(40, startH + (e.clientY - startMY)));
+    document.getElementById('edit-w').value = resizing.w;
+    document.getElementById('edit-h').value = resizing.h;
+    renderAll();
+  }
+});
+
+document.addEventListener('pointerup', () => { dragging = null; resizing = null; });
+
+function addCard() {
+  const id = Date.now();
+  const maxZ = cards.reduce((m, c) => Math.max(m, c.z||1), 1);
+  cards.push({id, label:'New block', sub:'', x:snap(60), y:snap(60), w:160, h:80, colorIdx:0, z:maxZ+1, opacity:1});
+  selectCard(id);
+}
+
+function clearAll() {
+  if (confirm('Clear all blocks?')) { cards = []; selectedId = null; panel.style.display = 'none'; renderAll(); }
+}
+
+function exportLayout() {
+  const desc = [...cards].sort((a,b)=>(a.z||1)-(b.z||1)).map(c => `[z${c.z||1}] ${c.label}${c.sub?' ('+c.sub+')':''}: ${c.w}x${c.h} at (${c.x}, ${c.y})`).join('\n');
+  navigator.clipboard.writeText(desc).then(() => {
+    const btn = document.querySelector('[onclick="exportLayout()"]');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1800);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = desc;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('Layout copied to clipboard!');
+  });
+}
+
+function saveLayout() {
+  localStorage.setItem('fretShedLayout', JSON.stringify(cards));
+  const btn = document.querySelector('[onclick="saveLayout()"]');
+  const orig = btn.textContent;
+  btn.textContent = 'Saved!';
+  setTimeout(() => btn.textContent = orig, 1800);
+}
+
+function loadLayout() {
+  const saved = localStorage.getItem('fretShedLayout');
+  if (saved) {
+    cards = JSON.parse(saved);
+    selectedId = null;
+    panel.style.display = 'none';
+    renderAll();
+    const btn = document.querySelector('[onclick="loadLayout()"]');
+    const orig = btn.textContent;
+    btn.textContent = 'Loaded!';
+    setTimeout(() => btn.textContent = orig, 1800);
+  } else {
+    alert('No saved layout found.');
+  }
+}
+
+cards = JSON.parse(JSON.stringify(defaultCards));
+renderAll();
+</script>
+</body>
+</html>
