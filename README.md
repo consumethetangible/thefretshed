@@ -2,6 +2,413 @@
 
 A personal guitar practice dashboard. Tracks curriculum progress, session blocks, song library, gear, and tone work. Built for daily use on desktop and iPad.
 
+**Live URL:** https://thefretshed.com
+
+---
+
+## File Structure
+
+```
+the-woodshed/
+├── index.html          # All HTML structure and markup
+├── css/
+│   └── styles.css      # All styles (CSS variables, layout, components)
+├── js/
+│   ├── app.js          # All application logic (theme system, UI, timers, drag-and-drop)
+│   ├── data.js         # All curriculum, song, and gear data — edit this to update content
+│   ├── spotify.js      # Spotify Web API integration (PKCE OAuth — live)
+│   └── claude.js       # Claude AI integration (planned)
+└── README.md
+```
+
+**Deployment:** AWS (S3 + CloudFront + Route 53 + ACM)
+
+**Workflow:** Edit files locally → test by opening `index.html` in Chrome → upload changed files to S3 → invalidate CloudFront cache (`/*`) → live at `thefretshed.com`
+
+---
+
+## Infrastructure & Hosting
+
+### Stack
+```
+thefretshed.com
+  → Route 53 (DNS)
+  → CloudFront (HTTPS delivery + CDN)
+  → S3 bucket: thefretshed.com (static file hosting)
+  → ACM (SSL certificate — us-east-1)
+```
+
+Future backend additions:
+```
+  → API Gateway + Lambda (serverless API)
+  → DynamoDB (session notes, user data)
+  → S3 private bucket (PDF course books)
+  → Cognito (authentication — when multi-user needed)
+```
+
+### Deployment Status
+| Service | Status | Notes |
+|---------|--------|-------|
+| AWS Account | ✅ Live | "The Shed - Practice App" |
+| Route 53 | ✅ Live | `thefretshed.com` — managed |
+| S3 Bucket | ✅ Live | `thefretshed.com`, static hosting enabled, public read policy set |
+| ACM Certificate | ✅ Live | Covers `thefretshed.com` + `www.thefretshed.com`, DNS validated |
+| CloudFront | ✅ Live | Origin = S3 website endpoint, HTTP only to origin, HTTPS to users, 404 → index.html (TTL 0) |
+| DNS | ✅ Live | Route 53 alias A records → CloudFront for apex + www |
+| Spotify OAuth | ✅ Live | PKCE flow working, redirect URI = `https://thefretshed.com/callback` |
+
+### Estimated Cost
+~$20–25/year total at single-user volume:
+- Route 53 hosted zone: ~$0.50/month
+- Domain registration: ~$13/year
+- S3 + CloudFront: effectively $0
+
+### CloudFront Deployment Workflow
+After every S3 upload:
+1. Go to CloudFront → thefretshed distribution → **Invalidations** tab
+2. Click **Create invalidation** → enter `/*` → **Create**
+3. Wait ~30–60 seconds → hard refresh browser (`Cmd+Shift+R`)
+
+---
+
+## Spotify Integration
+
+### Approach
+Full Spotify Web API integration using **Authorization Code with PKCE flow** — no client secret required, safe for a client-side web app.
+
+### How it works
+- Connect via **Settings → Spotify → Connect Spotify**
+- Once connected, opening any curriculum song card auto-searches Spotify and loads a collapsed player bar
+- Click the bar to expand the inline iframe player; click Collapse to close it
+- Track IDs cached in localStorage after first search — no repeat API calls
+- Token stored in localStorage with expiry check; reconnect when expired
+
+### `js/spotify.js` functions
+```
+initSpotify()                — handle OAuth callback on page load, update button state
+spotifyLogin()               — generate PKCE verifier + challenge, redirect to Spotify auth
+handleSpotifyCallback()      — exchange code for token, store in localStorage, clean URL
+spotifyLogout()              — clear token from localStorage
+getToken()                   — return valid token or null (checks expiry)
+isSpotifyConnected()         — boolean token check
+searchSpotifyTrack(t, a)     — search API, cache result, return { id, name, artist }
+getSpotifyEmbedUrl(id)       — return embed iframe URL for track
+initSpotifyPlayer(el, t, a)  — inject player into expanded song card
+toggleSpotifyEmbed(el)       — toggle collapsed/expanded player state
+updateSpotifyButtonState()   — update Settings button to reflect connected/disconnected
+```
+
+### localStorage keys
+| Key | Purpose |
+|-----|---------|
+| `ngc-spotify-token` | OAuth access token |
+| `ngc-spotify-expiry` | Token expiry timestamp |
+| `ngc-spotify-verifier` | PKCE verifier (temporary, cleared after auth) |
+| `ngc-spotify-track-{title}` | Cached Spotify track ID per song |
+
+---
+
+## Claude AI Integration (Planned)
+
+### Vision
+A "guitar teacher" layer — Claude reads actual practice data (session notes, streak, phase progress, song statuses) and provides contextual, personalized advice.
+
+### Planned touch points
+- **Song card analysis** — key, techniques, difficulty, what to focus on
+- **Practice session suggestions** — based on logged session notes and current phase
+- **Curriculum advice** — progress-aware recommendations
+- **Tone/gear recommendations** — matched to songs being learned
+- **Session note analysis** — Claude reads written notes to factor into suggestions
+
+### Planned `js/claude.js` functions
+```
+initClaude()                     — prompt for API key on first use, store in localStorage
+analyzeSong(title, artist)       — key, techniques, difficulty, focus areas
+analyzePracticeNotes(notes)      — curriculum suggestions from session notes
+suggestSession()                 — personalized session plan from full app state
+suggestCurriculumAdjustment()    — progress-aware curriculum recommendations
+```
+
+---
+
+## Next Session Checklist
+
+### UX Cleanup
+A pass over the UI to address friction points and polish interactions. Specific items to be identified at session start.
+
+### Music Guides — In-App PDF Viewer
+Add the curriculum book PDFs as a native in-app experience:
+
+1. **S3 private bucket** — Create a separate private S3 bucket for PDFs (not public-read)
+2. **CloudFront signed URLs or presigned S3 URLs** — Serve PDFs securely without exposing raw S3 links
+3. **Books tab or panel** — New section in the app listing all curriculum books
+4. **Inline PDF viewer** — Render PDFs in-app (likely via iframe or PDF.js) so books are accessible without leaving the site
+5. **Deep linking from song cards** — "Resources" field on each song card links directly to the relevant page in the relevant book
+
+**Books to include:**
+- *Complete Blues Guitar Compilation* (Books 1–3)
+- *300 Blues, Rock & Jazz Licks*
+- *Guitar Chords in Context*
+- *Heavy Metal Bible*
+- *Inside Outside Guitar Soloing*
+- *The Ultimate Guitar Technique Practice Collection*
+- *Beato Ear Training Booklet*
+
+---
+
+## Tabs
+
+### Dashboard
+Session overview for the current week. Includes:
+- **Phase hero card** — phase name, description, weekly focus text, progress bar, and a 2×6 week selector grid
+- **Session blocks** with per-block checkboxes (reset daily), progress timer, and "Session complete" banner
+- **Practice timer** with circular countdown ring, session-aware segment labels, audio pings, and custom duration support
+- **Streak & heatmap** showing current streak, longest streak, total days practiced, and a 14-week GitHub-style contribution grid
+
+### Curriculum
+Five-phase structured learning plan with weekly focus areas, song assignments, and teaching notes. Each phase has its own color:
+
+| Phase | Name | Color |
+|-------|------|-------|
+| 1 | Consolidate & Connect | Yellow `#c8b840` |
+| 2 | Blues Vocabulary | Sky blue `#5a9fd4` |
+| 3 | Phrasing & Feel | Salmon `#d4816a` |
+| 4 | Advanced Technique | Sunset orange `#d4903a` |
+| 5 | Integration | Purple `#9278b0` |
+
+### Song Library
+Drag-and-drop song cards across two columns: **Curriculum** (phase-tagged) and **Personal Repertoire**. Four-state status system with color-coded card borders:
+
+| Status | Color |
+|--------|-------|
+| Not Started | Muted grey |
+| In Progress | Amber |
+| Learned 🎯 | Green |
+| In The Fingers 💎 | Blue (glow) |
+
+Cards are draggable on both desktop (pointer events) and iOS Safari.
+
+### Rig & Tone
+Guitar cards with images, signal chain visualization, and full pedal collection with categorized color-matched tags.
+
+---
+
+## Header Metronome
+
+```
+METRONOME | [BPM input] BPM | Tap | Start
+```
+
+- BPM input is always directly typeable
+- Tap tempo averages the last 6 taps
+- Input turns amber when running
+- Web Audio API scheduling for tight timing
+
+---
+
+## Theme System
+
+Five themes, each with four named presets. **Gear icon → Settings → Preferences → Color Mode** opens the theme picker.
+
+| Theme | Presets |
+|-------|---------|
+| Dark | Scorched Earth, Void, Gunmetal, Obsidian |
+| Light | Parchment, Linen, Cream, Dusk |
+| Warm | Candlelight, Amber Hour, Burnished, Deep Tobacco |
+| Cool | North Atlantic, Slate, Glacial, Midnight Steel |
+| Psych | Black Light, Void Purple, Acid, Fever Dream |
+
+---
+
+## localStorage Reference
+
+| Key | Purpose |
+|-----|---------|
+| `ngc-theme` | Active theme key |
+| `ngc-preset-{key}` | Active preset per theme |
+| `ngc-custom-{key}` | Custom CSS var overrides per theme |
+| `ngc-week` | Current week (1–12) |
+| `ngc-current-phase` | Active phase number |
+| `ngc-practice-days` | Array of YYYY-MM-DD strings |
+| `ngc-song-status` | Object: title → status string |
+| `ngc-curriculum-p{n}` | Phase curriculum state JSON |
+| `ngc-notes` | Session notes text |
+| `ngc-gear-urls` | Object: gear id → image URL |
+| `ngc-checks` | Resource checklist state |
+| `ngc-milestones` | Milestone completion state |
+| `ngc-block-{date}-{plan}-{idx}` | Per-day session block completion |
+| `ngc-pref-compact` | Compact dashboard preference |
+| `ngc-gift-songs` | User-added personal repertoire songs |
+| `ngc-spotify-token` | Spotify OAuth access token |
+| `ngc-spotify-expiry` | Spotify token expiry timestamp |
+| `ngc-spotify-verifier` | PKCE verifier (temporary) |
+| `ngc-spotify-track-{title}` | Spotify track ID per song |
+
+---
+
+## Updating Content
+
+All curriculum, song, and gear data lives in `js/data.js`.
+
+### Adding or editing a song
+
+```javascript
+{
+  num: 1,
+  title: 'Purple Haze',
+  artist: 'Jimi Hendrix',
+  tuning: 'Eb (½ step down)',
+  teaches: 'What this song teaches — technique, theory, phrasing.',
+  resources: 'Book references and lick sources.',
+  weeksFocus: 'Weeks 1–2 (rhythm), Weeks 7–8 (solo)',
+  skills: ['bending', 'pentatonic', 'Hendrix voicings'],
+  status: 'active'   // 'active' | 'upcoming' | 'future'
+}
+```
+
+---
+
+## Guitars
+
+| Guitar | Pickups | Notes |
+|--------|---------|-------|
+| Fender American Professional II Stratocaster | 3× V-Mod II single-coil | Primary clean/blues guitar |
+| Gibson Les Paul Deluxe 70s Goldtop | 2× mini humbucker | PAF-adjacent, airy top end |
+| Gibson Les Paul Studio Faded T 2016 | 2× humbucker | Workhorse, darker tone |
+| Chapman ML3 Pro Bea | 2× full humbucker | T-style, high-output |
+| Yamaha Pacifica PAC611HFM Translucent Black | HB bridge / split / P90 neck | Versatile |
+| Martin SC-10E Standard Series | Acoustic-electric | Fingerpicking, clean work |
+
+---
+
+## Amps
+
+| Amp | Character |
+|-----|-----------|
+| Fender Blues Jr. 4 Tweed | Low-watt, warm breakup, recording-friendly |
+| Marshall DSL40CR | Versatile British gain, clean and lead channels |
+| Boss Katana Mk1 100W | Modeler/practice, silent recording via USB |
+
+---
+
+## Signal Chain
+
+```
+Guitar
+  → Crybaby Wah
+  → Keeley Compressor
+  → Ibanez Tube Screamer Mini
+  → Bogner La Grange
+  → Crazy Tube Circuits Orama  ← (two sections with FX loop between them)
+  → Tone City Wild Fro (9V battery)
+  → EQD Hizumitas
+  → Strymon Mobius
+  → TC Electronic Flashback 2
+  → TC Electronic Ditto Looper  ← (far-left board edge for easy stomping)
+  → EHX Oceans 11
+  → Amp
+```
+
+**Power:** MXR DC Brick (primary) + Donner unit (overflow). Wild Fro runs on 9V battery only.
+**Board:** 20"×12" angled Donner, signal routed right-to-left physically.
+
+---
+
+## Pedal Collection
+
+### Drive, Distortion & Fuzz
+- Boss Blues Driver Waza Craft
+- Boss Metal Zone MT-2
+- Ibanez Tube Screamer Mini *(board)*
+- JHS Notaklön (overdrive)
+- JHS Ratpack (Rat-style distortion)
+- Fulltone OCD *(off-board alternate)*
+- Bogner La Grange *(board)*
+- DOD Bone Shaker
+- Fuzzrocious Demon King
+- Fuzzrocious 420 Fuzz
+- Mask Audio Electronics YES! Fuzz
+- EHX Ram's Head Big Muff (J Mascis signature) *(off-board)*
+- EHX Green Russian Big Muff (JHS modded)
+- OBNE Alpha Haunt
+- Earthquaker Devices Hizumitas *(board)*
+- Earthquaker Devices Life Pedal *(off-board alternate)*
+- Dwarfcraft Devices Necromancer
+- Crazy Tube Circuits Orama *(board)*
+- Tone City Wild Fro *(board)*
+- Tone City Lil Heat *(off-board)*
+- Idiotbox Fuzz Freq *(off-board)*
+
+### Modulation
+- Strymon Mobius *(board)*
+- Stone Deaf Tremotron
+
+### Reverb
+- TC Electronic Hall of Fame 2
+- EHX Oceans 11 *(board)*
+- OBNE Minim (reverb/reverse/decay)
+- OBNE Dark Star (reverb/sustainer)
+
+### Delay
+- TC Electronic Flashback 2 *(board)*
+
+### Pitch & Octave
+- EHX Pitch Fork
+- Earthquaker Devices Data Corrupter
+
+### Compression
+- Keeley Compressor *(board)*
+
+### Utility
+- TC Electronic Ditto Looper *(board)*
+
+---
+
+## Recording Setup
+
+- **DAW:** Logic Pro
+- **Interface:** Focusrite Scarlett 2i4
+- **Primary method:** Direct into Scarlett with amp modeling plugins and cabinet IRs
+- **Amp modeling:** Amplitube 4 & 5, BIAS FX 2 (with Jimi Hendrix pack), STL Tones, Neural DSP (Rabea and Cali Fortin models)
+- **Drums:** Superior Drummer 3
+- **Mixing:** EZMix 3
+- **Mic:** Shure SM57 + stand (available, not yet used for recording)
+
+---
+
+## Curriculum Books
+
+- *Complete Blues Guitar Compilation* (Books 1–3)
+- *300 Blues, Rock & Jazz Licks*
+- *Guitar Chords in Context*
+- *Heavy Metal Bible*
+- *Inside Outside Guitar Soloing*
+- *The Ultimate Guitar Technique Practice Collection*
+- *Beato Ear Training Booklet*
+
+---
+
+## Roadmap
+
+### Next session
+- UX cleanup pass — friction points and interaction polish
+- Music guides in-app — PDF viewer with private S3 bucket, deep links from song cards
+
+### Near term
+- Claude AI integration — song analysis, session note parsing, practice suggestions
+- Session notes persistence to DynamoDB (move off localStorage)
+- Add Gear form (add gear directly from app without S3 uploads)
+- Book page number references on curriculum song entries
+
+### Future
+- Multi-user support via AWS Cognito — separate credentials and data per user
+- Users can upload their own songs, course books, and preferences
+- Shared curriculum templates
+- Amp profiler/modeler evaluation (Tonex vs. Kemper)
+
+
+A personal guitar practice dashboard. Tracks curriculum progress, session blocks, song library, gear, and tone work. Built for daily use on desktop and iPad.
+
 **Current live URL:** https://consumethetangible.github.io/the-woodshed/ *(migrating — see Infrastructure below)*
 
 **New domain:** https://thefretshed.com *(registered, deployment in progress)*
