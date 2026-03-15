@@ -188,6 +188,9 @@ function buildSettingsDrawer() {
   // ── Display prefs ──
   const compactDash = localStorage.getItem('ngc-pref-compact') === '1';
 
+  // ── Viewport preview state ──
+  const vp = localStorage.getItem('ngc-viewport-preview') || 'desktop';
+
   // ── App info ──
   body.innerHTML = `
     <div class="settings-section">
@@ -293,13 +296,22 @@ function buildSettingsDrawer() {
         <span class="settings-info-key">Version</span>
         <span class="settings-info-val">2.0</span>
       </div>
-      <div class="settings-info-row">
-        <span class="settings-info-key">Source</span>
-        <a class="settings-info-link" href="https://github.com/consumethetangible/the-woodshed" target="_blank" rel="noopener">GitHub ↗</a>
-      </div>
+
       <div class="settings-info-row">
         <span class="settings-info-key">Live</span>
         <a class="settings-info-link" href="https://thefretshed.com" target="_blank" rel="noopener">Open ↗</a>
+      </div>
+    </div>
+
+    <div class="settings-section-divider"></div>
+
+    <div class="settings-section">
+      <div class="settings-section-label settings-admin-label">Admin</div>
+      <div class="settings-pref-sub" style="margin-bottom:12px">Preview how the site renders on different device sizes. Desktop is the default full-width view.</div>
+      <div class="settings-viewport-btns">
+        <button class="settings-viewport-btn ${vp === 'desktop' ? 'active' : ''}" onclick="setViewportPreview('desktop')">Desktop</button>
+        <button class="settings-viewport-btn ${vp === 'tablet' ? 'active' : ''}" onclick="setViewportPreview('tablet')">Tablet</button>
+        <button class="settings-viewport-btn ${vp === 'phone' ? 'active' : ''}" onclick="setViewportPreview('phone')">Phone</button>
       </div>
     </div>`;
 
@@ -471,7 +483,35 @@ function getBlockCheckKey(planId, blockIdx) {
   return `ngc-block-${getTodayKey()}-${planId}-${blockIdx}`;
 }
 
-function toggleBlockComplete(planId, blockIdx) {
+// ── 3-state block system: idle / active / complete ──
+
+// Clicking a block body activates it: highlights it and loads its duration into the timer
+function activateBlock(blockEl, planId, blockIdx) {
+  const plan = document.getElementById('plan-' + planId);
+  if (!plan) return;
+
+  // Clear active from all blocks in this plan
+  plan.querySelectorAll('.sblock').forEach(b => b.classList.remove('active-block'));
+  blockEl.classList.add('active-block');
+
+  // Load this block's duration into the timer
+  const timeEl = blockEl.querySelector('.sblock-time');
+  const headEl = blockEl.querySelector('.sblock-head');
+  if (timeEl && headEl) {
+    const mins = parseInt(timeEl.textContent);
+    if (!isNaN(mins)) {
+      timerStop();
+      TIMER.segments = [{ label: headEl.textContent.trim(), minutes: mins }];
+      TIMER.segIdx = 0; TIMER.doneSegs.clear();
+      timerInitSeg(); timerRenderSegs();
+      const lbl = document.getElementById('timer-mode-label');
+      if (lbl) lbl.textContent = headEl.textContent.trim().substring(0, 22);
+    }
+  }
+}
+
+// Check button (stopPropagation'd from block click): toggle complete state
+function markBlockComplete(planId, blockIdx) {
   const key = getBlockCheckKey(planId, blockIdx);
   const isDone = localStorage.getItem(key) === '1';
   localStorage.setItem(key, isDone ? '0' : '1');
@@ -498,6 +538,44 @@ function restoreBlockStates() {
     });
   });
 }
+
+// Auto-advance on timer complete: mark current active block done, activate next incomplete
+function blockAutoComplete() {
+  const activePlan = document.querySelector('.session-plan.active');
+  if (!activePlan) return;
+  const planId = activePlan.id.replace('plan-', '');
+  const activeBlock = activePlan.querySelector('.sblock.active-block');
+
+  if (activeBlock) {
+    const idx = parseInt(activeBlock.dataset.idx);
+    if (!isNaN(idx)) {
+      localStorage.setItem(getBlockCheckKey(planId, idx), '1');
+      syncBlockState(planId, idx);
+      activeBlock.classList.remove('active-block');
+    }
+  }
+
+  // Find next incomplete block
+  const allBlocks = [...activePlan.querySelectorAll('.sblock')];
+  const nextBlock = allBlocks.find(b => {
+    const i = parseInt(b.dataset.idx);
+    return !isNaN(i) && !b.classList.contains('completed');
+  });
+
+  if (nextBlock) {
+    const nextIdx = parseInt(nextBlock.dataset.idx);
+    activateBlock(nextBlock, planId, nextIdx);
+    // Hold — load timer but don't start. User presses Start.
+    timerStop();
+    timerInitSeg();
+    timerRenderSegs();
+  }
+
+  checkSessionComplete();
+}
+
+// Legacy shim
+function toggleBlockComplete(planId, blockIdx) { markBlockComplete(planId, blockIdx); }
 
 function checkSessionComplete() {
   const activePlan = document.querySelector('.session-plan.active');
@@ -737,14 +815,21 @@ function setWeek(w) {
   currentWeek = w;
   localStorage.setItem('ngc-week', w);
   localStorage.setItem('ngc-current-phase', 1);
-  document.getElementById('current-week').textContent = w;
-  document.querySelectorAll('[id^="wbtn-"]').forEach(b => b.classList.remove('btn-week-active'));
-  const btn = document.getElementById('wbtn-' + w);
-  if (btn) btn.classList.add('btn-week-active');
+  const curEl = document.getElementById('current-week');
+  if (curEl) curEl.textContent = w;
+  // Apply 3-state styling to all week buttons
+  document.querySelectorAll('[id^="wbtn-"]').forEach(b => {
+    const num = parseInt(b.id.replace('wbtn-', ''));
+    b.classList.remove('btn-week-active', 'btn-week-done');
+    if (num === w) b.classList.add('btn-week-active');
+    else if (num < w) b.classList.add('btn-week-done');
+  });
   const wf = WEEK_DATA[Math.min(Math.floor((w-1)/2), WEEK_DATA.length-1)];
-  document.getElementById('week-focus-text').textContent = wf.detail;
-  const pct = Math.round((w / 12) * 100);
-  document.getElementById('phase-progress').style.width = pct + '%';
+  const focusEl = document.getElementById('week-focus-text');
+  if (focusEl) focusEl.textContent = wf.detail;
+  // progress bar may not exist in new layout — guard
+  const prog = document.getElementById('phase-progress');
+  if (prog) prog.style.width = Math.round((w / 12) * 100) + '%';
 }
 
 // ═══════════════════════════════════════════
@@ -784,16 +869,16 @@ function setEnergy(level) {
   document.querySelectorAll('.etab').forEach(b => b.classList.remove('active'));
   document.getElementById('plan-' + level).classList.add('active');
   event.target.classList.add('active');
-  // Re-check completion state for newly visible plan
+  // Clear active-block highlight from all plans on switch
+  document.querySelectorAll('.sblock').forEach(b => b.classList.remove('active-block'));
+  // Stop timer and reload for new plan
+  timerStop();
+  setTimeout(timerLoadSession, 50);
   checkSessionComplete();
 }
 
 function setEnergyAndTimer(level) {
   setEnergy(level);
-  if (!TIMER.running && TIMER.segments.length > 0) {
-    const modeLabel = document.getElementById('timer-mode-label').textContent;
-    if (modeLabel === 'Session') setTimeout(timerLoadSession, 50);
-  }
 }
 
 // ═══════════════════════════════════════════
@@ -1552,8 +1637,8 @@ function hmStart() {
   if (ctx.state === 'suspended') ctx.resume();
   HM.nextBeatTime = ctx.currentTime + 0.05;
   HM.timerID = setInterval(hmScheduler, HM.intervalMs);
-  const btn = document.getElementById('hm-start-btn');
-  const input = document.getElementById('hm-bpm-input');
+  const btn = document.getElementById('sm-start-btn');
+  const input = document.getElementById('sm-bpm-input');
   if (btn) { btn.textContent = 'Stop'; btn.classList.add('active'); }
   if (input) input.classList.add('running');
 }
@@ -1561,8 +1646,8 @@ function hmStart() {
 function hmStop() {
   HM.running = false;
   clearInterval(HM.timerID); HM.timerID = null;
-  const btn = document.getElementById('hm-start-btn');
-  const input = document.getElementById('hm-bpm-input');
+  const btn = document.getElementById('sm-start-btn');
+  const input = document.getElementById('sm-bpm-input');
   if (btn) { btn.textContent = 'Start'; btn.classList.remove('active'); }
   if (input) input.classList.remove('running');
 }
@@ -1572,7 +1657,7 @@ function hmToggle() { HM.running ? hmStop() : hmStart(); }
 function hmSetBpm(val) {
   val = Math.max(40, Math.min(240, parseInt(val) || 100));
   HM.bpm = val;
-  const input = document.getElementById('hm-bpm-input');
+  const input = document.getElementById('sm-bpm-input');
   if (input && document.activeElement !== input) input.value = val;
 }
 
@@ -1585,10 +1670,10 @@ function hmTap() {
     for (let i = 1; i < HM.tapTimes.length; i++) gaps.push(HM.tapTimes[i] - HM.tapTimes[i-1]);
     const avg = gaps.reduce((a,b) => a+b, 0) / gaps.length;
     hmSetBpm(Math.round(60000 / avg));
-    const input = document.getElementById('hm-bpm-input');
+    const input = document.getElementById('sm-bpm-input');
     if (input) input.value = HM.bpm;
   }
-  const btn = document.getElementById('hm-tap-btn');
+  const btn = document.getElementById('sm-tap-btn');
   if (btn) { btn.classList.add('tapped'); setTimeout(() => btn.classList.remove('tapped'), 100); }
 }
 
@@ -1686,16 +1771,26 @@ function timerReset() {
 function timerNextSeg() { if (!TIMER.segments.length) return; timerSegComplete(); }
 
 function timerSegComplete() {
-  timerPing(); TIMER.doneSegs.add(TIMER.segIdx); TIMER.segIdx++;
-  if (TIMER.segIdx >= TIMER.segments.length) { timerDone(); return; }
-  // Stop and wait — don't auto-advance into next segment
+  timerPing();
   clearInterval(TIMER.interval); TIMER.interval = null; TIMER.running = false; TIMER.waiting = true;
+  document.getElementById('timer-ring').classList.remove('running');
+
+  // If this was a single-block timer (block-activated), auto-advance to next block
+  const activePlan = document.querySelector('.session-plan.active');
+  const hasActiveBlock = activePlan && activePlan.querySelector('.sblock.active-block');
+  if (hasActiveBlock) {
+    TIMER.doneSegs.add(TIMER.segIdx);
+    blockAutoComplete();
+    return;
+  }
+
+  // Otherwise: standard session segment advance
+  TIMER.doneSegs.add(TIMER.segIdx); TIMER.segIdx++;
+  if (TIMER.segIdx >= TIMER.segments.length) { timerDone(); return; }
   timerInitSeg(); timerRenderSegs();
-  // Show waiting state
   const nextSeg = TIMER.segments[TIMER.segIdx];
   document.getElementById('timer-digits').textContent = 'Ready';
   document.getElementById('timer-seg-label').textContent = nextSeg ? nextSeg.label : '—';
-  document.getElementById('timer-ring').classList.remove('running');
   document.getElementById('timer-ring').style.strokeDashoffset = 0;
   const btn = document.getElementById('timer-start-btn');
   btn.textContent = 'Start'; btn.classList.add('timer-btn-waiting');
@@ -1754,15 +1849,35 @@ function timerPing(final=false) {
 }
 
 // ═══════════════════════════════════════════
+// VIEWPORT PREVIEW (Admin)
+// ═══════════════════════════════════════════
+function setViewportPreview(mode) {
+  localStorage.setItem('ngc-viewport-preview', mode);
+  document.body.classList.remove('preview-tablet', 'preview-phone');
+  if (mode === 'tablet') document.body.classList.add('preview-tablet');
+  if (mode === 'phone')  document.body.classList.add('preview-phone');
+  // Rebuild drawer to update active button state
+  buildSettingsDrawer();
+}
+
+function initViewportPreview() {
+  const mode = localStorage.getItem('ngc-viewport-preview') || 'desktop';
+  document.body.classList.remove('preview-tablet', 'preview-phone');
+  if (mode === 'tablet') document.body.classList.add('preview-tablet');
+  if (mode === 'phone')  document.body.classList.add('preview-phone');
+}
+
+// ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
 function init() {
   initTheme();
+  initViewportPreview();
   const wbr = document.getElementById('week-btn-row');
   if (wbr) {
     for (let i = 1; i <= 12; i++) {
       const b = document.createElement('button');
-      b.className = 'btn btn-week' + (i === 1 ? ' btn-week-active' : '');
+      b.className = 'btn btn-week';
       b.id = 'wbtn-' + i;
       b.textContent = 'Week ' + i;
       b.onclick = () => setWeek(i);

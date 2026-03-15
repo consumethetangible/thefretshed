@@ -14,7 +14,6 @@
 <div class="header">
   <div class="brand">
     <div class="brand-logo">THE FRET SHED</div>
-    <div class="brand-sub">Chris's Practice Room</div>
   </div>
   <nav class="nav">
     <button class="nav-btn active" onclick="showPanel('dashboard', event)">Dashboard</button>
@@ -23,18 +22,6 @@
     <button class="nav-btn" onclick="showPanel('rig', event)">Rig & Tone</button>
     <button class="nav-btn" onclick="showPanel('swaps', event)">Song Library</button>
   </nav>
-  <!-- Header Metronome -->
-  <div class="header-metro" id="header-metro">
-    <span class="hm-label">Metronome</span>
-    <div class="hm-sep"></div>
-    <input class="hm-bpm-input" id="hm-bpm-input" type="number" min="40" max="240" value="100"
-      onchange="hmSetBpm(this.value)" oninput="hmSetBpm(this.value)">
-    <span class="hm-bpm-unit">BPM</span>
-    <div class="hm-sep"></div>
-    <button class="hm-tap" id="hm-tap-btn" onclick="hmTap()">Tap</button>
-    <button class="hm-start" id="hm-start-btn" onclick="hmToggle()">Start</button>
-  </div>
-
   <div class="header-right-group">
     <button class="gear-btn" id="settings-gear-btn" onclick="openSettings()" aria-label="Settings">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -61,25 +48,29 @@
 <!-- DASHBOARD -->
 <div id="panel-dashboard" class="panel active">
   <div class="dash-grid">
-    <div class="dash-left">
+
+    <!-- ROW 1: Phase Hero — full width, slim -->
+    <div class="dash-phase">
       <div class="phase-hero">
         <div class="phase-hero-top">
-          <span class="badge badge-p1">Phase 1 — Active</span>
+          <div class="phase-hero-left">
+            <span class="badge badge-p1">Phase 1 — Active</span>
+            <span class="phase-hero-name" style="color:var(--p1c)">Consolidate &amp; Connect</span>
+          </div>
           <span class="mono small dimmed">Wk <span id="current-week">1</span> / 12</span>
         </div>
-        <div class="phase-hero-name" style="color:var(--p1c)">Consolidate &amp; Connect</div>
-        <div class="phase-hero-desc">Take what you partially know and own it front to back. Build the 12-bar foundation. Make bends land in tune.</div>
-        <div class="week-label">This week's focus</div>
-        <div class="week-focus" id="week-focus-text">12-Bar Foundation — Complete Blues Guitar (Book 1, Ch. 1–2). Learn the basic structure and open string riffs. Parallel: Purple Haze rhythm parts + Paranoid riff to full song.</div>
-        <div class="prog-bar" style="margin-top:10px">
-          <div class="prog-fill" id="phase-progress" style="width:8%"></div>
+        <div class="phase-hero-focus-row">
+          <span class="week-label-inline">This week:</span>
+          <span class="week-focus" id="week-focus-text">12-Bar Foundation — Complete Blues Guitar (Book 1, Ch. 1–2). Learn the basic structure and open string riffs. Parallel: Purple Haze rhythm parts + Paranoid riff to full song.</span>
         </div>
-        <div class="phase-hero-divider"></div>
-        <div id="week-btn-row"></div>
+        <div id="week-btn-row" class="week-btn-row-single"></div>
       </div>
+    </div>
 
+    <!-- ROW 2 COL 1: Tonight's Session -->
+    <div class="dash-session">
       <div class="session-card">
-        <div class="session-top">
+        <div class="session-header">
           <div class="session-title">Tonight's Session</div>
           <div class="energy-tabs">
             <button class="etab active" onclick="setEnergyAndTimer('high')">High Energy</button>
@@ -88,118 +79,80 @@
           </div>
         </div>
 
-        <div class="session-plan active" id="plan-high">
-          <div class="sblock warmup">
-            <div class="sblock-time">10 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Warmup</div>
-              <div class="sblock-detail">Ultimate Guitar Technique Collection — Routine 1 (Picking Hand Focus) or Routine 3 (Linear Fretting Hand). Alternate week to week.</div>
+        <div class="session-body">
+          <div class="session-blocks-col">
+            <div class="session-plan active" id="plan-high">
+              <div class="sblock warmup" onclick="activateBlock(this,'high',0)" data-plan="high" data-idx="0">
+                <div class="sblock-time">10 min</div>
+                <div class="sblock-main"><div class="sblock-head">Warmup</div><div class="sblock-detail">Ultimate Guitar Technique Collection — Routine 1 (Picking Hand Focus) or Routine 3 (Linear Fretting Hand). Alternate week to week.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('high',0)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock theory" onclick="activateBlock(this,'high',1)" data-plan="high" data-idx="1">
+                <div class="sblock-time">20 min</div>
+                <div class="sblock-main"><div class="sblock-head">Complete Blues Guitar (Book 1, Ch. 1–2)</div><div class="sblock-detail">12-bar structure and open string riffs. Work slowly through the examples.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('high',1)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock songs" onclick="activateBlock(this,'high',2)" data-plan="high" data-idx="2">
+                <div class="sblock-time">20 min</div>
+                <div class="sblock-main"><div class="sblock-head">Song Work — One Section</div><div class="sblock-detail">Purple Haze rhythm intro OR Paranoid riff at tempo. Pick one section, not the whole song.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('high',2)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock ear" onclick="activateBlock(this,'high',3)" data-plan="high" data-idx="3">
+                <div class="sblock-time">10 min</div>
+                <div class="sblock-main"><div class="sblock-head">Ear Training</div><div class="sblock-detail">Beato Ear Training Booklet (Ch. 1–2). Intervals and basic triads. One or two modules.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('high',3)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
             </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('high',0)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock theory">
-            <div class="sblock-time">20 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Complete Blues Guitar (Book 1, Ch. 1–2)</div>
-              <div class="sblock-detail">12-bar structure and open string riffs. Work slowly through the examples.</div>
+            <div class="session-plan" id="plan-low">
+              <div class="sblock warmup" onclick="activateBlock(this,'low',0)" data-plan="low" data-idx="0">
+                <div class="sblock-time">10 min</div>
+                <div class="sblock-main"><div class="sblock-head">Warmup</div><div class="sblock-detail">Whatever feels good. No pressure.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('low',0)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock explore" onclick="activateBlock(this,'low',1)" data-plan="low" data-idx="1">
+                <div class="sblock-time">30 min</div>
+                <div class="sblock-main"><div class="sblock-head">Explore / Play</div><div class="sblock-detail">Songs you know parts of, improvise over A minor or E minor backing track, mess with tones.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('low',1)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock licks" onclick="activateBlock(this,'low',2)" data-plan="low" data-idx="2">
+                <div class="sblock-time">20 min</div>
+                <div class="sblock-main"><div class="sblock-head">One Lick — 300 Blues, Rock &amp; Jazz Licks</div><div class="sblock-detail">BB King or Hendrix blues section. Pick one lick. Learn it. That's it.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('low',2)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
             </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('high',1)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock songs">
-            <div class="sblock-time">20 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Song Work — One Section</div>
-              <div class="sblock-detail">Purple Haze rhythm intro OR Paranoid riff at tempo. Pick one section, not the whole song.</div>
+            <div class="session-plan" id="plan-weekend">
+              <div class="sblock warmup" onclick="activateBlock(this,'weekend',0)" data-plan="weekend" data-idx="0">
+                <div class="sblock-time">15 min</div>
+                <div class="sblock-main"><div class="sblock-head">Warmup</div><div class="sblock-detail">Ultimate Guitar Technique Collection — full routine of your choice.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('weekend',0)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock theory" onclick="activateBlock(this,'weekend',1)" data-plan="weekend" data-idx="1">
+                <div class="sblock-time">25 min</div>
+                <div class="sblock-main"><div class="sblock-head">Deep Dive — Theory or Song Analysis</div><div class="sblock-detail">Go deeper on the week's book chapter. Transcribe a lick by ear. Watch a relevant YouTube breakdown.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('weekend',1)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock songs" onclick="activateBlock(this,'weekend',2)" data-plan="weekend" data-idx="2">
+                <div class="sblock-time">35 min</div>
+                <div class="sblock-main"><div class="sblock-head">Full Song Run-Through</div><div class="sblock-detail">Pick one Phase 1 song and play it front to back. Record yourself if you're brave.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('weekend',2)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
+              <div class="sblock ear" onclick="activateBlock(this,'weekend',3)" data-plan="weekend" data-idx="3">
+                <div class="sblock-time">15 min</div>
+                <div class="sblock-main"><div class="sblock-head">Ear Training + YouTube</div><div class="sblock-detail">Ben Eller picking mechanics or Paul Davids pentatonic application. One focused video.</div></div>
+                <div class="sblock-check" onclick="event.stopPropagation();markBlockComplete('weekend',3)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              </div>
             </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('high',2)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
           </div>
-          <div class="sblock ear">
-            <div class="sblock-time">10 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Ear Training</div>
-              <div class="sblock-detail">Beato Ear Training Booklet (Ch. 1–2). Intervals and basic triads. One or two modules.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('high',3)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-        </div>
 
-        <div class="session-plan" id="plan-low">
-          <div class="sblock warmup">
-            <div class="sblock-time">10 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Warmup</div>
-              <div class="sblock-detail">Whatever feels good. No pressure.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('low',0)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock explore">
-            <div class="sblock-time">30 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Explore / Play</div>
-              <div class="sblock-detail">Songs you know parts of, improvise over A minor or E minor backing track, mess with tones.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('low',1)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock licks">
-            <div class="sblock-time">20 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">One Lick — 300 Blues, Rock & Jazz Licks</div>
-              <div class="sblock-detail">BB King or Hendrix blues section. Pick one lick. Learn it. That's it.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('low',2)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-        </div>
-
-        <div class="session-plan" id="plan-weekend">
-          <div class="sblock warmup">
-            <div class="sblock-time">15 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Warmup</div>
-              <div class="sblock-detail">Ultimate Guitar Technique Collection — full routine of your choice.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('weekend',0)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock theory">
-            <div class="sblock-time">25 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Deep Dive — Theory or Song Analysis</div>
-              <div class="sblock-detail">Go deeper on the week's book chapter. Transcribe a lick by ear. Watch a relevant YouTube breakdown.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('weekend',1)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock songs">
-            <div class="sblock-time">35 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Full Song Run-Through</div>
-              <div class="sblock-detail">Pick one Phase 1 song and play it front to back. Record yourself if you're brave.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('weekend',2)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="sblock ear">
-            <div class="sblock-time">15 min</div>
-            <div class="sblock-main">
-              <div class="sblock-head">Ear Training + YouTube</div>
-              <div class="sblock-detail">Ben Eller picking mechanics or Paul Davids pentatonic application. One focused video.</div>
-            </div>
-            <div class="sblock-check" onclick="toggleBlockComplete('weekend',3)"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-        </div>
-
-        <!-- Timer — integrated into session card -->
-        <div class="session-timer-divider">
-          <span>Practice Timer</span>
-          <div class="timer-mode-label" id="timer-mode-label">Session</div>
-        </div>
-        <div class="session-timer-body">
-          <div class="session-timer-left">
-            <div class="timer-ring-wrap" style="margin-bottom:10px">
-              <svg width="130" height="130" viewBox="0 0 130 130">
+          <div class="session-tools-col">
+            <div class="session-tools-label">Timer</div>
+            <div class="timer-ring-wrap">
+              <svg width="120" height="120" viewBox="0 0 130 130">
                 <circle class="timer-ring-bg" cx="65" cy="65" r="54" fill="none" stroke-width="6"/>
                 <circle class="timer-ring-fill" id="timer-ring" cx="65" cy="65" r="54" fill="none" stroke-width="6" stroke-dasharray="339.3" stroke-dashoffset="0"/>
               </svg>
               <div class="timer-display">
                 <div class="timer-digits" id="timer-digits">00:00</div>
-                <div class="timer-seg-label" id="timer-seg-label">—</div>
               </div>
             </div>
             <div class="timer-controls">
@@ -207,40 +160,36 @@
               <button class="timer-btn timer-btn-primary" id="timer-start-btn" onclick="timerToggle()">Start</button>
               <button class="timer-btn timer-btn-secondary" onclick="timerNextSeg()">Skip</button>
             </div>
-            <div class="timer-custom-row">
-              <button class="timer-btn timer-btn-ghost" id="timer-custom-toggle" onclick="timerToggleCustom()">Custom</button>
-              <button class="timer-btn timer-btn-ghost" onclick="timerLoadSession()">Session</button>
+            <div class="session-tools-divider"></div>
+            <div class="session-tools-label">Metronome</div>
+            <div class="sm-bpm-row">
+              <button class="sm-nudge-btn" onclick="hmSetBpm(HM.bpm - 1)" oncontextmenu="event.preventDefault();hmSetBpm(HM.bpm - 5)">−</button>
+              <div class="sm-bpm-wrap">
+                <input class="sm-bpm-input" id="sm-bpm-input" type="number" min="40" max="240" value="100"
+                  onchange="hmSetBpm(this.value)" oninput="hmSetBpm(this.value)">
+                <span class="sm-bpm-unit">BPM</span>
+              </div>
+              <button class="sm-nudge-btn" onclick="hmSetBpm(HM.bpm + 1)" oncontextmenu="event.preventDefault();hmSetBpm(HM.bpm + 5)">+</button>
             </div>
-            <div class="timer-custom-expand" id="timer-custom-expand">
-              <span class="timer-custom-label">Minutes</span>
-              <input class="timer-custom-input" id="timer-custom-min" type="number" min="1" max="120" value="20" onkeydown="if(event.key==='Enter')timerLoadCustom()">
-              <button class="timer-btn timer-btn-primary timer-custom-go" onclick="timerLoadCustom()">Go</button>
+            <div class="sm-metro-controls">
+              <button class="sm-btn sm-btn-tap" id="sm-tap-btn" onclick="hmTap()">Tap</button>
+              <button class="sm-btn sm-btn-start" id="sm-start-btn" onclick="hmToggle()">Start</button>
             </div>
-          </div>
-          <div class="session-timer-right">
-            <div class="timer-segments" id="timer-segments"></div>
           </div>
         </div>
       </div>
-
     </div>
 
-    <div class="dash-right">
+    <!-- ROW 2 COL 2: Phase Songs -->
+    <div class="dash-songs-col">
       <div class="card">
         <div class="card-title">Phase 1 Songs</div>
         <div class="stack" style="gap:8px" id="dash-songs"></div>
       </div>
+    </div>
 
-      <div class="card">
-        <div class="card-title">Session Notes</div>
-        <textarea class="notes-area" id="session-notes" placeholder="What did you work on? What clicked? What needs more time?..." rows="5" oninput="saveNotes()"></textarea>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-          <span class="mono small dimmed" id="notes-saved"></span>
-          <button class="btn btn-sm btn-ghost" onclick="clearNotes()">Clear</button>
-        </div>
-      </div>
-
-      <!-- Practice Streak -->
+    <!-- ROW 3 COL 1: Practice Streak -->
+    <div class="dash-streak">
       <div class="streak-card">
         <div class="card-title">Practice Streak</div>
         <div class="streak-row">
@@ -248,14 +197,8 @@
           <div>
             <div class="streak-label">Day Streak 🔥</div>
             <div class="streak-meta">
-              <div class="streak-stat">
-                <div class="streak-stat-val" id="streak-longest">0</div>
-                <div class="streak-stat-lbl">Longest</div>
-              </div>
-              <div class="streak-stat">
-                <div class="streak-stat-val" id="streak-total">0</div>
-                <div class="streak-stat-lbl">Total Days</div>
-              </div>
+              <div class="streak-stat"><div class="streak-stat-val" id="streak-longest">0</div><div class="streak-stat-lbl">Longest</div></div>
+              <div class="streak-stat"><div class="streak-stat-val" id="streak-total">0</div><div class="streak-stat-lbl">Total Days</div></div>
             </div>
           </div>
         </div>
@@ -271,23 +214,37 @@
         </div>
         <button class="log-today-btn" id="log-today-btn" onclick="logPracticeDay(false)">✓ Log Today's Practice</button>
       </div>
+    </div>
 
-      <!-- Resources -->
+    <!-- ROW 3 COL 2: Session Notes -->
+    <div class="dash-interface">
+      <div class="card">
+        <div class="card-title">Session Notes</div>
+        <textarea class="notes-area" id="session-notes" placeholder="What did you work on? What clicked? What needs more time?..." oninput="saveNotes()"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span class="mono small dimmed" id="notes-saved"></span>
+          <button class="btn btn-sm btn-ghost" onclick="clearNotes()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 4: Active Resources -->
+    <div class="dash-resources">
       <div class="card">
         <div class="card-title">Active Resources</div>
         <div class="stack" style="gap:6px">
           <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">Complete Blues Guitar (Book 1, Ch. 1–9)</div></div>
           <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">Complete Blues Guitar (Book 2, Ch. 1 + Appendices)</div></div>
-          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">300 Blues, Rock & Jazz Licks — BB King, Hendrix, Clapton</div></div>
-          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">Ultimate Guitar Technique Collection — Routines 1 & 3</div></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">300 Blues, Rock &amp; Jazz Licks — BB King, Hendrix, Clapton</div></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">Ultimate Guitar Technique Collection — Routines 1 &amp; 3</div></div>
           <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">Beato Ear Training Booklet (Ch. 1–2)</div></div>
           <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="check-label small">Hendrix Are You Experienced songbook</div></div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
-
 <!-- CURRICULUM -->
 <div id="panel-curriculum" class="panel">
   <div class="inner-tabs">
