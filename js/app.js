@@ -959,11 +959,16 @@ function buildDashSongs() {
 }
 
 function goToSongInLibrary(title, phaseNum) {
-  showPanel('curriculum', null);
+  showPanel('swaps', null);
+  showInner('sw', 'phase' + phaseNum);
+  // Also activate the correct inner-tab button
+  document.querySelectorAll('#panel-swaps .inner-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', i === (phaseNum - 1));
+  });
   setTimeout(() => {
-    const cards = document.querySelectorAll('.song-card');
+    const cards = document.querySelectorAll('.sl-card');
     for (const card of cards) {
-      const nameEl = card.querySelector('.song-card-name');
+      const nameEl = card.querySelector('.sl-card-title');
       if (nameEl && nameEl.textContent.trim() === title) {
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         card.classList.add('drop-target');
@@ -1639,6 +1644,7 @@ function getAudioVolume(type) {
 }
 
 
+function hmGetCtx() {
   if (!HM.ctx) HM.ctx = new (window.AudioContext || window.webkitAudioContext)();
   return HM.ctx;
 }
