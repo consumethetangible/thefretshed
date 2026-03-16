@@ -265,6 +265,30 @@ function buildSettingsDrawer() {
     <div class="settings-section-divider"></div>
 
     <div class="settings-section">
+      <div class="settings-section-label">Audio</div>
+      <div class="settings-pref-row" style="margin-bottom:10px">
+        <div style="flex:1">
+          <div class="settings-pref-label">Metronome volume</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="range" min="0" max="100" value="${Math.round((parseFloat(localStorage.getItem('ngc-metro-volume') ?? '0.7')) * 100)}" style="width:90px" oninput="setAudioVolume('metro', this.value)" />
+          <span style="font-size:12px;color:var(--text3);min-width:28px;text-align:right" id="metro-vol-label">${Math.round((parseFloat(localStorage.getItem('ngc-metro-volume') ?? '0.7')) * 100)}%</span>
+        </div>
+      </div>
+      <div class="settings-pref-row">
+        <div style="flex:1">
+          <div class="settings-pref-label">Timer beep volume</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="range" min="0" max="100" value="${Math.round((parseFloat(localStorage.getItem('ngc-timer-volume') ?? '0.7')) * 100)}" style="width:90px" oninput="setAudioVolume('timer', this.value)" />
+          <span style="font-size:12px;color:var(--text3);min-width:28px;text-align:right" id="timer-vol-label">${Math.round((parseFloat(localStorage.getItem('ngc-timer-volume') ?? '0.7')) * 100)}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section-divider"></div>
+
+    <div class="settings-section">
       <div class="settings-section-label">Preferences</div>
       <div class="settings-pref-row" style="margin-bottom:10px">
         <div>
@@ -935,22 +959,19 @@ function buildDashSongs() {
 }
 
 function goToSongInLibrary(title, phaseNum) {
-  showPanel('swaps', null);
+  showPanel('curriculum', null);
   setTimeout(() => {
-    const phaseTabBtn = document.querySelector(`[onclick*="showSwapPhase(${phaseNum})"]`);
-    if (phaseTabBtn) phaseTabBtn.click();
-    setTimeout(() => {
-      const cards = document.querySelectorAll('.sl-card');
-      for (const card of cards) {
-        if (card.dataset.title === title) {
-          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          card.classList.add('drop-target');
-          setTimeout(() => card.classList.remove('drop-target'), 1800);
-          break;
-        }
+    const cards = document.querySelectorAll('.song-card');
+    for (const card of cards) {
+      const nameEl = card.querySelector('.song-card-name');
+      if (nameEl && nameEl.textContent.trim() === title) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('drop-target');
+        setTimeout(() => card.classList.remove('drop-target'), 1800);
+        break;
       }
-    }, 120);
-  }, 60);
+    }
+  }, 120);
 }
 
 // ═══════════════════════════════════════════
@@ -1603,20 +1624,35 @@ const HM = {
   intervalMs: 25, timerID: null, tapTimes: []
 };
 
-function hmGetCtx() {
+function setAudioVolume(type, val) {
+  const key = type === 'metro' ? 'ngc-metro-volume' : 'ngc-timer-volume';
+  const labelId = type === 'metro' ? 'metro-vol-label' : 'timer-vol-label';
+  const normalized = parseInt(val) / 100;
+  localStorage.setItem(key, normalized.toString());
+  const label = document.getElementById(labelId);
+  if (label) label.textContent = `${val}%`;
+}
+
+function getAudioVolume(type) {
+  const key = type === 'metro' ? 'ngc-metro-volume' : 'ngc-timer-volume';
+  return parseFloat(localStorage.getItem(key) ?? '0.7');
+}
+
+
   if (!HM.ctx) HM.ctx = new (window.AudioContext || window.webkitAudioContext)();
   return HM.ctx;
 }
 
 function hmScheduleBeat(time, isDownbeat) {
   const ctx = hmGetCtx();
+  const vol = getAudioVolume('metro');
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.connect(gain); gain.connect(ctx.destination);
   osc.frequency.value = isDownbeat ? 1100 : 660;
   osc.type = 'square';
   gain.gain.setValueAtTime(0, time);
-  gain.gain.linearRampToValueAtTime(isDownbeat ? 0.22 : 0.12, time + 0.002);
+  gain.gain.linearRampToValueAtTime(isDownbeat ? 0.22 * vol : 0.12 * vol, time + 0.002);
   gain.gain.linearRampToValueAtTime(0, time + (isDownbeat ? 0.06 : 0.045));
   osc.start(time); osc.stop(time + 0.08);
 }
@@ -1836,13 +1872,14 @@ function timerJumpSeg(idx) {
 function timerPing(final=false) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const vol = getAudioVolume('timer');
     const tones = final ? [523,659,784] : [660,880];
     tones.forEach((freq,i) => {
       const osc = ctx.createOscillator(), gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
       osc.frequency.value = freq; osc.type = 'sine';
       const t = ctx.currentTime + i * 0.18;
-      gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.18, t+0.02); gain.gain.linearRampToValueAtTime(0, t+0.35);
+      gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.18 * vol, t+0.02); gain.gain.linearRampToValueAtTime(0, t+0.35);
       osc.start(t); osc.stop(t+0.4);
     });
   } catch(e) {}

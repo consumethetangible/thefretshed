@@ -63,12 +63,30 @@ Auto-advance: timer completion marks block done, activates next incomplete block
 
 ## Planned
 
-- Phase Songs card: Tonight subsection + The Shed navigation
-- Nav rename: Dashboard / The Shed / Song Library / Rig & Tone
-- The Shed tab: song workspaces (tempo, key, Spotify, PDF)
+- The Shed tab: song workspaces (tempo, key, Spotify, PDF, MP3 audio)
 - Claude-aware Interface card
 - PDF viewer, CSV export, custom blocks, Add Gear form
 
 ---
 
-*Last updated: session/songs ratio ~65/35; week buttons centered, done state color-only (no checkmark); row 3 swapped — notes left, streak right.*
+## AWS Content Infrastructure
+
+Private S3 bucket: `thefretshed-content`
+- `books/` — curriculum PDFs (flat, all books at root of folder)
+- `audio/` — lesson MP3s (flat, all files at root of folder)
+
+IAM user: `thefretshed-content-user`
+Policy: `TheFretShedContentAccess` (s3:GetObject on thefretshed-content/*)
+Lambda: `getFretShedContentUrl` — generates pre-signed URLs (1hr expiry)
+API Gateway: `thefretshed-content-api` — HTTP API, GET /get-url?key=books/filename.pdf
+
+**Next session — wire API into app:**
+1. Add Invoke URL as a config constant at top of `app.js` (e.g. `CONTENT_API_URL`)
+2. Write `getContentUrl(key)` fetch helper in `app.js`
+3. Add PDF and MP3 filenames per song in `data.js`
+4. Build PDF button and audio player on song cards in The Shed tab
+5. On click: call API → get pre-signed URL → open PDF in new tab or play MP3 inline
+
+---
+
+*Last updated: nav renamed/reordered — Dashboard / The Shed / Song Library / Rig & Tone; Phase Songs card clicks navigate to The Shed and scroll to song card; separate metronome & timer volume sliders in Settings; phone view timer centered. AWS content infrastructure live — S3 bucket, Lambda, API Gateway all working and validated.*
