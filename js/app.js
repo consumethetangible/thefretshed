@@ -1379,22 +1379,95 @@ function weekCloseAudio(browserId) {
   if (btn) btn.classList.remove('active');
 }
 
-function weekClosePlayer(cardId) {
-  const playerWrap = document.getElementById('week-audio-player-' + cardId);
-  const audioEl    = document.getElementById('week-audio-el-' + cardId);
-  const repeatBtn  = document.getElementById('week-audio-repeat-' + cardId);
-  if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl.loop = false; }
-  if (repeatBtn) repeatBtn.classList.remove('active');
-  if (playerWrap) playerWrap.style.display = 'none';
-  // Also deselect any active file in browser
+// ── Custom audio player ────────────────────────────────────────────────────────
+function makeWeekPlayer(pid) {
+  return `<div class="wap" id="wap-${pid}" style="display:none">
+    <audio id="wap-audio-${pid}" preload="none"></audio>
+    <div class="wap-top">
+      <span class="wap-track" id="wap-track-${pid}">—</span>
+      <button class="wap-close" onclick="weekClosePlayer('${pid}')">✕</button>
+    </div>
+    <div class="wap-controls">
+      <button class="wap-btn wap-play" id="wap-play-${pid}" onclick="weekPlayerToggle('${pid}')">▶</button>
+      <span class="wap-time wap-cur" id="wap-cur-${pid}">0:00</span>
+      <div class="wap-scrub-wrap" onclick="weekPlayerSeek(event,this,'${pid}')">
+        <div class="wap-scrub-track">
+          <div class="wap-scrub-fill" id="wap-fill-${pid}"></div>
+          <div class="wap-scrub-thumb" id="wap-thumb-${pid}"></div>
+        </div>
+      </div>
+      <span class="wap-time wap-dur" id="wap-dur-${pid}">0:00</span>
+      <button class="wap-btn wap-repeat" id="wap-rep-${pid}" onclick="weekToggleRepeat('${pid}',this)" title="Repeat">⟳</button>
+    </div>
+  </div>`;
+}
+
+function wapFmt(s) {
+  if (!isFinite(s)) return '0:00';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+function weekPlayerToggle(pid) {
+  const audio = document.getElementById('wap-audio-' + pid);
+  const btn   = document.getElementById('wap-play-' + pid);
+  if (!audio) return;
+  if (audio.paused) { audio.play(); btn.textContent = '⏸'; }
+  else              { audio.pause(); btn.textContent = '▶'; }
+}
+
+function weekPlayerSeek(e, wrap, pid) {
+  const audio = document.getElementById('wap-audio-' + pid);
+  if (!audio || !audio.duration) return;
+  const rect = wrap.getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  audio.currentTime = pct * audio.duration;
+  wapUpdateScrub(pid);
+}
+
+function wapUpdateScrub(pid) {
+  const audio = document.getElementById('wap-audio-' + pid);
+  const fill  = document.getElementById('wap-fill-' + pid);
+  const thumb = document.getElementById('wap-thumb-' + pid);
+  const cur   = document.getElementById('wap-cur-'  + pid);
+  const dur   = document.getElementById('wap-dur-'  + pid);
+  if (!audio) return;
+  const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  if (fill)  fill.style.width = pct + '%';
+  if (thumb) thumb.style.left = pct + '%';
+  if (cur)   cur.textContent  = wapFmt(audio.currentTime);
+  if (dur)   dur.textContent  = wapFmt(audio.duration);
+}
+
+function wapBindEvents(pid) {
+  const audio = document.getElementById('wap-audio-' + pid);
+  if (!audio || audio._wapBound) return;
+  audio._wapBound = true;
+  audio.addEventListener('timeupdate', () => wapUpdateScrub(pid));
+  audio.addEventListener('loadedmetadata', () => wapUpdateScrub(pid));
+  audio.addEventListener('ended', () => {
+    const btn = document.getElementById('wap-play-' + pid);
+    if (btn) btn.textContent = '▶';
+  });
+}
+
+function weekClosePlayer(pid) {
+  const audio   = document.getElementById('wap-audio-' + pid);
+  const wrap    = document.getElementById('wap-' + pid);
+  const repBtn  = document.getElementById('wap-rep-' + pid);
+  const playBtn = document.getElementById('wap-play-' + pid);
+  if (audio)   { audio.pause(); audio.src = ''; }
+  if (repBtn)  repBtn.classList.remove('active');
+  if (playBtn) playBtn.textContent = '▶';
+  if (wrap)    wrap.style.display = 'none';
   document.querySelectorAll('.week-audio-item.active').forEach(i => i.classList.remove('active'));
 }
 
-function weekToggleRepeat(cardId, btn) {
-  const audioEl = document.getElementById('week-audio-el-' + cardId);
-  if (!audioEl) return;
-  audioEl.loop = !audioEl.loop;
-  btn.classList.toggle('active', audioEl.loop);
+function weekToggleRepeat(pid, btn) {
+  const audio = document.getElementById('wap-audio-' + pid);
+  if (!audio) return;
+  audio.loop = !audio.loop;
+  btn.classList.toggle('active', audio.loop);
 }
 
 function weekSwitchTab(tabEl, browserId, idx) {
@@ -1409,25 +1482,28 @@ function weekSwitchTab(tabEl, browserId, idx) {
 
 async function weekPlayFile(key, itemEl, cardId) {
   const browser = itemEl.closest('.week-audio-browser');
-  if (browser) {
-    browser.querySelectorAll('.week-audio-item').forEach(i => i.classList.remove('active'));
-  }
+  if (browser) browser.querySelectorAll('.week-audio-item').forEach(i => i.classList.remove('active'));
   itemEl.classList.add('active');
 
-  const playerWrap = document.getElementById('week-audio-player-' + cardId);
-  const labelEl   = document.getElementById('week-audio-label-' + cardId);
-  const audioEl   = document.getElementById('week-audio-el-' + cardId);
-  if (!playerWrap || !audioEl) return;
+  const wrap    = document.getElementById('wap-' + cardId);
+  const audio   = document.getElementById('wap-audio-' + cardId);
+  const track   = document.getElementById('wap-track-' + cardId);
+  const playBtn = document.getElementById('wap-play-' + cardId);
+  if (!wrap || !audio) return;
 
   const name = key.split('/').pop().replace('.mp3', '');
-  if (labelEl) labelEl.textContent = name;
-  playerWrap.style.display = 'flex';
-  audioEl.src = '';
+  if (track)   track.textContent = name;
+  wrap.style.display = 'block';
+  audio.src = '';
+  if (playBtn) playBtn.textContent = '▶';
+  wapUpdateScrub(cardId);
+  wapBindEvents(cardId);
 
   try {
     const url = await getContentUrl(key);
-    audioEl.src = url;
-    audioEl.play();
+    audio.src = url;
+    audio.play();
+    if (playBtn) playBtn.textContent = '⏸';
   } catch(e) {
     alert('Could not load audio. Please try again.');
   }
@@ -1506,24 +1582,10 @@ function renderShedWeeks(phase) {
         </div>
         <div class="shed-week-action-row shed-divider-top">
           ${practiceBtn}
-          <div class="week-audio-player-wrap" id="week-audio-player-${cardId}-practice" style="display:none">
-            <button class="week-audio-player-close" onclick="weekClosePlayer('${cardId}-practice')">✕</button>
-            <div class="week-audio-now-playing" id="week-audio-label-${cardId}-practice"></div>
-            <div class="week-audio-controls">
-              <audio id="week-audio-el-${cardId}-practice" style="height:28px;flex:1;min-width:0"></audio>
-              <button class="week-audio-repeat" id="week-audio-repeat-${cardId}-practice" onclick="weekToggleRepeat('${cardId}-practice',this)" title="Repeat">⟳</button>
-            </div>
-          </div>
           ${examplesBtn}
-          ${examplesBtn ? `<div class="week-audio-player-wrap" id="week-audio-player-${cardId}" style="display:none">
-            <button class="week-audio-player-close" onclick="weekClosePlayer('${cardId}')">✕</button>
-            <div class="week-audio-now-playing" id="week-audio-label-${cardId}"></div>
-            <div class="week-audio-controls">
-              <audio id="week-audio-el-${cardId}" style="height:28px;flex:1;min-width:0"></audio>
-              <button class="week-audio-repeat" id="week-audio-repeat-${cardId}" onclick="weekToggleRepeat('${cardId}',this)" title="Repeat">⟳</button>
-            </div>
-          </div>` : ''}
         </div>
+        ${makeWeekPlayer(cardId + '-practice')}
+        ${examplesBtn ? makeWeekPlayer(cardId) : ''}
       </div>
     </div>`;
   }).join('');
