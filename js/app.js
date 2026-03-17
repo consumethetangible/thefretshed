@@ -1582,10 +1582,42 @@ function renderShedWeeks(phase) {
         </div>
         <div class="shed-week-action-row shed-divider-top">
           ${practiceBtn}
+          <div class="wap wap-inline" id="wap-${cardId}-practice" style="display:none">
+            <audio id="wap-audio-${cardId}-practice" preload="none"></audio>
+            <div class="wap-controls">
+              <button class="wap-btn wap-play" id="wap-play-${cardId}-practice" onclick="weekPlayerToggle('${cardId}-practice')">▶</button>
+              <span class="wap-time wap-cur" id="wap-cur-${cardId}-practice">0:00</span>
+              <div class="wap-scrub-wrap" onclick="weekPlayerSeek(event,this,'${cardId}-practice')">
+                <div class="wap-scrub-track">
+                  <div class="wap-scrub-fill" id="wap-fill-${cardId}-practice"></div>
+                  <div class="wap-scrub-thumb" id="wap-thumb-${cardId}-practice"></div>
+                </div>
+              </div>
+              <span class="wap-time wap-dur" id="wap-dur-${cardId}-practice">0:00</span>
+              <button class="wap-btn wap-repeat" id="wap-rep-${cardId}-practice" onclick="weekToggleRepeat('${cardId}-practice',this)" title="Repeat">⟳</button>
+              <button class="wap-close" onclick="weekClosePlayer('${cardId}-practice')">✕</button>
+            </div>
+            <div class="wap-track" id="wap-track-${cardId}-practice"></div>
+          </div>
           ${examplesBtn}
+          ${examplesBtn ? `<div class="wap wap-inline" id="wap-${cardId}" style="display:none">
+            <audio id="wap-audio-${cardId}" preload="none"></audio>
+            <div class="wap-controls">
+              <button class="wap-btn wap-play" id="wap-play-${cardId}" onclick="weekPlayerToggle('${cardId}')">▶</button>
+              <span class="wap-time wap-cur" id="wap-cur-${cardId}">0:00</span>
+              <div class="wap-scrub-wrap" onclick="weekPlayerSeek(event,this,'${cardId}')">
+                <div class="wap-scrub-track">
+                  <div class="wap-scrub-fill" id="wap-fill-${cardId}"></div>
+                  <div class="wap-scrub-thumb" id="wap-thumb-${cardId}"></div>
+                </div>
+              </div>
+              <span class="wap-time wap-dur" id="wap-dur-${cardId}">0:00</span>
+              <button class="wap-btn wap-repeat" id="wap-rep-${cardId}" onclick="weekToggleRepeat('${cardId}',this)" title="Repeat">⟳</button>
+              <button class="wap-close" onclick="weekClosePlayer('${cardId}')">✕</button>
+            </div>
+            <div class="wap-track" id="wap-track-${cardId}"></div>
+          </div>` : ''}
         </div>
-        ${makeWeekPlayer(cardId + '-practice')}
-        ${examplesBtn ? makeWeekPlayer(cardId) : ''}
       </div>
     </div>`;
   }).join('');
