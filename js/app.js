@@ -758,56 +758,8 @@ function buildHeatmap(daySet) {
 // NAVIGATION
 // ═══════════════════════════════════════════
 // ═══════════════════════════════════════════
-// GEAR IMAGE URL MANAGEMENT
+// GEAR IMAGE URL MANAGEMENT — removed (images now hardcoded)
 // ═══════════════════════════════════════════
-function getGearUrls() { return JSON.parse(localStorage.getItem('ngc-gear-urls') || '{}'); }
-function saveGearUrls(u) { localStorage.setItem('ngc-gear-urls', JSON.stringify(u)); }
-
-function toggleUrlEditor(headerEl) {
-  const body = headerEl.nextElementSibling;
-  const toggle = headerEl.querySelector('.gear-url-editor-toggle');
-  const isCollapsed = body.classList.contains('collapsed');
-  body.classList.toggle('collapsed', !isCollapsed);
-  toggle.textContent = isCollapsed ? 'hide ▴' : 'show ▾';
-}
-
-function setGearUrl(id) {
-  const imgEl = document.getElementById('ui-' + id);
-  const imgUrl = imgEl ? imgEl.value.trim() : '';
-  if (!imgUrl) return;
-  const urls = getGearUrls();
-  urls[id] = imgUrl;
-  saveGearUrls(urls);
-  applyGearUrl(id, imgUrl);
-  // Visual feedback
-  const btn = imgEl.nextElementSibling;
-  if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = 'Set'; }, 1500); }
-}
-
-function applyGearUrl(id, imgUrl) {
-  const imgTag = document.getElementById('img-' + id);
-  const phTag  = document.getElementById('ph-' + id);
-  if (!imgTag || !imgUrl) return;
-  imgTag.onload = () => { if (phTag) phTag.style.display = 'none'; };
-  imgTag.onerror = () => {
-    imgTag.style.display = 'none';
-    if (phTag) phTag.style.display = 'flex';
-  };
-  imgTag.src = imgUrl;
-  imgTag.style.display = 'block';
-}
-
-function applyAllGearUrls() {
-  const urls = getGearUrls();
-  const ids = ['strat','lp','lpstudio','chapman','pacifica','martin','bluesjr','katana','marshall'];
-  ids.forEach(id => {
-    const imgUrl = urls[id];
-    if (!imgUrl) return;
-    const imgInput = document.getElementById('ui-' + id);
-    if (imgInput) imgInput.value = imgUrl;
-    applyGearUrl(id, imgUrl);
-  });
-}
 
 function showPanel(id, e) {
   const ev = e || event;
@@ -2337,8 +2289,6 @@ function init() {
   buildStreakCard();
   // Restore completion banner if today was already done
   checkSessionComplete();
-  // Restore gear image URLs
-  applyAllGearUrls();
   // Load session timer by default
   setTimeout(timerLoadSession, 100);
 }
