@@ -90,32 +90,23 @@ Private S3 bucket: `thefretshed-content`
 - `audio/` — lesson MP3s
 
 IAM user: `thefretshed-content-user`
-Policy: `TheFretShedContentAccess` (s3:GetObject on thefretshed-content/*)
-Lambda: `getFretShedContentUrl` — generates pre-signed URLs (1hr expiry)
-API Gateway: `thefretshed-content-api` — HTTP API, GET /get-url?key=books/filename.pdf
+Policy: `TheFretShedContentAccess` (s3:GetObject + s3:ListBucket on thefretshed-content/*)
+Lambda: `getFretShedContentUrl` — two routes:
+- `GET /get-url?key=books/filename.pdf` — generates pre-signed URL (1hr expiry)
+- `GET /list-folder?prefix=audio/folder-name/` — lists all objects under a prefix
+API Gateway: `thefretshed-content-api` — HTTP API, auto-deploy enabled on `$default` stage
 
 ---
 
 ## Next Session Plan
 
-### 1. GitHub → AWS CI/CD (do first)
-Set up GitHub Actions to auto-deploy to S3 + CloudFront invalidation on every push to `main`. Goal: GitHub is source of truth, S3 always stays in sync automatically.
-
-Steps:
-- Add AWS credentials to GitHub repo secrets (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFRONT_DISTRIBUTION_ID`)
-- Create `.github/workflows/deploy.yml` — on push to main: sync `shed_package/` to S3, then invalidate CloudFront
-- Test: push a change, confirm it goes live without manual upload
-
-### 2. Gear & Tone — image fixes
-Images in the Gear and Tone section are broken/missing. Audit what's stored (localStorage `ngc-gear-url-{id}`), fix the upload/display flow.
-
-### 3. Week Map cards + API wiring
-The Shed song cards need the week map panel and the full PDF/audio content wiring:
-- Wire `CONTENT_API_URL` constant into `app.js`
-- Write `getContentUrl(key)` fetch helper
-- Add PDF and MP3 filenames per song in `data.js`
-- PDF button: call API → pre-signed URL → open in new tab
-- Audio player: call API → pre-signed URL → play inline
+### Backlog / Future
+- Claude-aware Interface card (session context, practice suggestions)
+- Session notes CSV export
+- Custom session blocks
+- Add Gear form (in-app, no S3 upload needed for metadata)
+- Multi-user support via Cognito (future)
+- Phases 4 & 5 Week Map data (currently empty `weeks:[]`)
 
 ---
 
@@ -139,4 +130,4 @@ The Shed song cards need the week map panel and the full PDF/audio content wirin
 
 ---
 
-*Last updated: GitHub Actions CI/CD live (push to main → auto-deploy S3 + CloudFront invalidation); gear images hardcoded from images/ folder; Marshall DSL40CR replaced with Bugera 1990 Infinium; URL editor panels removed; Week Map/API wiring queued next.*
+*Last updated: Week Map cards complete — status dropdowns (Not Started/In Progress/Complete), expandable bodies with clickable PDF refs, inline audio folder browser with pre-signed URL playback; Lambda updated with `/list-folder` route; API Gateway `/list-folder` route added; gear images hardcoded from `images/` folder; Marshall DSL40CR replaced with Bugera 1990 Infinium; GitHub Actions CI/CD live (push to main → auto-deploy S3 + CloudFront invalidation).*
