@@ -1355,13 +1355,9 @@ async function weekOpenAudio(audioPrefixes, btnEl, cardId) {
     const html = `<div class="week-audio-browser" id="${browserId}">
       <div class="week-audio-browser-header">
         <div class="week-audio-tabs">${tabs}</div>
-        <button class="week-audio-close" onclick="weekCloseAudio('${browserId}','${cardId}')">✕</button>
+        <button class="week-audio-close" onclick="weekCloseAudio('${browserId}')">✕</button>
       </div>
       <div class="week-audio-panels">${panels}</div>
-      <div class="week-audio-player-wrap" id="week-audio-player-${cardId}" style="display:none">
-        <div class="week-audio-now-playing" id="week-audio-label-${cardId}"></div>
-        <audio id="week-audio-el-${cardId}" controls style="width:100%;height:32px"></audio>
-      </div>
     </div>`;
 
     const actionRow = btnEl ? btnEl.closest('.shed-week-action-row') : null;
@@ -1375,16 +1371,30 @@ async function weekOpenAudio(audioPrefixes, btnEl, cardId) {
   }
 }
 
-function weekCloseAudio(browserId, cardId) {
+function weekCloseAudio(browserId) {
   const browser = document.getElementById(browserId);
   if (browser) browser.remove();
-  const player = document.getElementById('week-audio-player-' + cardId);
-  if (player) { player.style.display = 'none'; }
+  // Reset audio button active state
+  const btn = document.querySelector('.shed-btn-audio.active');
+  if (btn) btn.classList.remove('active');
+}
+
+function weekClosePlayer(cardId) {
+  const playerWrap = document.getElementById('week-audio-player-' + cardId);
+  const audioEl    = document.getElementById('week-audio-el-' + cardId);
+  const repeatBtn  = document.getElementById('week-audio-repeat-' + cardId);
+  if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl.loop = false; }
+  if (repeatBtn) repeatBtn.classList.remove('active');
+  if (playerWrap) playerWrap.style.display = 'none';
+  // Also deselect any active file in browser
+  document.querySelectorAll('.week-audio-item.active').forEach(i => i.classList.remove('active'));
+}
+
+function weekToggleRepeat(cardId, btn) {
   const audioEl = document.getElementById('week-audio-el-' + cardId);
-  if (audioEl) { audioEl.pause(); audioEl.src = ''; }
-  // Reset button
-  const btn = document.querySelector(`[onclick*="${cardId}"]`);
-  if (btn && btn.classList.contains('shed-btn-audio')) btn.classList.remove('active');
+  if (!audioEl) return;
+  audioEl.loop = !audioEl.loop;
+  btn.classList.toggle('active', audioEl.loop);
 }
 
 function weekSwitchTab(tabEl, browserId, idx) {
@@ -1411,7 +1421,7 @@ async function weekPlayFile(key, itemEl, cardId) {
 
   const name = key.split('/').pop().replace('.mp3', '');
   if (labelEl) labelEl.textContent = name;
-  playerWrap.style.display = 'block';
+  playerWrap.style.display = 'flex';
   audioEl.src = '';
 
   try {
@@ -1441,20 +1451,34 @@ function renderShedWeeks(phase) {
     </select>`;
 
     const refs = w.refs || [];
-    const refsHtml = refs.length > 0
-      ? refs.map(r => `<a class="shed-resource-link" href="#" onclick="event.preventDefault();shedOpenPdf('${r.book}',this)">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="flex-shrink:0"><rect x="0.5" y="0.5" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1"/><line x1="2" y1="3.5" x2="7" y2="3.5" stroke="currentColor" stroke-width="0.9"/><line x1="2" y1="5.5" x2="7" y2="5.5" stroke="currentColor" stroke-width="0.9"/><line x1="2" y1="7.5" x2="5" y2="7.5" stroke="currentColor" stroke-width="0.9"/></svg>
-          <span>${r.label}</span>
-        </a>`).join('')
-      : '<span class="small muted">No book references for this block.</span>';
+    const pdfIcon = `<svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="flex-shrink:0"><rect x="0.5" y="0.5" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1"/><line x1="2" y1="3.5" x2="7" y2="3.5" stroke="currentColor" stroke-width="0.9"/><line x1="2" y1="5.5" x2="7" y2="5.5" stroke="currentColor" stroke-width="0.9"/><line x1="2" y1="7.5" x2="5" y2="7.5" stroke="currentColor" stroke-width="0.9"/></svg>`;
+    const makeRef = r => `<a class="shed-resource-link" href="#" onclick="event.preventDefault();shedOpenPdf('${r.book}',this)">${pdfIcon}<span>${r.label}</span></a>`;
+
+    const universalRefs = [
+      { label:'Beato Ear Training Booklet', book:'beato' },
+      { label:'Ultimate Guitar Technique Practice', book:'technique' },
+    ];
+    const allRefs = [...refs, ...universalRefs];
+    const refsHtml = allRefs.map(makeRef).join('');
 
     const audioPrefixes = w.audioPrefixes || [];
-    const audioBtn = audioPrefixes.length > 0
-      ? `<button class="shed-action-btn shed-btn-audio" id="week-audio-btn-${cardId}"
+    const practicePrefix = [{ prefix:'audio/Guitar Practice Warmup Routines/', label:'Warmup Routines' }];
+    const practiceBtnId = `week-practice-btn-${cardId}`;
+    const examplesBtnId = `week-audio-btn-${cardId}`;
+
+    const practiceBtn = `<button class="shed-action-btn shed-btn-practice" id="${practiceBtnId}"
+        data-prefixes="${encodeURIComponent(JSON.stringify(practicePrefix))}"
+        data-cardid="${cardId}-practice"
+        onclick="weekOpenAudioBtn(this);event.stopPropagation()">
+        ♫ Practice
+      </button>`;
+
+    const examplesBtn = audioPrefixes.length > 0
+      ? `<button class="shed-action-btn shed-btn-audio" id="${examplesBtnId}"
           data-prefixes="${encodeURIComponent(JSON.stringify(audioPrefixes))}"
           data-cardid="${cardId}"
           onclick="weekOpenAudioBtn(this);event.stopPropagation()">
-          ♫ Audio
+          ♫ Examples
         </button>`
       : '';
 
@@ -1470,9 +1494,36 @@ function renderShedWeeks(phase) {
         </div>
       </div>
       <div class="shed-week-body" style="display:none">
-        <div class="shed-week-detail">${w.detail}</div>
-        <div class="shed-week-refs">${refsHtml}</div>
-        ${audioBtn ? `<div class="shed-week-action-row shed-divider-top">${audioBtn}</div>` : ''}
+        <div class="shed-detail-grid">
+          <div>
+            <div class="shed-detail-label">Focus</div>
+            <div class="shed-detail-value">${w.detail}</div>
+          </div>
+          <div>
+            <div class="shed-detail-label">Resources</div>
+            <div class="shed-week-refs">${refsHtml}</div>
+          </div>
+        </div>
+        <div class="shed-week-action-row shed-divider-top">
+          ${practiceBtn}
+          <div class="week-audio-player-wrap" id="week-audio-player-${cardId}-practice" style="display:none">
+            <button class="week-audio-player-close" onclick="weekClosePlayer('${cardId}-practice')">✕</button>
+            <div class="week-audio-now-playing" id="week-audio-label-${cardId}-practice"></div>
+            <div class="week-audio-controls">
+              <audio id="week-audio-el-${cardId}-practice" style="height:28px;flex:1;min-width:0"></audio>
+              <button class="week-audio-repeat" id="week-audio-repeat-${cardId}-practice" onclick="weekToggleRepeat('${cardId}-practice',this)" title="Repeat">⟳</button>
+            </div>
+          </div>
+          ${examplesBtn}
+          ${examplesBtn ? `<div class="week-audio-player-wrap" id="week-audio-player-${cardId}" style="display:none">
+            <button class="week-audio-player-close" onclick="weekClosePlayer('${cardId}')">✕</button>
+            <div class="week-audio-now-playing" id="week-audio-label-${cardId}"></div>
+            <div class="week-audio-controls">
+              <audio id="week-audio-el-${cardId}" style="height:28px;flex:1;min-width:0"></audio>
+              <button class="week-audio-repeat" id="week-audio-repeat-${cardId}" onclick="weekToggleRepeat('${cardId}',this)" title="Repeat">⟳</button>
+            </div>
+          </div>` : ''}
+        </div>
       </div>
     </div>`;
   }).join('');
