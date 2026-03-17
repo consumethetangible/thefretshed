@@ -993,28 +993,23 @@ function shedStatusPill(status) {
   return `<span class="shed-status-pill shed-s-${sc}">${labels[sc] || '○ Not Started'}</span>`;
 }
 
-function shedStatusSelect(title, status) {
+function shedStatusSelect(title, status, stopProp = false) {
   const sc = shedStatusClass(status);
   const opts = Object.entries(SONG_STATUS_LABELS).map(([val, label]) =>
     `<option value="${val}" ${sc === val ? 'selected' : ''}>${SONG_STATUS_ICONS[val]} ${label}</option>`
   ).join('');
   const safe = title.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  return `<select class="shed-status-select shed-s-${sc}" onchange="shedHandleStatusChange(event,'${safe}')">${opts}</select>`;
+  const clickAttr = stopProp ? ' onclick="event.stopPropagation()"' : '';
+  return `<select class="shed-status-select shed-s-${sc}"${clickAttr} onchange="shedHandleStatusChange(event,'${safe}')">${opts}</select>`;
 }
 
 function shedHandleStatusChange(e, title) {
   const newStatus = e.target.value;
   setSongStatus(title, newStatus);
   e.target.className = `shed-status-select shed-s-${newStatus}`;
-  // Update pill in same card header
+  // Update card border/bg tint
   const card = e.target.closest('.shed-song-card');
   if (card) {
-    const pill = card.querySelector('.shed-status-pill');
-    const labels = { ns:'○ Not Started', ip:'◑ In Progress', lrn:'🎯 Learned', itf:'💎 In The Fingers' };
-    if (pill) {
-      pill.className = `shed-status-pill shed-s-${newStatus}`;
-      pill.textContent = labels[newStatus] || '○ Not Started';
-    }
     // Update border and bg tint
     ['ns','ip','lrn','itf'].forEach(s => card.classList.remove('shed-card-' + s));
     card.classList.add('shed-card-' + newStatus);
@@ -1105,8 +1100,8 @@ function renderShedSongCard(s, phaseId, cardId) {
   const refs = s.refs || [];
   const safeTitle = s.title.replace(/'/g, "\\'");
   const safeTitleAttr = s.title.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  const tuningTag = s.tuning && s.tuning !== 'Standard'
-    ? `<span class="tag shed-tag-tuning">${s.tuning}</span>` : '';
+  const tuningRow = s.tuning && s.tuning !== 'Standard'
+    ? `<div class="shed-tuning-row"><span class="shed-detail-label">Tuning</span><span class="shed-tuning-val">${s.tuning}</span></div>` : '';
 
   const refsHtml = refs.length > 0
     ? refs.map(r => `<a class="shed-resource-link" href="#" onclick="event.preventDefault();shedOpenPdf('${r.book}',this)">
@@ -1132,8 +1127,7 @@ function renderShedSongCard(s, phaseId, cardId) {
         <div class="shed-card-artist">${s.artist}</div>
       </div>
       <div class="shed-card-meta">
-        ${tuningTag}
-        ${shedStatusPill(status)}
+        ${shedStatusSelect(s.title, status, true)}
         <span class="shed-chevron">▼</span>
       </div>
     </div>
@@ -1146,6 +1140,7 @@ function renderShedSongCard(s, phaseId, cardId) {
         <div>
           <div class="shed-detail-label">Resources</div>
           ${refsHtml}
+          ${tuningRow}
         </div>
       </div>
       <div class="shed-skills">${s.skills.map(sk => `<span class="tag">${sk}</span>`).join('')}</div>
@@ -1153,7 +1148,7 @@ function renderShedSongCard(s, phaseId, cardId) {
       <div class="shed-action-row">
         ${renderShedTonePopover(cardId, s.title)}
         <a class="shed-action-btn shed-btn-spotify" href="${spotifyUrl}" target="_blank" rel="noopener">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
           Spotify
         </a>
         <a class="shed-action-btn shed-btn-ug" href="${ugUrl}" target="_blank" rel="noopener">
@@ -1161,10 +1156,6 @@ function renderShedSongCard(s, phaseId, cardId) {
           Tab ↗
         </a>
         ${toneBtn}
-        <div class="shed-status-row">
-          <span class="shed-status-label">Status</span>
-          ${shedStatusSelect(s.title, status)}
-        </div>
       </div>
     </div>
   </div>`;

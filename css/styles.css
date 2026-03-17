@@ -1481,18 +1481,28 @@ body.preview-phone .theme-mode-btn { padding: 5px 7px; }
   background: rgba(146,120,176,0.18) !important;
 }
 
-/* Status row */
-.shed-status-row { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
-.shed-status-label { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
+/* Status row — removed (status now lives in card header as a select) */
 select.shed-status-select {
-  font-size: 10px; font-family: 'DM Mono', monospace;
-  padding: 4px 6px; border-radius: 4px;
+  font-size: 9px; font-family: 'DM Mono', monospace;
+  padding: 3px 5px; border-radius: 4px;
   border: 1px solid var(--border2); background: var(--bg3);
-  color: var(--text); cursor: pointer;
+  color: var(--text2); cursor: pointer; flex-shrink: 0;
+  /* stop click from bubbling up to shedToggleCard */
+  pointer-events: all;
 }
+select.shed-status-select:focus { outline: none; }
 select.shed-s-ip  { border-color: var(--accent); color: var(--accent); }
-select.shed-s-lrn { border-color: var(--green); color: var(--green); }
+select.shed-s-lrn { border-color: var(--green);  color: var(--green); }
 select.shed-s-itf { border-color: var(--status-itf); color: var(--status-itf); }
+
+/* Tuning row — sits below resources in card body */
+.shed-tuning-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.shed-tuning-val {
+  font-size: 11px; font-family: 'DM Mono', monospace;
+  color: var(--accent); background: var(--accent-dim);
+  border: 1px solid rgba(196,144,96,0.35);
+  padding: 1px 6px; border-radius: 3px;
+}
 
 /* Tone popover */
 .shed-tone-popover {
