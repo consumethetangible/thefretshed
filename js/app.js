@@ -1303,52 +1303,60 @@ function shedToggleWeekCard(card) {
   if (chev) chev.textContent = isOpen ? '▼' : '▲';
 }
 
-// ── Audio folder browser ───────────────────────────────────────────────────────
-async function weekOpenAudio(prefix, btnEl, cardId) {
-  const browserId = 'week-audio-browser-' + cardId + '-' + btoa(prefix).replace(/[^a-z0-9]/gi,'').slice(0,12);
-  let browserEl = document.getElementById(browserId);
+// ── Audio folder browser (tabbed) ────────────────────────────────────────────
+// audioPrefixes is array of {prefix, label} objects
+async function weekOpenAudio(audioPrefixes, btnEl, cardId) {
+  const browserId = 'week-audio-browser-' + cardId;
+  const existing = document.getElementById(browserId);
 
-  // Toggle: close if already open
-  if (browserEl) {
-    browserEl.remove();
-    if (btnEl) { btnEl.classList.remove('active'); btnEl.textContent = '♫ Audio'; }
+  // Toggle off if already open
+  if (existing) {
+    existing.remove();
+    if (btnEl) { btnEl.classList.remove('active'); btnEl.disabled = false; }
     return;
   }
 
   if (btnEl) { btnEl.textContent = '⏳ Loading…'; btnEl.disabled = true; }
 
   try {
-    const res = await fetch(`${CONTENT_API_URL}/list-folder?prefix=${encodeURIComponent(prefix)}`);
-    if (!res.ok) throw new Error('API error ' + res.status);
-    const data = await res.json();
-    const files = (data.files || []).filter(f => f.endsWith('.mp3'));
+    // Fetch all folders in parallel
+    const results = await Promise.all(audioPrefixes.map(async ({ prefix, label }) => {
+      const res = await fetch(`${CONTENT_API_URL}/list-folder?prefix=${encodeURIComponent(prefix)}`);
+      if (!res.ok) throw new Error('API error ' + res.status);
+      const data = await res.json();
+      const files = (data.files || []).filter(f => f.endsWith('.mp3'));
+      return { prefix, label, files };
+    }));
 
-    if (!files.length) {
-      if (btnEl) { btnEl.textContent = '♫ Audio'; btnEl.disabled = false; }
-      alert('No audio files found in this folder.');
-      return;
-    }
+    // Build tab headers
+    const tabs = results.map((r, i) =>
+      `<button class="week-audio-tab${i===0?' active':''}" onclick="weekSwitchTab(this,'${browserId}',${i})">${r.label}</button>`
+    ).join('');
 
-    // Build browser HTML
-    const listItems = files.map(key => {
-      const name = key.replace(prefix, '').replace('.mp3', '');
-      const safeKey = key.replace(/'/g, "\\'");
-      return `<div class="week-audio-item" onclick="weekPlayFile('${safeKey}', this)">${name}</div>`;
+    // Build file lists per tab
+    const panels = results.map((r, i) => {
+      const items = r.files.length
+        ? r.files.map(key => {
+            const name = key.replace(r.prefix, '').replace('.mp3', '');
+            const safeKey = key.replace(/'/g, "\\'");
+            return `<div class="week-audio-item" onclick="weekPlayFile('${safeKey}',this,'${cardId}')">${name}</div>`;
+          }).join('')
+        : '<div class="week-audio-empty">No audio files found.</div>';
+      return `<div class="week-audio-panel${i===0?'':' hidden'}" data-tab="${i}">${items}</div>`;
     }).join('');
 
     const html = `<div class="week-audio-browser" id="${browserId}">
       <div class="week-audio-browser-header">
-        <span class="week-audio-folder-name">${prefix.replace('audio/','').replace(/\/$/,'')}</span>
-        <button class="week-audio-close" onclick="document.getElementById('${browserId}').remove();document.getElementById('week-audio-player-${cardId}').style.display='none'">✕</button>
+        <div class="week-audio-tabs">${tabs}</div>
+        <button class="week-audio-close" onclick="weekCloseAudio('${browserId}','${cardId}')">✕</button>
       </div>
-      <div class="week-audio-list">${listItems}</div>
+      <div class="week-audio-panels">${panels}</div>
       <div class="week-audio-player-wrap" id="week-audio-player-${cardId}" style="display:none">
         <div class="week-audio-now-playing" id="week-audio-label-${cardId}"></div>
         <audio id="week-audio-el-${cardId}" controls style="width:100%;height:32px"></audio>
       </div>
     </div>`;
 
-    // Insert after action row
     const actionRow = btnEl ? btnEl.closest('.shed-week-action-row') : null;
     if (actionRow) actionRow.insertAdjacentHTML('afterend', html);
 
@@ -1360,25 +1368,41 @@ async function weekOpenAudio(prefix, btnEl, cardId) {
   }
 }
 
-async function weekPlayFile(key, itemEl) {
-  // Find card ID from parent
-  const browser = itemEl.closest('.week-audio-browser');
-  if (!browser) return;
-  const browserId = browser.id;
-  // Extract cardId from browserId pattern: week-audio-browser-{cardId}-{hash}
-  const parts = browserId.replace('week-audio-browser-','').split('-');
-  const cardId = parts.slice(0, parts.length - 1).join('-');
+function weekCloseAudio(browserId, cardId) {
+  const browser = document.getElementById(browserId);
+  if (browser) browser.remove();
+  const player = document.getElementById('week-audio-player-' + cardId);
+  if (player) { player.style.display = 'none'; }
+  const audioEl = document.getElementById('week-audio-el-' + cardId);
+  if (audioEl) { audioEl.pause(); audioEl.src = ''; }
+  // Reset button
+  const btn = document.querySelector(`[onclick*="${cardId}"]`);
+  if (btn && btn.classList.contains('shed-btn-audio')) btn.classList.remove('active');
+}
 
-  // Highlight selected
-  browser.querySelectorAll('.week-audio-item').forEach(i => i.classList.remove('active'));
+function weekSwitchTab(tabEl, browserId, idx) {
+  const browser = document.getElementById(browserId);
+  if (!browser) return;
+  browser.querySelectorAll('.week-audio-tab').forEach(t => t.classList.remove('active'));
+  browser.querySelectorAll('.week-audio-panel').forEach(p => p.classList.add('hidden'));
+  tabEl.classList.add('active');
+  const panel = browser.querySelector(`.week-audio-panel[data-tab="${idx}"]`);
+  if (panel) panel.classList.remove('hidden');
+}
+
+async function weekPlayFile(key, itemEl, cardId) {
+  const browser = itemEl.closest('.week-audio-browser');
+  if (browser) {
+    browser.querySelectorAll('.week-audio-item').forEach(i => i.classList.remove('active'));
+  }
   itemEl.classList.add('active');
 
   const playerWrap = document.getElementById('week-audio-player-' + cardId);
-  const labelEl = document.getElementById('week-audio-label-' + cardId);
-  const audioEl = document.getElementById('week-audio-el-' + cardId);
+  const labelEl   = document.getElementById('week-audio-label-' + cardId);
+  const audioEl   = document.getElementById('week-audio-el-' + cardId);
   if (!playerWrap || !audioEl) return;
 
-  const name = key.split('/').pop().replace('.mp3','');
+  const name = key.split('/').pop().replace('.mp3', '');
   if (labelEl) labelEl.textContent = name;
   playerWrap.style.display = 'block';
   audioEl.src = '';
@@ -1418,16 +1442,11 @@ function renderShedWeeks(phase) {
       : '<span class="small muted">No book references for this block.</span>';
 
     const audioPrefixes = w.audioPrefixes || [];
-    const audioBtns = audioPrefixes.length > 0
-      ? audioPrefixes.map((prefix, i) => {
-          const btnId = `week-audio-btn-${cardId}-${i}`;
-          const folderName = prefix.replace('audio/','').replace(/\/$/,'');
-          const shortName = folderName.length > 28 ? folderName.slice(0,28)+'…' : folderName;
-          return `<button class="shed-action-btn shed-btn-audio" id="${btnId}"
-            onclick="weekOpenAudio('${prefix.replace(/'/g,"\\'")}',this,'${cardId}-${i}');event.stopPropagation()">
-            ♫ ${shortName}
-          </button>`;
-        }).join('')
+    const audioBtn = audioPrefixes.length > 0
+      ? `<button class="shed-action-btn shed-btn-audio" id="week-audio-btn-${cardId}"
+          onclick="weekOpenAudio(${JSON.stringify(audioPrefixes)},this,'${cardId}');event.stopPropagation()">
+          ♫ Audio
+        </button>`
       : '';
 
     return `<div class="shed-week-card shed-card-${sc}" id="shed-wcard-${cardId}">
@@ -1444,7 +1463,7 @@ function renderShedWeeks(phase) {
       <div class="shed-week-body" style="display:none">
         <div class="shed-week-detail">${w.detail}</div>
         <div class="shed-week-refs">${refsHtml}</div>
-        ${audioBtns ? `<div class="shed-week-action-row shed-divider-top">${audioBtns}</div>` : ''}
+        ${audioBtn ? `<div class="shed-week-action-row shed-divider-top">${audioBtn}</div>` : ''}
       </div>
     </div>`;
   }).join('');

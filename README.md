@@ -130,4 +130,4 @@ API Gateway: `thefretshed-content-api` — HTTP API, auto-deploy enabled on `$de
 
 ---
 
-*Last updated: Week Map cards complete — status dropdowns (Not Started/In Progress/Complete), expandable bodies with clickable PDF refs, inline audio folder browser with pre-signed URL playback; Lambda updated with `/list-folder` route; API Gateway `/list-folder` route added; gear images hardcoded from `images/` folder; Marshall DSL40CR replaced with Bugera 1990 Infinium; GitHub Actions CI/CD live (push to main → auto-deploy S3 + CloudFront invalidation).*
+*Last updated: Week Map cards complete — status dropdowns (Not Started/In Progress/Complete), expandable bodies with clickable PDF refs, tabbed audio browser (one ♫ Audio button per week, tabs per book folder, inline player with pre-signed URL playback); Lambda updated with `/list-folder` route; API Gateway `/list-folder` route added; gear images hardcoded from `images/` folder; Marshall DSL40CR replaced with Bugera 1990 Infinium; GitHub Actions CI/CD live.*
