@@ -1304,6 +1304,13 @@ function shedToggleWeekCard(card) {
 }
 
 // ── Audio folder browser (tabbed) ────────────────────────────────────────────
+// Wrapper called from onclick — reads data attributes to avoid JSON-in-HTML issues
+function weekOpenAudioBtn(btnEl) {
+  const audioPrefixes = JSON.parse(decodeURIComponent(btnEl.dataset.prefixes));
+  const cardId = btnEl.dataset.cardid;
+  weekOpenAudio(audioPrefixes, btnEl, cardId);
+}
+
 // audioPrefixes is array of {prefix, label} objects
 async function weekOpenAudio(audioPrefixes, btnEl, cardId) {
   const browserId = 'week-audio-browser-' + cardId;
@@ -1444,7 +1451,9 @@ function renderShedWeeks(phase) {
     const audioPrefixes = w.audioPrefixes || [];
     const audioBtn = audioPrefixes.length > 0
       ? `<button class="shed-action-btn shed-btn-audio" id="week-audio-btn-${cardId}"
-          onclick="weekOpenAudio(${JSON.stringify(audioPrefixes)},this,'${cardId}');event.stopPropagation()">
+          data-prefixes="${encodeURIComponent(JSON.stringify(audioPrefixes))}"
+          data-cardid="${cardId}"
+          onclick="weekOpenAudioBtn(this);event.stopPropagation()">
           ♫ Audio
         </button>`
       : '';
