@@ -9,15 +9,59 @@ Personal guitar practice dashboard. Vanilla HTML/CSS/JS, deployed to AWS S3 + Cl
 ## File Structure
 
 ```
-shed_package/
+thefretshed/
 ├── index.html
-├── css/styles.css
-└── js/
-    ├── app.js        ← all logic
-    ├── data.js       ← edit content here
-    ├── spotify.js
-    └── claude.js
+├── css/
+│   └── styles.css
+├── js/
+│   ├── theme.js        ← theme system, settings drawer
+│   ├── session.js      ← block states, auto-advance
+│   ├── streak.js       ← practice days, streak calc, heatmap
+│   ├── ui.js           ← nav, week, checks, milestones, energy, notes
+│   ├── curriculum.js   ← song cards, swap table, drag-drop, library state
+│   ├── personal.js     ← personal + acoustic sections
+│   ├── audio.js        ← metronome engine + practice timer
+│   ├── viewport.js     ← admin viewport preview
+│   ├── init.js         ← entry point (init())
+│   ├── data.js         ← all curriculum/song/gear content — edit here
+│   ├── spotify.js      ← Spotify OAuth + search + inline player
+│   └── claude.js       ← Claude AI integration (stub)
+├── images/             ← gear images (hardcoded in index.html)
+├── tests/
+│   └── streak.test.js  ← Vitest tests for calcStreaks
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml  ← deploys to S3 + CloudFront on push to main
+│       └── test.yml    ← runs npm test on every PR to main
+├── package.json        ← npm start (serve) + npm test (vitest)
+└── README.md
 ```
+
+---
+
+## Local Development
+
+```bash
+npm install       # first time only
+npm start         # serves at http://localhost:3000
+npm test          # runs Vitest test suite
+npm run test:watch  # runs tests in watch mode
+```
+
+---
+
+## Git Workflow
+
+- `main` — production branch, protected. No direct pushes.
+- All changes go through a feature branch + PR.
+- PRs require 0 approvals (self-merge ok) but must pass CI tests.
+- GitHub Actions runs `npm test` on every PR before merge.
+- Merging to `main` auto-deploys to S3 + CloudFront.
+
+**Branch naming:**
+- `feature/description` — new functionality
+- `chore/description` — tooling, config, cleanup
+- `fix/description` — bug fixes
 
 ---
 
@@ -77,12 +121,14 @@ Each phase has expandable song workspace cards with:
 ## AWS Infrastructure
 
 ### Hosting (thefretshed.com)
-- S3 bucket: `thefretshed` — static site hosting
+- S3 bucket: `thefretshed.com` — static site hosting
 - CloudFront distribution → S3 website endpoint
 - ACM SSL cert (us-east-1) — auto-validated via Route 53
 - Route 53 A alias records → CloudFront
+- IAM user: `thefretshed-deploy` — S3 sync + CloudFront invalidation
+- GitHub secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFRONT_DISTRIBUTION_ID`
 
-**Deploy workflow (current):** manually push files to S3, then invalidate CloudFront (`/*`).
+**Deploy workflow:** push to `main` → GitHub Actions syncs to S3 + invalidates CloudFront (`/*`). No manual steps.
 
 ### Content (PDFs + Audio)
 Private S3 bucket: `thefretshed-content`
@@ -98,25 +144,15 @@ API Gateway: `thefretshed-content-api` — HTTP API, auto-deploy enabled on `$de
 
 ---
 
-## Next Session Plan
+## GitHub Project Board
 
-### Backlog / Future
-- Claude-aware Interface card (session context, practice suggestions)
-- Session notes CSV export
-- Custom session blocks
-- Add Gear form (in-app, no S3 upload needed for metadata)
-- Multi-user support via Cognito (future)
-- Phases 4 & 5 Week Map data (currently empty `weeks:[]`)
+**The Fret Shed** project board at github.com/consumethetangible/thefretshed/projects
 
----
+Columns: Backlog → Ready → In Progress → Done
 
-## Backlog
+Labels: `bug` · `ux` · `feature` · `engineering` · `data` · `investigate` · `priority-1` · `priority-2` · `priority-3` · `priority-4`
 
-- Claude-aware Interface card (session context, practice suggestions)
-- Session notes CSV export
-- Custom session blocks
-- Add Gear form (in-app, no S3 upload needed for metadata)
-- Multi-user support via Cognito (future)
+All backlog items are filed as Issues with labels and priority. Promote issues from Backlog → Ready before starting work.
 
 ---
 
@@ -130,4 +166,16 @@ API Gateway: `thefretshed-content-api` — HTTP API, auto-deploy enabled on `$de
 
 ---
 
-*Last updated: Week Map cards complete — status dropdowns (Not Started/In Progress/Complete), expandable bodies with clickable PDF refs, tabbed audio browser (one ♫ Audio button per week, tabs per book folder, inline player with pre-signed URL playback); Lambda updated with `/list-folder` route; API Gateway `/list-folder` route added; gear images hardcoded from `images/` folder; Marshall DSL40CR replaced with Bugera 1990 Infinium; GitHub Actions CI/CD live.*
+## Next Up — Priority 1 UX Fixes
+
+All tracked as GitHub Issues with `priority-1` label:
+
+1. Fix Light Mode — broken/hard to use
+2. Settings panel reorganization — primary settings to top
+3. Easier way to exit Settings — navigation friction
+4. Secure login page
+5. Site logo + browser favicon
+
+---
+
+*Last updated: Engineering foundation complete — app.js split into 9 modules, branch protection enabled (PRs required), GitHub Projects board + 31 Issues filed, local dev server (npm start → localhost:3000), Vitest test suite with CI integration (npm test runs on every PR). Next session: Priority 1 UX fixes.*
