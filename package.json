@@ -4,8 +4,10 @@
   "description": "Personal guitar practice dashboard. Vanilla HTML/CSS/JS, deployed to AWS S3 + CloudFront.",
   "main": "index.js",
   "scripts": {
-  "start": "serve . -p 3000"
-},
+    "start": "serve . -p 3000",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/consumethetangible/thefretshed.git"
@@ -19,6 +21,7 @@
   },
   "homepage": "https://github.com/consumethetangible/thefretshed#readme",
   "devDependencies": {
-    "serve": "^14.2.6"
+    "serve": "^14.2.6",
+    "vitest": "^4.1.0"
   }
 }
