@@ -1,0 +1,24 @@
+{
+  "name": "thefretshed",
+  "version": "1.0.0",
+  "description": "Personal guitar practice dashboard. Vanilla HTML/CSS/JS, deployed to AWS S3 + CloudFront.",
+  "main": "index.js",
+  "scripts": {
+  "start": "serve . -p 3000"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/consumethetangible/thefretshed.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/consumethetangible/thefretshed/issues"
+  },
+  "homepage": "https://github.com/consumethetangible/thefretshed#readme",
+  "devDependencies": {
+    "serve": "^14.2.6"
+  }
+}
