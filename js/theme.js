@@ -9,7 +9,7 @@
 
 // ── Default palette definitions ─────────────
 // Each theme has 4 named presets. Each preset defines the CSS variable overrides.
-// Variables: bg, bg2, bg3, bg4, bg5, border, border2, text, text2, text3,
+// Variables: bg, bg2, bg3, bg4, bg5, brder, border2, text, text2, text3,
 //            accent, accent2, accent-dim, accent-dim2, red, green, blue,
 //            p1c,p1b,p1br, p2c,p2b,p2br, p3c,p3b,p3br, p4c,p4b,p4br, p5c,p5b,p5br
 
@@ -242,7 +242,7 @@ function buildSettingsDrawer() {
         <button class="settings-confirm-yes" onclick="settingsDoAction('reset-statuses')">Yes, reset</button>
         <button class="settings-confirm-no" onclick="settingsDismissConfirm('reset-statuses')">Cancel</button>
       </div>
-    </div>
+    </div
 
     <div class="settings-section-divider"></div>
 
@@ -296,7 +296,7 @@ function buildSettingsDrawer() {
           <div class="settings-pref-sub">Theme and color palette</div>
         </div>
         <button class="settings-mode-btn" onclick="closeSettings(); openThemePicker();">
-          <span id="settings-mode-label">Dark</span> ▾
+                    <span id="settings-mode-label">${THEME_DEFAULTS[localStorage.getItem('ngc-theme') || 'dark'].label}</span> ▾
         </button>
       </div>
       <div class="settings-pref-row">
