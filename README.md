@@ -71,7 +71,7 @@ Claude opens each session by fetching this README via curl from GitHub main bran
 then checks open Issues on the project board before any work begins.
 
 **Session start sequence:**
-1. `curl` README from GitHub → establish current state
+1. `curl` README from `main` → establish current state
 2. Check GitHub Issues board for open bugs and priorities
 3. Confirm what we're working on, then build
 
@@ -87,6 +87,10 @@ then checks open Issues on the project board before any work begins.
 - One PR per logical fix. Keep commits clean and descriptive.
 - All backlog items tracked as GitHub Issues. No verbal backlogs.
 - README updated at end of every session as the handoff artifact.
+
+**Known limitation:** The built-in GitHub connector in Claude.ai (Settings → Connectors) is
+OAuth read-context only — it does not give Claude tool-callable API access. Full automation
+(create issues, push files without local repo) requires the custom GitHub MCP server (Issue #36).
 
 ---
 
@@ -177,7 +181,7 @@ Columns: Backlog → Ready → In Progress → **Bugs** → Done
 
 Labels: `bug` · `ux` · `feature` · `engineering` · `data` · `investigate` · `priority-1` · `priority-2` · `priority-3` · `priority-4`
 
-All backlog items are filed as Issues with labels and priority. Promote issues from Backlog → Ready before starting work. Active bugs and defects go in the Bugs column.
+All backlog items are filed as Issues with labels and priority. Promote issues from Backlog → Ready before starting work. Active bugs and defects go in the **Bugs** column.
 
 ---
 
@@ -198,24 +202,32 @@ Tracked in GitHub Issues under the **Bugs** column on the project board.
 | # | Issue | Status |
 |---|---|---|
 | #2 | Fix Light Mode — broken/hard to use | Open, priority-1 |
-| #37 | Settings Color Mode dropdown hardcoded to "Dark" | Fixed PR #38, deployed |
+| #37 | Settings Color Mode dropdown hardcoded to "Dark" | Fixed, PR #38 deployed |
+| #38 | Color Mode Edit button doesn't switch theme; drawer full-screen height | Fixed, PR fix/theme-drawer-ux pending merge |
 
 ---
 
 ## Next Up — Priority 1 UX Fixes
 
-All tracked as GitHub Issues with `priority-1` label:
+All tracked as GitHub Issues with `priority-1` label. Work in this order:
 
-1. **#2** Fix Light Mode — broken/hard to use
-2. **#3** Settings panel reorganization — primary settings to top
-3. **#4** Easier way to exit Settings — navigation friction
-4. **#5** Secure login page
-5. **#6** Site logo + browser favicon
-
-**Also pending merge (fix/theme-drawer-ux):**
-- Edit button in Color Mode picker now switches active theme (not just expands panel)
-- Color Mode drawer height capped so page shows below and is clickable to dismiss
+1. **Merge PR `fix/theme-drawer-ux`** — already open, ready to merge (Edit button + drawer height fixes)
+2. **#2** Fix Light Mode — broken/hard to use
+3. **#3** Settings panel reorganization — primary settings to top
+4. **#4** Easier way to exit Settings — navigation friction
+5. **#5** Secure login page
+6. **#6** Site logo + browser favicon
 
 ---
 
-*Last updated: Mar 19, 2026 — Bug fix session. Fixed Settings Color Mode label (PR #38, deployed). Fixed theme drawer Edit button + height (PR fix/theme-drawer-ux, pending merge). Discovered GitHub built-in connector is OAuth-only — full automation needs custom GitHub MCP server (Issue #36). Desktop Commander now has local repo access — Claude writes files and pushes branches directly via git CLI without touching GitHub web editor. Next session: merge fix/theme-drawer-ux, then Priority 1 UX fixes starting with Light Mode (#2).*
+## Engineering Backlog
+
+| # | Item | Status |
+|---|---|---|
+| #36 | GitHub MCP server — replace built-in connector with custom MCP endpoint | Open, priority-2 |
+| — | Split curriculum.js (1100+ lines) | Open |
+| — | Expand Vitest coverage beyond streak module | Open |
+
+---
+
+*Last updated: Mar 19, 2026 — Bug fix session. Deployed Settings Color Mode label fix (PR #38). Identified and fixed two more theme drawer bugs: Edit button now switches active theme, drawer height capped so page is visible below (PR fix/theme-drawer-ux, open for merge). Discovered GitHub built-in connector is OAuth-only — logged Issue #36 for custom MCP server setup. Desktop Commander now configured with local repo path — Claude writes and pushes directly via git CLI. Next session: merge fix/theme-drawer-ux, then Priority 1 UX fixes starting with Light Mode (#2).*
