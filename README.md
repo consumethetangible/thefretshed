@@ -14,7 +14,7 @@ thefretshed/
 ├── css/
 │   └── styles.css
 ├── js/
-│   ├── theme.js        ← theme system, settings drawer
+│   ├── theme.js        ← theme system, settings drawer, Color Mode picker
 │   ├── session.js      ← block states, auto-advance
 │   ├── streak.js       ← practice days, streak calc, heatmap
 │   ├── ui.js           ← nav, week, checks, milestones, energy, notes
@@ -62,6 +62,31 @@ npm run test:watch  # runs tests in watch mode
 - `feature/description` — new functionality
 - `chore/description` — tooling, config, cleanup
 - `fix/description` — bug fixes
+
+---
+
+## Session Workflow (Claude + Chris)
+
+Claude opens each session by fetching this README via curl from GitHub main branch,
+then checks open Issues on the project board before any work begins.
+
+**Session start sequence:**
+1. `curl` README from GitHub → establish current state
+2. Check GitHub Issues board for open bugs and priorities
+3. Confirm what we're working on, then build
+
+**How Claude makes changes:**
+- Uses Desktop Commander (`allowedDirectories: /Users/christophervoss/Documents/thefretshed`)
+- Edits files directly in the local repo via `edit_block`
+- Creates branch, commits, and pushes via `start_process` (git CLI)
+- Opens PR via Claude in Chrome browser automation
+- Merges PR → CI runs → auto-deploys to S3 + CloudFront
+
+**Key principles:**
+- Collect → plan → build. Confirm approach before writing code.
+- One PR per logical fix. Keep commits clean and descriptive.
+- All backlog items tracked as GitHub Issues. No verbal backlogs.
+- README updated at end of every session as the handoff artifact.
 
 ---
 
@@ -148,11 +173,11 @@ API Gateway: `thefretshed-content-api` — HTTP API, auto-deploy enabled on `$de
 
 **The Fret Shed** project board at github.com/consumethetangible/thefretshed/projects
 
-Columns: Backlog → Ready → In Progress → Done
+Columns: Backlog → Ready → In Progress → **Bugs** → Done
 
 Labels: `bug` · `ux` · `feature` · `engineering` · `data` · `investigate` · `priority-1` · `priority-2` · `priority-3` · `priority-4`
 
-All backlog items are filed as Issues with labels and priority. Promote issues from Backlog → Ready before starting work.
+All backlog items are filed as Issues with labels and priority. Promote issues from Backlog → Ready before starting work. Active bugs and defects go in the Bugs column.
 
 ---
 
@@ -166,16 +191,31 @@ All backlog items are filed as Issues with labels and priority. Promote issues f
 
 ---
 
+## Known Issues (Active Bugs)
+
+Tracked in GitHub Issues under the **Bugs** column on the project board.
+
+| # | Issue | Status |
+|---|---|---|
+| #2 | Fix Light Mode — broken/hard to use | Open, priority-1 |
+| #37 | Settings Color Mode dropdown hardcoded to "Dark" | Fixed PR #38, deployed |
+
+---
+
 ## Next Up — Priority 1 UX Fixes
 
 All tracked as GitHub Issues with `priority-1` label:
 
-1. Fix Light Mode — broken/hard to use
-2. Settings panel reorganization — primary settings to top
-3. Easier way to exit Settings — navigation friction
-4. Secure login page
-5. Site logo + browser favicon
+1. **#2** Fix Light Mode — broken/hard to use
+2. **#3** Settings panel reorganization — primary settings to top
+3. **#4** Easier way to exit Settings — navigation friction
+4. **#5** Secure login page
+5. **#6** Site logo + browser favicon
+
+**Also pending merge (fix/theme-drawer-ux):**
+- Edit button in Color Mode picker now switches active theme (not just expands panel)
+- Color Mode drawer height capped so page shows below and is clickable to dismiss
 
 ---
 
-*Last updated: Engineering foundation complete — app.js split into 9 modules, branch protection enabled (PRs required), GitHub Projects board + 31 Issues filed, local dev server (npm start → localhost:3000), Vitest test suite with CI integration (npm test runs on every PR). Next session: Priority 1 UX fixes.*
+*Last updated: Mar 19, 2026 — Bug fix session. Fixed Settings Color Mode label (PR #38, deployed). Fixed theme drawer Edit button + height (PR fix/theme-drawer-ux, pending merge). Discovered GitHub built-in connector is OAuth-only — full automation needs custom GitHub MCP server (Issue #36). Desktop Commander now has local repo access — Claude writes files and pushes branches directly via git CLI without touching GitHub web editor. Next session: merge fix/theme-drawer-ux, then Priority 1 UX fixes starting with Light Mode (#2).*
