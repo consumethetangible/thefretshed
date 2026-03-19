@@ -429,6 +429,7 @@ function settingsToggleExpand(key) {
   document.querySelectorAll('.str-expand').forEach(e => e.classList.remove('open'));
   document.querySelectorAll('.str-edit-btn').forEach(b => b.textContent = 'Edit ▾');
   if (!isOpen) {
+    setTheme(key);
     el.classList.add('open');
     const btn = el.closest('.settings-theme-row').querySelector('.str-edit-btn');
     if (btn) btn.textContent = 'Edit ▴';
