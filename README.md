@@ -201,9 +201,10 @@ Tracked in GitHub Issues under the **Bugs** column on the project board.
 
 | # | Issue | Status |
 |---|---|---|
-| #2 | Fix Light Mode — broken/hard to use | Open, priority-1 |
 | #37 | Settings Color Mode dropdown hardcoded to "Dark" | Fixed, PR #38 deployed |
-| #38 | Color Mode Edit button doesn't switch theme; drawer full-screen height | Fixed, PR fix/theme-drawer-ux pending merge |
+| #39 | Color Mode Edit button doesn't switch theme; drawer full-screen height | Fixed, merged |
+| — | Settings drawer missing bottom border + wrong top offset | Fixed, merged |
+| #2 | Fix Light Mode — broken/hard to use | Fixed, merged |
 
 ---
 
@@ -211,12 +212,10 @@ Tracked in GitHub Issues under the **Bugs** column on the project board.
 
 All tracked as GitHub Issues with `priority-1` label. Work in this order:
 
-1. **Merge PR `fix/theme-drawer-ux`** — already open, ready to merge (Edit button + drawer height fixes)
-2. **#2** Fix Light Mode — broken/hard to use
-3. **#3** Settings panel reorganization — primary settings to top
-4. **#4** Easier way to exit Settings — navigation friction
-5. **#5** Secure login page
-6. **#6** Site logo + browser favicon
+1. **#3** Settings panel reorganization — primary settings to top
+2. **#4** Easier way to exit Settings — navigation friction
+3. **#5** Secure login page
+4. **#6** Site logo + browser favicon
 
 ---
 
@@ -229,4 +228,4 @@ All tracked as GitHub Issues with `priority-1` label. Work in this order:
 
 ---
 
-*Last updated: Mar 20, 2026 — GitHub MCP session. Connected GitHub's remote MCP endpoint (https://api.githubcopilot.com/mcp/) as a Claude.ai custom connector — Claude now reads issues reliably at session start with no rate limit errors. Write access (create/close issues) is blocked by Claude.ai's HTTPS-only connector requirement; localhost servers not reachable. Write operations remain manual in GitHub UI; code pushes continue via Desktop Commander + git CLI. Closed #36 and #24. Next session: merge fix/theme-drawer-ux, then Priority 1 UX fixes starting with Light Mode (#2).*
+*Last updated: Mar 20, 2026 — Light Mode fixed (PR fix/light-mode). Rebuilt all four Light theme presets with proper bg layering (lightest→darkest), high-contrast text, and cool neutral tones. Settings drawer border + top offset also fixed (PR fix/settings-drawer-border). Close #2 manually in GitHub. Next: #3 Settings panel reorganization.*
