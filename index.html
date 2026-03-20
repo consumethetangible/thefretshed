@@ -22,7 +22,7 @@
     <button class="nav-btn" onclick="showPanel('rig', event)">Rig & Tone</button>
   </nav>
   <div class="header-right-group">
-    <button class="gear-btn" id="settings-gear-btn" onclick="openSettings()" aria-label="Settings">
+    <button class="gear-btn" id="settings-gear-btn" onclick="document.getElementById('settings-drawer').classList.contains('open') ? closeSettings() : openSettings()" aria-label="Settings">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M7 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.2"/>
         <path d="M11.3 7c0-.2 0-.4-.02-.6l1.3-1a.5.5 0 0 0 .12-.64l-1.24-2.14a.5.5 0 0 0-.6-.22l-1.54.62a4.6 4.6 0 0 0-1.03-.6L8.06.84A.5.5 0 0 0 7.57.5H5.09a.5.5 0 0 0-.49.34l-.43 1.62a4.6 4.6 0 0 0-1.03.6l-1.54-.62a.5.5 0 0 0-.6.22L.76 4.8a.5.5 0 0 0 .12.64l1.3 1A4.7 4.7 0 0 0 2.16 7c0 .2.01.41.03.6l-1.3 1a.5.5 0 0 0-.12.64l1.24 2.14c.13.22.4.3.6.22l1.54-.62c.32.23.66.42 1.03.6l.44 1.62c.08.3.36.5.67.5h2.48c.3 0 .58-.2.66-.5l.44-1.62a4.6 4.6 0 0 0 1.03-.6l1.54.62c.22.08.47 0 .6-.22l1.24-2.14a.5.5 0 0 0-.12-.64l-1.3-1Z" stroke="currentColor" stroke-width="1.2"/>

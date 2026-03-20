@@ -1428,6 +1428,7 @@ body.preview-phone .theme-mode-btn { padding: 5px 7px; }
   position: fixed;
   inset: 0;
   z-index: 199;
+  background: rgba(0,0,0,0.25);
 }
 #drawer-overlay.active { display: block; }
 
