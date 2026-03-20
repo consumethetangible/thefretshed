@@ -48,6 +48,14 @@ npm test          # runs Vitest test suite
 npm run test:watch  # runs tests in watch mode
 ```
 
+**Standard test-before-merge workflow:**
+```bash
+git checkout fix/your-branch-name   # switch to the branch being tested
+npm start                           # serves at http://localhost:3000
+# test in browser, Ctrl+C to stop
+# if good → open PR on GitHub and merge → auto-deploys
+```
+
 ---
 
 ## Git Workflow
@@ -201,10 +209,12 @@ Tracked in GitHub Issues under the **Bugs** column on the project board.
 
 | # | Issue | Status |
 |---|---|---|
-| #37 | Settings Color Mode dropdown hardcoded to "Dark" | Fixed, PR #38 deployed |
+| #37 | Settings Color Mode dropdown hardcoded to "Dark" | Fixed, merged |
 | #39 | Color Mode Edit button doesn't switch theme; drawer full-screen height | Fixed, merged |
 | — | Settings drawer missing bottom border + wrong top offset | Fixed, merged |
 | #2 | Fix Light Mode — broken/hard to use | Fixed, merged |
+| #3 | Settings panel reorganization | Fixed, merged |
+| #4 | Easier way to exit Settings | Fixed, merged |
 
 ---
 
@@ -212,10 +222,8 @@ Tracked in GitHub Issues under the **Bugs** column on the project board.
 
 All tracked as GitHub Issues with `priority-1` label. Work in this order:
 
-1. **#3** Settings panel reorganization — primary settings to top
-2. **#4** Easier way to exit Settings — navigation friction
-3. **#5** Secure login page
-4. **#6** Site logo + browser favicon
+1. **#5** Secure login page
+2. **#6** Site logo + browser favicon
 
 ---
 
@@ -228,4 +236,4 @@ All tracked as GitHub Issues with `priority-1` label. Work in this order:
 
 ---
 
-*Last updated: Mar 20, 2026 — Light Mode fixed (PR fix/light-mode). Rebuilt all four Light theme presets with proper bg layering (lightest→darkest), high-contrast text, and cool neutral tones. Settings drawer border + top offset also fixed (PR fix/settings-drawer-border). Close #2 manually in GitHub. Next: #3 Settings panel reorganization.*
+*Last updated: Mar 20, 2026 — Session 2. Fixed settings drawer border + top offset. Rebuilt Light theme palettes (proper bg layering, high contrast, cool neutral Cream default). Settings panel reorganized: Preferences first (with Audio merged in), Spotify, Data Management, Admin, App Info last. Gear icon now toggles settings open/close. Color Mode Save button closes picker and returns to Settings. Overlay dim added. VERSION constant added to theme.js (now at 2.1). Close #2, #3, #4 manually in GitHub. Next: #5 Secure login page, #6 Logo + favicon.*
