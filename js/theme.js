@@ -212,6 +212,7 @@ function buildSettingsDrawer() {
         </div>
         <button class="settings-toggle${compactDash ? ' on' : ''}" id="pref-compact" onclick="settingsTogglePref('compact')"></button>
       </div>
+      <div class="settings-section-label" style="margin-top:14px;margin-bottom:8px">Audio</div>
       <div class="settings-pref-row" style="margin-bottom:10px">
         <div style="flex:1">
           <div class="settings-pref-label">Metronome volume</div>
