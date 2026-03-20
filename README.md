@@ -224,10 +224,9 @@ All tracked as GitHub Issues with `priority-1` label. Work in this order:
 
 | # | Item | Status |
 |---|---|---|
-| #36 | GitHub MCP server — replace built-in connector with custom MCP endpoint | Open, priority-2 |
 | — | Split curriculum.js (1100+ lines) | Open |
 | — | Expand Vitest coverage beyond streak module | Open |
 
 ---
 
-*Last updated: Mar 19, 2026 — Bug fix session. Deployed Settings Color Mode label fix (PR #38). Identified and fixed two more theme drawer bugs: Edit button now switches active theme, drawer height capped so page is visible below (PR fix/theme-drawer-ux, open for merge). Discovered GitHub built-in connector is OAuth-only — logged Issue #36 for custom MCP server setup. Desktop Commander now configured with local repo path — Claude writes and pushes directly via git CLI. Next session: merge fix/theme-drawer-ux, then Priority 1 UX fixes starting with Light Mode (#2).*
+*Last updated: Mar 20, 2026 — GitHub MCP session. Connected GitHub's remote MCP endpoint (https://api.githubcopilot.com/mcp/) as a Claude.ai custom connector — Claude now reads issues reliably at session start with no rate limit errors. Write access (create/close issues) is blocked by Claude.ai's HTTPS-only connector requirement; localhost servers not reachable. Write operations remain manual in GitHub UI; code pushes continue via Desktop Commander + git CLI. Closed #36 and #24. Next session: merge fix/theme-drawer-ux, then Priority 1 UX fixes starting with Light Mode (#2).*
