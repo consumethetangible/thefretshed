@@ -2,6 +2,7 @@
 // app.js — All application logic
 // ═══════════════════════════════════════════
 
+const VERSION = '2.1';
 
 // ═══════════════════════════════════════════
 // THEME SYSTEM
@@ -194,6 +195,64 @@ function buildSettingsDrawer() {
   // ── App info ──
   body.innerHTML = `
     <div class="settings-section">
+      <div class="settings-section-label">Preferences</div>
+      <div class="settings-pref-row" style="margin-bottom:10px">
+        <div>
+          <div class="settings-pref-label">Color Mode</div>
+          <div class="settings-pref-sub">Theme and color palette</div>
+        </div>
+        <button class="settings-mode-btn" onclick="closeSettings(); openThemePicker();">
+                    <span id="settings-mode-label">${THEME_DEFAULTS[localStorage.getItem('ngc-theme') || 'dark'].label}</span> ▾
+        </button>
+      </div>
+      <div class="settings-pref-row" style="margin-bottom:10px">
+        <div>
+          <div class="settings-pref-label">Compact dashboard</div>
+          <div class="settings-pref-sub">Tighter card spacing on mobile</div>
+        </div>
+        <button class="settings-toggle${compactDash ? ' on' : ''}" id="pref-compact" onclick="settingsTogglePref('compact')"></button>
+      </div>
+      <div class="settings-pref-row" style="margin-bottom:10px">
+        <div style="flex:1">
+          <div class="settings-pref-label">Metronome volume</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="range" min="0" max="100" value="${Math.round((parseFloat(localStorage.getItem('ngc-metro-volume') ?? '0.7')) * 100)}" style="width:90px" oninput="setAudioVolume('metro', this.value)" />
+          <span style="font-size:12px;color:var(--text3);min-width:28px;text-align:right" id="metro-vol-label">${Math.round((parseFloat(localStorage.getItem('ngc-metro-volume') ?? '0.7')) * 100)}%</span>
+        </div>
+      </div>
+      <div class="settings-pref-row">
+        <div style="flex:1">
+          <div class="settings-pref-label">Timer beep volume</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="range" min="0" max="100" value="${Math.round((parseFloat(localStorage.getItem('ngc-timer-volume') ?? '0.7')) * 100)}" style="width:90px" oninput="setAudioVolume('timer', this.value)" />
+          <span style="font-size:12px;color:var(--text3);min-width:28px;text-align:right" id="timer-vol-label">${Math.round((parseFloat(localStorage.getItem('ngc-timer-volume') ?? '0.7')) * 100)}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section-divider"></div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Spotify</div>
+      <div class="settings-pref-sub" style="margin-bottom:10px">Connect to auto-load players on curriculum song cards.</div>
+      <button class="settings-action-btn spotify-btn" id="spotify-connect-btn" onclick="spotifyLogin()">
+        <span class="settings-action-icon spotify-btn-icon">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+          </svg>
+        </span>
+        <div class="settings-action-info">
+          <div class="settings-action-label spotify-btn-label">Connect Spotify</div>
+          <div class="settings-action-sub spotify-btn-sub">Adds inline players to curriculum song cards</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="settings-section-divider"></div>
+
+    <div class="settings-section">
       <div class="settings-section-label">Data Management</div>
 
       <button class="settings-action-btn" onclick="settingsExportData()">
@@ -242,69 +301,17 @@ function buildSettingsDrawer() {
         <button class="settings-confirm-yes" onclick="settingsDoAction('reset-statuses')">Yes, reset</button>
         <button class="settings-confirm-no" onclick="settingsDismissConfirm('reset-statuses')">Cancel</button>
       </div>
-    </div
-
-    <div class="settings-section-divider"></div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Spotify</div>
-      <div class="settings-pref-sub" style="margin-bottom:10px">Connect to auto-load players on curriculum song cards.</div>
-      <button class="settings-action-btn spotify-btn" id="spotify-connect-btn" onclick="spotifyLogin()">
-        <span class="settings-action-icon spotify-btn-icon">
-          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-          </svg>
-        </span>
-        <div class="settings-action-info">
-          <div class="settings-action-label spotify-btn-label">Connect Spotify</div>
-          <div class="settings-action-sub spotify-btn-sub">Adds inline players to curriculum song cards</div>
-        </div>
-      </button>
     </div>
 
     <div class="settings-section-divider"></div>
 
     <div class="settings-section">
-      <div class="settings-section-label">Audio</div>
-      <div class="settings-pref-row" style="margin-bottom:10px">
-        <div style="flex:1">
-          <div class="settings-pref-label">Metronome volume</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="range" min="0" max="100" value="${Math.round((parseFloat(localStorage.getItem('ngc-metro-volume') ?? '0.7')) * 100)}" style="width:90px" oninput="setAudioVolume('metro', this.value)" />
-          <span style="font-size:12px;color:var(--text3);min-width:28px;text-align:right" id="metro-vol-label">${Math.round((parseFloat(localStorage.getItem('ngc-metro-volume') ?? '0.7')) * 100)}%</span>
-        </div>
-      </div>
-      <div class="settings-pref-row">
-        <div style="flex:1">
-          <div class="settings-pref-label">Timer beep volume</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="range" min="0" max="100" value="${Math.round((parseFloat(localStorage.getItem('ngc-timer-volume') ?? '0.7')) * 100)}" style="width:90px" oninput="setAudioVolume('timer', this.value)" />
-          <span style="font-size:12px;color:var(--text3);min-width:28px;text-align:right" id="timer-vol-label">${Math.round((parseFloat(localStorage.getItem('ngc-timer-volume') ?? '0.7')) * 100)}%</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="settings-section-divider"></div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Preferences</div>
-      <div class="settings-pref-row" style="margin-bottom:10px">
-        <div>
-          <div class="settings-pref-label">Color Mode</div>
-          <div class="settings-pref-sub">Theme and color palette</div>
-        </div>
-        <button class="settings-mode-btn" onclick="closeSettings(); openThemePicker();">
-                    <span id="settings-mode-label">${THEME_DEFAULTS[localStorage.getItem('ngc-theme') || 'dark'].label}</span> ▾
-        </button>
-      </div>
-      <div class="settings-pref-row">
-        <div>
-          <div class="settings-pref-label">Compact dashboard</div>
-          <div class="settings-pref-sub">Tighter card spacing on mobile</div>
-        </div>
-        <button class="settings-toggle${compactDash ? ' on' : ''}" id="pref-compact" onclick="settingsTogglePref('compact')"></button>
+      <div class="settings-section-label settings-admin-label">Admin</div>
+      <div class="settings-pref-sub" style="margin-bottom:12px">Preview how the site renders on different device sizes. Desktop is the default full-width view.</div>
+      <div class="settings-viewport-btns">
+        <button class="settings-viewport-btn ${vp === 'desktop' ? 'active' : ''}" onclick="setViewportPreview('desktop')">Desktop</button>
+        <button class="settings-viewport-btn ${vp === 'tablet' ? 'active' : ''}" onclick="setViewportPreview('tablet')">Tablet</button>
+        <button class="settings-viewport-btn ${vp === 'phone' ? 'active' : ''}" onclick="setViewportPreview('phone')">Phone</button>
       </div>
     </div>
 
@@ -318,24 +325,11 @@ function buildSettingsDrawer() {
       </div>
       <div class="settings-info-row">
         <span class="settings-info-key">Version</span>
-        <span class="settings-info-val">2.0</span>
+        <span class="settings-info-val">${VERSION}</span>
       </div>
-
       <div class="settings-info-row">
         <span class="settings-info-key">Live</span>
         <a class="settings-info-link" href="https://thefretshed.com" target="_blank" rel="noopener">Open ↗</a>
-      </div>
-    </div>
-
-    <div class="settings-section-divider"></div>
-
-    <div class="settings-section">
-      <div class="settings-section-label settings-admin-label">Admin</div>
-      <div class="settings-pref-sub" style="margin-bottom:12px">Preview how the site renders on different device sizes. Desktop is the default full-width view.</div>
-      <div class="settings-viewport-btns">
-        <button class="settings-viewport-btn ${vp === 'desktop' ? 'active' : ''}" onclick="setViewportPreview('desktop')">Desktop</button>
-        <button class="settings-viewport-btn ${vp === 'tablet' ? 'active' : ''}" onclick="setViewportPreview('tablet')">Tablet</button>
-        <button class="settings-viewport-btn ${vp === 'phone' ? 'active' : ''}" onclick="setViewportPreview('phone')">Phone</button>
       </div>
     </div>`;
 
@@ -467,12 +461,9 @@ function settingsSaveCustom(themeKey) {
   } else {
     localStorage.setItem('ngc-custom-' + themeKey, JSON.stringify(custom));
   }
-  // Flash save confirmation
+  // Flash save confirmation, then close theme picker and return to settings
   const btn = document.querySelector(`#str-expand-${themeKey} .str-save-btn`);
-  if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save'; }, 1500); }
-  buildThemeDrawer();
-  const el = document.getElementById('str-expand-' + themeKey);
-  if (el) el.classList.add('open');
+  if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { closeThemePicker(); openSettings(); }, 800); }
 }
 
 function settingsResetCustom(themeKey) {
