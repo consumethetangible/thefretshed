@@ -538,11 +538,18 @@
   <script src="js/session.js"></script>
   <script src="js/streak.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/progress.js"></script>
   <script src="js/curriculum.js"></script>
   <script src="js/personal.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/viewport.js"></script>
   <script src="js/init.js"></script>
+  <script>
+    // Auth guard — redirect to login if not logged in
+    if (!sessionStorage.getItem('ngc-user-id')) {
+      window.location.href = '/login.html';
+    }
+  </script>
 
 
 <!-- DRAWER OVERLAY (click outside to close) -->
