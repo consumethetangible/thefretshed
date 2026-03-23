@@ -100,9 +100,16 @@ async function loadAllSongStatuses() {
 
 // ─── Book Progress ───────────────────────────────────────────────────────────
 
-// bookKey: e.g. 'cbg', chapter: e.g. 'ch1'
+// Pure helper — builds the DynamoDB SK for a book completion record.
+// Exported for testing (#61). bookKey: e.g. 'cbg', label: ref label string.
+function buildBookSk(bookKey, label) {
+  return `BOOK#${bookKey}#${label}`;
+}
+
+// Save or clear a single chapter completion.
+// Uses the ref label as the chapter key for human-readable records.
 async function saveBookChapter(bookKey, chapter, completed = true) {
-  return progressPut(`BOOK#${bookKey}#${chapter}`, { bookKey, chapter, completed });
+  return progressPut(buildBookSk(bookKey, chapter), { bookKey, chapter, completed });
 }
 
 async function loadBookProgress(bookKey) {
@@ -110,6 +117,17 @@ async function loadBookProgress(bookKey) {
   const completed = {};
   items.forEach(item => { completed[item.chapter] = item.completed; });
   return completed;
+}
+
+// Load all book completions across all book keys.
+// Returns a Set of "bookKey|label" strings for O(1) lookup in the modal.
+async function loadAllBookCompletions() {
+  const items = await progressList('BOOK#');
+  const done = new Set();
+  items.forEach(item => {
+    if (item.completed) done.add(`${item.bookKey}|${item.chapter}`);
+  });
+  return done;
 }
 
 // ─── Milestones ──────────────────────────────────────────────────────────────

@@ -46,8 +46,11 @@ function openPracticeModal(blockEl, planId, blockIdx) {
   document.getElementById('pm-title').textContent      = title;
   document.getElementById('pm-detail').textContent     = detail;
 
-  // Build content buttons from block's data attributes (set by session.js at render)
-  buildPmContentBtns(planId, blockIdx);
+  // Build content buttons immediately (unchecked), then hydrate checkboxes async
+  buildPmContentBtns(planId, blockIdx, null);
+  loadAllBookCompletions().then(completedSet => {
+    buildPmContentBtns(planId, blockIdx, completedSet);
+  }).catch(() => {}); // silently degrade — checkboxes just stay unchecked
 
   // Initialise timer (not started)
   pmTimerInit(mins);
@@ -91,7 +94,40 @@ document.addEventListener('keydown', function(e) {
 // ─── Content Buttons ─────────────────────────────────────────────────────────
 // Block data is stored as dataset attributes on .sblock elements by session.js
 
-function buildPmContentBtns(planId, blockIdx) {
+function buildPmContentBtns(planId, blockIdx, completedSet) {
+  const container = document.getElementById('pm-content-btns');
+// Render a ref row: checkbox (for completion tracking) + PDF button.
+// completedSet: Set of "bookKey|label" strings from loadAllBookCompletions().
+function renderRefRow(ref, container, completedSet) {
+  const row = document.createElement('div');
+  row.className = 'pm-ref-row';
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.className = 'pm-ref-check';
+  cb.dataset.book = ref.book;
+  cb.dataset.label = ref.label;
+  cb.checked = completedSet ? completedSet.has(`${ref.book}|${ref.label}`) : false;
+  cb.onchange = async () => {
+    try {
+      await saveBookChapter(ref.book, ref.label, cb.checked);
+    } catch(e) {
+      cb.checked = !cb.checked; // revert on failure
+      console.warn('saveBookChapter failed:', e);
+    }
+  };
+
+  const btn = document.createElement('button');
+  btn.className = 'pm-book-btn';
+  btn.innerHTML = '<span class="pm-btn-icon">📖</span>' + ref.label;
+  btn.onclick = () => openBookPdf(ref.book, btn);
+
+  row.appendChild(cb);
+  row.appendChild(btn);
+  container.appendChild(row);
+}
+
+function buildPmContentBtns(planId, blockIdx, completedSet) {
   const container = document.getElementById('pm-content-btns');
   container.innerHTML = '';
 
@@ -100,17 +136,11 @@ function buildPmContentBtns(planId, blockIdx) {
   const block = plan.querySelectorAll('.sblock')[blockIdx];
   if (!block) return;
 
-  // ── Book / PDF refs ──
+  // ── Book / PDF refs (with completion checkboxes) ──
   const refsJson = block.dataset.refs;
   if (refsJson) {
     try {
-      JSON.parse(refsJson).forEach(ref => {
-        const btn = document.createElement('button');
-        btn.className = 'pm-book-btn';
-        btn.innerHTML = '<span class="pm-btn-icon">📖</span>' + ref.label;
-        btn.onclick = () => openBookPdf(ref.book, btn);
-        container.appendChild(btn);
-      });
+      JSON.parse(refsJson).forEach(ref => renderRefRow(ref, container, completedSet));
     } catch(e) {}
   }
 
@@ -129,13 +159,7 @@ function buildPmContentBtns(planId, blockIdx) {
       const songs = JSON.parse(songsJson);
       songs.forEach(song => {
         if (!song.refs || !song.refs.length) return;
-        song.refs.forEach(ref => {
-          const btn = document.createElement('button');
-          btn.className = 'pm-book-btn';
-          btn.innerHTML = '<span class="pm-btn-icon">📖</span>' + ref.label;
-          btn.onclick = () => openBookPdf(ref.book, btn);
-          container.appendChild(btn);
-        });
+        song.refs.forEach(ref => renderRefRow(ref, container, completedSet));
       });
     } catch(e) {}
   }
@@ -414,4 +438,5 @@ function getCompletedBlockLabels(planId) {
     }
   });
   return labels;
+}
 }
