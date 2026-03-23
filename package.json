@@ -23,5 +23,11 @@
   "devDependencies": {
     "serve": "^14.2.6",
     "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1014.0",
+    "@aws-sdk/client-iam": "^3.1014.0",
+    "@aws-sdk/client-lambda": "^3.1014.0",
+    "@aws-sdk/credential-providers": "^3.1014.0"
   }
 }

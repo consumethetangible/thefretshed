@@ -1,0 +1,8 @@
+node_modules/
+scripts/node_modules/
+scripts/lambda-deploy.zip
+scripts/index.mjs
+scripts/package-lock.json
+scripts/package.json
+.DS_Store
+.thefretshed-mcp-env

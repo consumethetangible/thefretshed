@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Fret Shed</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d0f;
+      --surface:  #16181c;
+      --border:   #2a2d35;
+      --accent:   #e8a838;
+      --text:     #e8e8ec;
+      --muted:    #7a7d8a;
+      --error:    #e05252;
+      --radius:   10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px 40px 40px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .logo-mark {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .logo h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .logo p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus { border-color: var(--accent); }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: var(--error);
+      margin-bottom: 16px;
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #0d0d0f;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 12px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 4px;
+    }
+
+    button:hover { opacity: 0.88; }
+    button:active { opacity: 0.75; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <span class="logo-mark">🎸</span>
+      <h1>The Fret Shed</h1>
+      <p>Practice Dashboard</p>
+    </div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" autocomplete="username" autocapitalize="none" spellcheck="false" />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" autocomplete="current-password" />
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button id="login-btn">Enter The Shed</button>
+  </div>
+
+  <script>
+    // ─── Users ───────────────────────────────────────────────────────────────
+    // Add entries here to grant access. Format: 'username': 'password'
+    // When moving to Cognito later, replace this block only.
+    const USERS = {
+      'chris': 'changeme',
+    };
+
+    // ─── Login logic ─────────────────────────────────────────────────────────
+    const usernameEl = document.getElementById('username');
+    const passwordEl = document.getElementById('password');
+    const errorEl    = document.getElementById('error-msg');
+    const btnEl      = document.getElementById('login-btn');
+
+    function attempt() {
+      const u = usernameEl.value.trim().toLowerCase();
+      const p = passwordEl.value;
+      errorEl.textContent = '';
+
+      if (!u || !p) { errorEl.textContent = 'Please enter your username and password.'; return; }
+
+      if (USERS[u] && USERS[u] === p) {
+        sessionStorage.setItem('ngc-user-id', u);
+        window.location.href = '/index.html';
+      } else {
+        errorEl.textContent = 'Incorrect username or password.';
+        passwordEl.value = '';
+        passwordEl.focus();
+      }
+    }
+
+    btnEl.addEventListener('click', attempt);
+    passwordEl.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+    usernameEl.addEventListener('keydown', e => { if (e.key === 'Enter') passwordEl.focus(); });
+
+    // Auto-focus
+    usernameEl.focus();
+
+    // Redirect if already logged in
+    if (sessionStorage.getItem('ngc-user-id')) window.location.href = '/index.html';
+  </script>
+</body>
+</html>
