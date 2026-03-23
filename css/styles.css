@@ -1942,6 +1942,18 @@ select.shed-s-itf { border-color: var(--status-itf); color: var(--status-itf); }
 .pm-book-btn .pm-btn-icon { font-size: 14px; }
 .pm-audio-btn { border-color: var(--p2c); color: var(--p2c); }
 .pm-audio-btn:hover { border-color: var(--p2c); background: var(--p2b); }
+.pm-ref-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pm-ref-check {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
 .pm-audio-picker {
   display: flex;
   flex-direction: column;
