@@ -37,6 +37,7 @@ function init() {
 
   // New: restore block states and build streak
   restoreBlockStates();
+  stampBlockRefs();
   buildStreakCard();
   // Restore completion banner if today was already done
   checkSessionComplete();

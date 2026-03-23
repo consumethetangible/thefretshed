@@ -536,6 +536,7 @@
   <!-- Application logic (split modules — load order matters) -->
   <script src="js/theme.js"></script>
   <script src="js/session.js"></script>
+  <script src="js/modal.js"></script>
   <script src="js/streak.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/progress.js"></script>
@@ -562,6 +563,91 @@
     <button class="settings-drawer-close" onclick="closeSettings()" aria-label="Close">✕</button>
   </div>
   <div class="settings-drawer-body" id="settings-drawer-body"></div>
+</div>
+
+<!-- PRACTICE MODAL -->
+<div class="practice-modal-backdrop" id="practice-modal-backdrop" onclick="practiceModalBackdropClick(event)">
+  <div class="practice-modal" id="practice-modal" role="dialog" aria-modal="true">
+
+    <!-- Header -->
+    <div class="pm-header">
+      <div class="pm-header-left">
+        <span class="pm-block-type" id="pm-block-type"></span>
+        <span class="pm-duration" id="pm-duration"></span>
+      </div>
+      <button class="pm-close-btn" onclick="closePracticeModal()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Title + description -->
+    <div class="pm-title" id="pm-title"></div>
+    <div class="pm-detail" id="pm-detail"></div>
+
+    <!-- Content buttons (books, audio) -->
+    <div class="pm-content-btns" id="pm-content-btns"></div>
+
+    <!-- Main body: timer + metronome side by side -->
+    <div class="pm-body">
+
+      <!-- Timer column -->
+      <div class="pm-timer-col">
+        <div class="pm-section-label">Timer</div>
+        <div class="timer-ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 130 130">
+            <circle class="timer-ring-bg" cx="65" cy="65" r="54" fill="none" stroke-width="6"/>
+            <circle class="timer-ring-fill" id="pm-timer-ring" cx="65" cy="65" r="54" fill="none" stroke-width="6" stroke-dasharray="339.3" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-display">
+            <div class="timer-digits" id="pm-timer-digits">00:00</div>
+          </div>
+        </div>
+        <div class="timer-controls">
+          <button class="timer-btn timer-btn-secondary" onclick="pmTimerReset()">Reset</button>
+          <button class="timer-btn timer-btn-primary" id="pm-timer-start-btn" onclick="pmTimerToggle()">Start</button>
+          <button class="timer-btn timer-btn-secondary" onclick="pmTimerSkip()">Skip</button>
+        </div>
+        <div class="pm-keep-practicing" id="pm-keep-practicing" style="display:none">
+          <button class="pm-action-secondary" onclick="pmKeepPracticing()">+ 5 min more</button>
+        </div>
+      </div>
+
+      <!-- Metronome column -->
+      <div class="pm-metro-col">
+        <div class="pm-section-label">Metronome</div>
+        <div class="sm-bpm-row">
+          <button class="sm-nudge-btn" onclick="hmSetBpm(HM.bpm - 1);syncPmBpmInput()" oncontextmenu="event.preventDefault();hmSetBpm(HM.bpm - 5);syncPmBpmInput()">−</button>
+          <div class="sm-bpm-wrap">
+            <input class="sm-bpm-input" id="pm-bpm-input" type="number" min="40" max="240" value="100"
+              onchange="hmSetBpm(this.value);document.getElementById('sm-bpm-input').value=this.value"
+              oninput="hmSetBpm(this.value);document.getElementById('sm-bpm-input').value=this.value">
+            <span class="sm-bpm-unit">BPM</span>
+          </div>
+          <button class="sm-nudge-btn" onclick="hmSetBpm(HM.bpm + 1);syncPmBpmInput()" oncontextmenu="event.preventDefault();hmSetBpm(HM.bpm + 5);syncPmBpmInput()">+</button>
+        </div>
+        <div class="sm-metro-controls">
+          <button class="sm-btn sm-btn-tap" onclick="hmTap();syncPmBpmInput()">Tap</button>
+          <button class="sm-btn sm-btn-start" id="pm-metro-start-btn" onclick="hmToggle();syncPmMetroBtn()">Start</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action row: normal practice state -->
+    <div class="pm-actions" id="pm-actions-normal">
+      <button class="pm-action-secondary" onclick="pmComeBack()">Come Back to This</button>
+      <button class="pm-action-primary" onclick="pmMarkComplete()">Mark Complete</button>
+    </div>
+
+    <!-- Wrap-up state (shown when last block completes) -->
+    <div class="pm-wrapup" id="pm-wrapup" style="display:none">
+      <div class="pm-wrapup-title">Session done — nice work.</div>
+      <div class="pm-wrapup-label">Add a note before you go?</div>
+      <textarea class="pm-notes-input" id="pm-notes-input" placeholder="What clicked today? What needs work?"></textarea>
+      <div class="pm-wrapup-actions">
+        <button class="pm-action-secondary" onclick="pmSkipNotes()">Skip Notes</button>
+        <button class="pm-action-primary" onclick="pmSaveAndFinish()">Save &amp; Finish</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- THEME PICKER DRAWER (Mode button) -->

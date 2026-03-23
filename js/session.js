@@ -20,29 +20,29 @@ function getBlockCheckKey(planId, blockIdx) {
 
 // ── 3-state block system: idle / active / complete ──
 
-// Clicking a block body activates it: highlights it and loads its duration into the timer
+// Stamp data-refs on each block so the modal can build content buttons.
+// Called once from init.js after DOM is ready.
+function stampBlockRefs() {
+  // Week refs come from PHASES[0].weeks[currentWeek-1].refs
+  // We map them onto the theory/book blocks by position.
+  // For now we attach current-week refs to any .theory block in the active plan.
+  try {
+    const phase = PHASES[0];
+    const weekIdx = Math.min(Math.floor((currentWeek - 1) / 2), phase.weeks.length - 1);
+    const week = phase.weeks[weekIdx];
+    if (!week || !week.refs || !week.refs.length) return;
+    const refsJson = JSON.stringify(week.refs);
+    document.querySelectorAll('.sblock.theory, .sblock.ear').forEach(block => {
+      block.dataset.refs = refsJson;
+    });
+  } catch(e) {}
+}
+
+// Clicking a block body opens the practice modal
 function activateBlock(blockEl, planId, blockIdx) {
-  const plan = document.getElementById('plan-' + planId);
-  if (!plan) return;
-
-  // Clear active from all blocks in this plan
-  plan.querySelectorAll('.sblock').forEach(b => b.classList.remove('active-block'));
-  blockEl.classList.add('active-block');
-
-  // Load this block's duration into the timer
-  const timeEl = blockEl.querySelector('.sblock-time');
-  const headEl = blockEl.querySelector('.sblock-head');
-  if (timeEl && headEl) {
-    const mins = parseInt(timeEl.textContent);
-    if (!isNaN(mins)) {
-      timerStop();
-      TIMER.segments = [{ label: headEl.textContent.trim(), minutes: mins }];
-      TIMER.segIdx = 0; TIMER.doneSegs.clear();
-      timerInitSeg(); timerRenderSegs();
-      const lbl = document.getElementById('timer-mode-label');
-      if (lbl) lbl.textContent = headEl.textContent.trim().substring(0, 22);
-    }
-  }
+  // Don't open if already completed
+  if (blockEl.classList.contains('completed')) return;
+  openPracticeModal(blockEl, planId, blockIdx);
 }
 
 // Check button (stopPropagation'd from block click): toggle complete state
