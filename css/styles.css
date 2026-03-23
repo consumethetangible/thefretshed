@@ -343,7 +343,7 @@ body {
 .sblock.songs { border-left-color: var(--p1c); }
 .sblock.ear { border-left-color: var(--purple, #8b4bc8); }
 .sblock.explore { border-left-color: var(--green); }
-.sblock.licks { border-left-color: var(--p2c); }
+.sblock.licks { border-left-color: var(--p3c); }
 .sblock.completed { opacity: 0.42; }
 .sblock.completed .sblock-head { text-decoration: line-through; text-decoration-color: var(--text3); color: var(--text3); }
 .sblock { cursor: pointer; }
@@ -1940,6 +1940,39 @@ select.shed-s-itf { border-color: var(--status-itf); color: var(--status-itf); }
 }
 .pm-book-btn:hover { background: var(--bg4); border-color: var(--accent); }
 .pm-book-btn .pm-btn-icon { font-size: 14px; }
+.pm-audio-btn { border-color: var(--p2c); color: var(--p2c); }
+.pm-audio-btn:hover { border-color: var(--p2c); background: var(--p2b); }
+.pm-audio-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+}
+.pm-audio-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+.pm-audio-item:hover { background: var(--bg4); color: var(--text); }
+.pm-licks-prompt {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text3);
+  margin: 4px 2px 0;
+}
 
 /* PM body: timer + metro two-column */
 .pm-body {

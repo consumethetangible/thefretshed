@@ -100,12 +100,11 @@ function buildPmContentBtns(planId, blockIdx) {
   const block = plan.querySelectorAll('.sblock')[blockIdx];
   if (!block) return;
 
-  // Book refs: stored as JSON in data-refs attribute
+  // ── Book / PDF refs ──
   const refsJson = block.dataset.refs;
   if (refsJson) {
     try {
-      const refs = JSON.parse(refsJson);
-      refs.forEach(ref => {
+      JSON.parse(refsJson).forEach(ref => {
         const btn = document.createElement('button');
         btn.className = 'pm-book-btn';
         btn.innerHTML = '<span class="pm-btn-icon">📖</span>' + ref.label;
@@ -114,6 +113,104 @@ function buildPmContentBtns(planId, blockIdx) {
       });
     } catch(e) {}
   }
+
+  // ── Licks notes prompt (#59) ──
+  if (block.dataset.isLicks) {
+    const prompt = document.createElement('p');
+    prompt.className = 'pm-licks-prompt';
+    prompt.textContent = 'Note what you worked on in session notes.';
+    container.appendChild(prompt);
+  }
+
+  // ── Song refs: book buttons from active song data (#57) ──
+  const songsJson = block.dataset.songs;
+  if (songsJson) {
+    try {
+      const songs = JSON.parse(songsJson);
+      songs.forEach(song => {
+        if (!song.refs || !song.refs.length) return;
+        song.refs.forEach(ref => {
+          const btn = document.createElement('button');
+          btn.className = 'pm-book-btn';
+          btn.innerHTML = '<span class="pm-btn-icon">📖</span>' + ref.label;
+          btn.onclick = () => openBookPdf(ref.book, btn);
+          container.appendChild(btn);
+        });
+      });
+    } catch(e) {}
+  }
+
+  // ── Audio examples (#56) ──
+  const audioJson = block.dataset.audioPrefixes;
+  if (audioJson) {
+    try {
+      JSON.parse(audioJson).forEach(ap => {
+        const btn = document.createElement('button');
+        btn.className = 'pm-book-btn pm-audio-btn';
+        btn.innerHTML = '<span class="pm-btn-icon">🎵</span>' + ap.label;
+        btn.onclick = () => openAudioFolder(ap.prefix, btn);
+        container.appendChild(btn);
+      });
+    } catch(e) {}
+  }
+}
+
+// ── Audio folder listing + pre-signed URL open (#56) ──
+async function openAudioFolder(prefix, btnEl) {
+  const originalHtml = btnEl ? btnEl.innerHTML : '';
+  try {
+    if (btnEl) { btnEl.innerHTML = '<span class="pm-btn-icon">⏳</span>Loading…'; btnEl.disabled = true; }
+    const res = await fetch(`${CONTENT_API_URL}/list-folder?prefix=${encodeURIComponent(prefix)}`);
+    if (!res.ok) throw new Error('list-folder error: ' + res.status);
+    const data = await res.json();
+    const files = (data.files || data.objects || data.keys || []).filter(f => f.key || f);
+    if (!files.length) { alert('No audio files found for this section.'); return; }
+
+    // Build a small picker if multiple files, otherwise open directly
+    if (files.length === 1) {
+      const key = files[0].key || files[0];
+      const urlRes = await fetch(`${CONTENT_API_URL}/get-url?key=${encodeURIComponent(key)}`);
+      const urlData = await urlRes.json();
+      window.open(urlData.url, '_blank');
+    } else {
+      showAudioPicker(files, btnEl);
+    }
+  } catch(e) {
+    alert('Could not load audio. Please try again.');
+  } finally {
+    if (btnEl) { btnEl.innerHTML = originalHtml; btnEl.disabled = false; }
+  }
+}
+
+// Show a simple inline list of audio files under the button
+function showAudioPicker(files, anchorBtn) {
+  // Remove any existing picker
+  const existing = document.getElementById('pm-audio-picker');
+  if (existing) existing.remove();
+
+  const picker = document.createElement('div');
+  picker.id = 'pm-audio-picker';
+  picker.className = 'pm-audio-picker';
+  files.forEach(f => {
+    const key = f.key || f;
+    const name = key.split('/').pop().replace(/\.mp3$/i, '');
+    const item = document.createElement('button');
+    item.className = 'pm-audio-item';
+    item.innerHTML = '<span class="pm-btn-icon">▶</span>' + name;
+    item.onclick = async () => {
+      item.textContent = '⏳ Loading…';
+      item.disabled = true;
+      try {
+        const res = await fetch(`${CONTENT_API_URL}/get-url?key=${encodeURIComponent(key)}`);
+        const data = await res.json();
+        window.open(data.url, '_blank');
+      } catch(e) { alert('Could not load file.'); }
+      item.disabled = false;
+      item.innerHTML = '<span class="pm-btn-icon">▶</span>' + name;
+    };
+    picker.appendChild(item);
+  });
+  anchorBtn.parentNode.insertBefore(picker, anchorBtn.nextSibling);
 }
 
 // ─── Modal Timer ─────────────────────────────────────────────────────────────

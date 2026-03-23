@@ -20,22 +20,59 @@ function getBlockCheckKey(planId, blockIdx) {
 
 // ── 3-state block system: idle / active / complete ──
 
-// Stamp data-refs on each block so the modal can build content buttons.
+// Stamp data attributes on each block so the modal can build content buttons.
 // Called once from init.js after DOM is ready.
+// Covers: theory/ear refs + audio, warmup book, licks ref, song data.
 function stampBlockRefs() {
-  // Week refs come from PHASES[0].weeks[currentWeek-1].refs
-  // We map them onto the theory/book blocks by position.
-  // For now we attach current-week refs to any .theory block in the active plan.
   try {
     const phase = PHASES[0];
     const weekIdx = Math.min(Math.floor((currentWeek - 1) / 2), phase.weeks.length - 1);
     const week = phase.weeks[weekIdx];
-    if (!week || !week.refs || !week.refs.length) return;
-    const refsJson = JSON.stringify(week.refs);
-    document.querySelectorAll('.sblock.theory, .sblock.ear').forEach(block => {
-      block.dataset.refs = refsJson;
+    if (!week) return;
+
+    // ── Theory / ear: book chapter refs ──
+    if (week.refs && week.refs.length) {
+      const refsJson = JSON.stringify(week.refs);
+      document.querySelectorAll('.sblock.theory, .sblock.ear').forEach(b => {
+        b.dataset.refs = refsJson;
+      });
+    }
+
+    // ── Theory / ear: audio example prefixes (#56) ──
+    if (week.audioPrefixes && week.audioPrefixes.length) {
+      const audioJson = JSON.stringify(week.audioPrefixes);
+      document.querySelectorAll('.sblock.theory, .sblock.ear').forEach(b => {
+        b.dataset.audioPrefixes = audioJson;
+      });
+    }
+
+    // ── Warmup: always link to Technique Collection (#57) ──
+    const warmupRef = [{ label: 'Ultimate Guitar Technique Collection', book: 'technique' }];
+    document.querySelectorAll('.sblock.warmup').forEach(b => {
+      b.dataset.refs = JSON.stringify(warmupRef);
     });
-  } catch(e) {}
+
+    // ── Licks: week-specific 300 Licks section (#59) ──
+    if (week.licksRef) {
+      const licksJson = JSON.stringify([week.licksRef]);
+      document.querySelectorAll('.sblock.licks').forEach(b => {
+        b.dataset.refs = licksJson;
+        b.dataset.isLicks = '1';
+      });
+    }
+
+    // ── Songs: stamp active song refs into .songs blocks (#57) ──
+    const activeSongs = phase.songs.filter(s => s.status === 'active');
+    if (activeSongs.length) {
+      const songsJson = JSON.stringify(activeSongs.map(s => ({
+        title: s.title, artist: s.artist, refs: s.refs || [],
+      })));
+      document.querySelectorAll('.sblock.songs').forEach(b => {
+        b.dataset.songs = songsJson;
+      });
+    }
+
+  } catch(e) { console.warn('stampBlockRefs error:', e); }
 }
 
 // Clicking a block body opens the practice modal
