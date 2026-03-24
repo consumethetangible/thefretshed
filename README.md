@@ -7,7 +7,6 @@ Personal guitar practice dashboard. Vanilla HTML/CSS/JS, deployed to AWS S3 + Cl
 ---
 
 ## File Structure
-
 ```
 thefretshed/
 ├── index.html
@@ -44,11 +43,10 @@ thefretshed/
 ---
 
 ## Local Development
-
 ```bash
-npm install       # first time only
-npm start         # serves at http://localhost:3000
-npm test          # runs Vitest test suite
+npm install         # first time only
+npm start           # serves at http://localhost:3000
+npm test            # runs Vitest test suite
 npm run test:watch  # runs tests in watch mode
 ```
 
@@ -80,9 +78,8 @@ then checks open Issues on the project board before any work begins.
 3. Confirm what we're working on, then build
 
 **How Claude makes changes:**
-- Uses Desktop Commander (`allowedDirectories: /Users/christophervoss/Documents/thefretshed`)
-- Edits files directly in the local repo via `edit_block`
-- Creates branch, commits, and pushes via `start_process` (git CLI)
+- Edits files directly in the local repo via Desktop Commander
+- Creates branch, commits, and pushes via git CLI
 - Opens PR via GitHub REST API using PAT stored at `~/.thefretshed-mcp-env`
 - Merges PR → CI runs → auto-deploys to S3 + CloudFront
 
@@ -90,7 +87,7 @@ then checks open Issues on the project board before any work begins.
 - GitHub MCP connector is read-only — write ops return 403
 - Workaround: PAT + GitHub REST API via bash_tool
 - PAT stored at `~/.thefretshed-mcp-env` (chmod 600) — never commit this file
-- Usage: `source ~/.thefretshed-mcp-env && curl -X POST ... -H "Authorization: Bearer $GITHUB_TOKEN"`
+- Usage: `. ~/.thefretshed-mcp-env && curl -X POST ... -H "Authorization: Bearer $GITHUB_TOKEN"`
 
 **Key principles:**
 - Collect → plan → build. Confirm approach before writing code.
@@ -116,7 +113,7 @@ Designed to swap to Cognito (#31) without redesigning the UI.
 - `loadAllSessions()` — all sessions for streak/heatmap
 - `savePosition(week, phase)` / `loadPosition()` — curriculum position
 - `saveSongStatus(title, status)` / `loadAllSongStatuses()` — song progress
-- `saveBookChapter(bookKey, chapter)` / `loadBookProgress(bookKey)` — book completions
+- `saveBookChapter(bookKey, chapter)` / `loadAllBookCompletions()` — book chapter completions
 - `saveMilestone(id)` / `loadAllMilestones()` — milestone tracking
 - `calcStreakFromBackend()` — streak derived from session records
 - `saveNotes(notes)` / `loadTodayNotes()` — session notes
@@ -190,7 +187,7 @@ Each phase has expandable song workspace cards with:
 ### Progress Database
 - DynamoDB table: `thefretshed-progress` (us-east-1, PAY_PER_REQUEST)
 - Partition key: `userId` (string) · Sort key: `sk` (string)
-- SK patterns: `SESSION#YYYY-MM-DD` · `SONG#title` · `BOOK#key#chapter` · `MILESTONE#id` · `POSITION`
+- SK patterns: `SESSION#YYYY-MM-DD` · `SONG#title` · `BOOK#bookKey#chapter` · `MILESTONE#id` · `POSITION`
 
 ### Content (PDFs + Audio)
 Private S3 bucket: `thefretshed-content`
@@ -214,24 +211,9 @@ Columns: Backlog → Ready → In Progress → **Bugs** → Done
 
 Labels: `bug` · `ux` · `feature` · `engineering` · `data` · `investigate` · `priority-1` · `priority-2` · `priority-3` · `priority-4`
 
----
-
-## Priority 1 Queue
-
-| # | Issue | Status |
-|---|---|---|
-| #46 | Epic: Unified Session + Progress Tracking | 🔵 In Progress |
-| #47 | DynamoDB backend + data schema | ✅ Done (PR #53) |
-| #48 | Login page — simple password gate | ✅ Done (PR #53) |
-| #49 | Unified Session View — practice modal | ✅ Done (PR #55) |
-| #50 | Book/exercise progress tracking | 🔲 Next |
-| #51 | Milestone auto-calculation | 🔲 Queued |
-| #52 | Progress history + streak from backend | 🔲 Queued |
-| #6  | Site logo + browser favicon | 🔲 After epic |
+**Project board:** https://github.com/orgs/consumethetangible/projects — source of truth for all prioritized work.
 
 ---
-
-*Last updated: Mar 23, 2026 — Book/chapter completion tracking shipped (PR pending). Modal now renders a checkbox alongside each PDF/book button — checking saves to DynamoDB via `saveBookChapter()`; state hydrates async on open via `loadAllBookCompletions()`. Pure helper `buildBookSk()` added to `progress.js` with 4 Vitest tests (10 total across 2 test files). Week map visibility deferred to #51. Next: #51 Milestone auto-calculation.*
 
 ## Gear
 
@@ -239,7 +221,3 @@ Labels: `bug` · `ux` · `feature` · `engineering` · `data` · `investigate` �
 Gibson Les Paul Studio Faded T 2016, Chapman ML3 Pro Bea, Yamaha Pacifica PAC611HFM, Martin SC-10E
 
 **Amps:** Fender Blues Jr. 4 Tweed, Bugera 1990 Infinium 120W Head, Boss Katana Mk1 100W combo
-
----
-
-
