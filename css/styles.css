@@ -1942,6 +1942,10 @@ select.shed-s-itf { border-color: var(--status-itf); color: var(--status-itf); }
 .pm-book-btn .pm-btn-icon { font-size: 14px; }
 .pm-audio-btn { border-color: var(--p2c); color: var(--p2c); }
 .pm-audio-btn:hover { border-color: var(--p2c); background: var(--p2b); }
+.pm-spotify-btn { border-color: #1db954; color: #1db954; }
+.pm-spotify-btn:hover { border-color: #1db954; background: rgba(29,185,84,0.1); }
+.pm-tab-btn { border-color: var(--p3c); color: var(--p3c); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.pm-tab-btn:hover { border-color: var(--p3c); background: var(--p3b); }
 .pm-ref-row {
   display: flex;
   align-items: center;

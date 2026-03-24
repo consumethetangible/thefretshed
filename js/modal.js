@@ -150,14 +150,37 @@ function buildPmContentBtns(planId, blockIdx, completedSet) {
     container.appendChild(prompt);
   }
 
-  // ── Song refs: book buttons from active song data (#57) ──
+  // ── Song buttons: Spotify + Tab (#57) ──
   const songsJson = block.dataset.songs;
   if (songsJson) {
     try {
       const songs = JSON.parse(songsJson);
       songs.forEach(song => {
-        if (!song.refs || !song.refs.length) return;
-        song.refs.forEach(ref => renderRefRow(ref, container, completedSet));
+        // Spotify button — triggers inline player via spotify.js
+        const spotifyBtn = document.createElement('button');
+        spotifyBtn.className = 'pm-book-btn pm-spotify-btn';
+        spotifyBtn.innerHTML = '<span class="pm-btn-icon">🎵</span>Spotify — ' + song.title;
+        spotifyBtn.onclick = () => {
+          spotifyBtn.disabled = true;
+          spotifyBtn.innerHTML = '<span class="pm-btn-icon">⏳</span>Loading…';
+          const container = document.getElementById('pm-content-btns');
+          loadSpotifyCard(container, song.title, song.artist).finally(() => {
+            spotifyBtn.remove();
+          });
+        };
+        container.appendChild(spotifyBtn);
+
+        // Tab button — opens Ultimate Guitar in new tab
+        const tabUrl = typeof SONG_TABS !== 'undefined' && SONG_TABS[song.title];
+        if (tabUrl) {
+          const tabBtn = document.createElement('a');
+          tabBtn.className = 'pm-book-btn pm-tab-btn';
+          tabBtn.href = tabUrl;
+          tabBtn.target = '_blank';
+          tabBtn.rel = 'noopener';
+          tabBtn.innerHTML = '<span class="pm-btn-icon">🎸</span>Tab — ' + song.title;
+          container.appendChild(tabBtn);
+        }
       });
     } catch(e) {}
   }
