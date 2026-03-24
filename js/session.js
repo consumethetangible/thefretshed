@@ -61,11 +61,11 @@ function stampBlockRefs() {
       });
     }
 
-    // ── Songs: stamp active song refs into .songs blocks (#57) ──
+    // ── Songs: stamp title + artist for Spotify/tab buttons (#57) ──
     const activeSongs = phase.songs.filter(s => s.status === 'active');
     if (activeSongs.length) {
       const songsJson = JSON.stringify(activeSongs.map(s => ({
-        title: s.title, artist: s.artist, refs: s.refs || [],
+        title: s.title, artist: s.artist,
       })));
       document.querySelectorAll('.sblock.songs').forEach(b => {
         b.dataset.songs = songsJson;
