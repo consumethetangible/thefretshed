@@ -94,8 +94,6 @@ document.addEventListener('keydown', function(e) {
 // ─── Content Buttons ─────────────────────────────────────────────────────────
 // Block data is stored as dataset attributes on .sblock elements by session.js
 
-function buildPmContentBtns(planId, blockIdx, completedSet) {
-  const container = document.getElementById('pm-content-btns');
 // Render a ref row: checkbox (for completion tracking) + PDF button.
 // completedSet: Set of "bookKey|label" strings from loadAllBookCompletions().
 function renderRefRow(ref, container, completedSet) {
@@ -438,5 +436,4 @@ function getCompletedBlockLabels(planId) {
     }
   });
   return labels;
-}
 }
