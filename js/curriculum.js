@@ -1155,5 +1155,8 @@ function rebuildPhaseHeader(phaseNum) {
 function refreshSiteFromCurriculum() {
   buildDashSongs();
   buildToneProfiles();
+  // Re-render Shed song cards so status dropdowns/colours stay in sync
+  // when a status is changed from the Song Library side
+  buildCurriculum();
 }
 
