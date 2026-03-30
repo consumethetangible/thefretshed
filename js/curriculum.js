@@ -38,9 +38,10 @@ function shedHandleStatusChange(e, title) {
       if (newStatus !== 'ns') header.classList.add('shed-hbg-' + newStatus);
     }
   }
-  // Also sync Song Library and dashboard
+  // Also sync Song Library, dashboard, and milestones
   rebuildPhaseHeader(parseInt(localStorage.getItem('ngc-current-phase') || '1'));
   buildDashSongs();
+  buildMilestones();
 }
 
 function shedToggleCard(el) {
@@ -283,22 +284,47 @@ function shedShowTab(phaseId, tab) {
 
 // ─── Milestone rendering per phase ────────
 function renderShedMilestones(phaseId) {
-  const group = MILESTONES.find(m => m.phase === phaseId);
-  if (!group) return `<div class="small muted" style="padding:14px 0">Milestones will be defined when you reach this phase.</div>`;
+  const phase = PHASES.find(p => p.id === phaseId);
+  if (!phase || !phase.milestones) return `<div class="small muted" style="padding:14px 0">Milestones will be defined when you reach this phase.</div>`;
   const completed = getCompletedPhases();
   const isCompleted = completed.includes(phaseId);
-  const total = group.items.length;
-  const done = group.items.filter(item => milestonesDone[item]).length;
-  const pct = Math.round((done / total) * 100);
-  const allDone = done === total;
 
-  const items = group.items.map(item => {
-    const checked = !!milestonesDone[item];
-    return `<div class="shed-milestone-item ${checked ? 'done' : ''}" onclick="shedToggleMilestone(this,'${item.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',${phaseId})">
+  const allStatuses = getAllSongStatuses();
+  const aggItem = phase.milestones.find(m => m.type === 'aggregate');
+  const manualItems = phase.milestones.filter(m => m.type === 'manual');
+  const manualDone = manualItems.filter(m => milestonesDone[m.id]).length;
+  const manualTotal = manualItems.length;
+  const pct = Math.round((manualDone / manualTotal) * 100);
+  const allDone = manualDone === manualTotal;
+
+  let aggHtml = '';
+  if (aggItem) {
+    const allSongs = phase.songs.filter(s => !s.inOptions);
+    const coreSongs = allSongs.filter(s => !s.reach);
+    const qualified = coreSongs.filter(s => { const st = allStatuses[s.title] || 'ns'; return st === 'lrn' || st === 'itf'; });
+    const threshold = aggItem.threshold;
+    const aggPct = Math.min(100, Math.round((qualified.length / threshold) * 100));
+    const pillHtml = allSongs.map(s => {
+      const st = allStatuses[s.title] || 'ns';
+      const statusCls = st === 'itf' ? 'itf' : st === 'lrn' ? 'lrn' : st === 'ip' ? 'ip' : '';
+      const reachCls = s.reach ? 'reach' : '';
+      return `<span class="milestone-song-pill ${statusCls} ${reachCls}" title="${s.reach ? 'Reach goal — bonus' : ''}">${s.title}${s.reach ? ' ★' : ''}</span>`;
+    }).join('');
+    aggHtml = `<div class="milestone-agg" style="margin-bottom:12px">
+      <div class="milestone-agg-label">${aggItem.label}</div>
+      <div class="prog-bar" style="margin:6px 0 4px"><div class="prog-fill green" style="width:${aggPct}%"></div></div>
+      <div class="milestone-agg-count">${qualified.length} out of ${threshold} learned</div>
+      <div class="milestone-song-pills">${pillHtml}</div>
+    </div>`;
+  }
+
+  const items = manualItems.map(item => {
+    const checked = !!milestonesDone[item.id];
+    return `<div class="shed-milestone-item ${checked ? 'done' : ''}" onclick="shedToggleMilestone(this,'${item.id}',${phaseId})">
       <div class="shed-milestone-icon">
         <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="shed-milestone-text">${item}</div>
+      <div class="shed-milestone-text">${item.label}</div>
     </div>`;
   }).join('');
 
@@ -306,11 +332,13 @@ function renderShedMilestones(phaseId) {
     ? `<button class="shed-complete-btn shed-complete-done" onclick="shedTogglePhaseComplete(${phaseId}, event)">✓ Phase ${phaseId} Complete — Undo</button>`
     : allDone
       ? `<button class="shed-complete-btn shed-complete-ready" onclick="shedTogglePhaseComplete(${phaseId}, event)">Mark Phase ${phaseId} Complete →</button>`
-      : `<button class="shed-complete-btn shed-complete-locked" disabled>${done}/${total} milestones complete</button>`;
+      : `<button class="shed-complete-btn shed-complete-locked" disabled>${manualDone}/${manualTotal} milestones complete</button>`;
 
   return `<div style="padding: 4px 0">
+    ${aggHtml}
+    <div class="milestone-manual-label" style="margin-bottom:8px">Manual check-off</div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span class="mono small dimmed">${done} / ${total} complete</span>
+      <span class="mono small dimmed">${manualDone} / ${manualTotal} complete</span>
       <span class="mono small" style="color:var(--accent)">${pct}%</span>
     </div>
     <div class="prog-bar" style="margin-bottom:16px"><div class="prog-fill green" style="width:${pct}%"></div></div>
@@ -319,10 +347,11 @@ function renderShedMilestones(phaseId) {
   </div>`;
 }
 
-function shedToggleMilestone(el, item, phaseId) {
+function shedToggleMilestone(el, id, phaseId) {
   el.classList.toggle('done');
-  milestonesDone[item] = el.classList.contains('done');
-  localStorage.setItem('ngc-milestones', JSON.stringify(milestonesDone));
+  const isDone = el.classList.contains('done');
+  milestonesDone[id] = isDone;
+  saveMilestone(id, isDone);
   // Refresh milestone tab to update progress and button state
   const panel = document.getElementById(`shed-tab-${phaseId}-milestones`);
   if (panel && panel.style.display !== 'none') {
@@ -725,18 +754,18 @@ function buildCurriculum() {
 
     // Per-phase tab strip
     const tabStrip = `<div class="shed-phase-tabs">
-      <button class="shed-phase-tab shed-tab-active" id="shed-tabbn-${phase.id}-songs" onclick="shedShowTab(${phase.id},'songs')">Songs</button>
-      <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-weeks" onclick="shedShowTab(${phase.id},'weeks')">Week Map</button>
+      <button class="shed-phase-tab shed-tab-active" id="shed-tabbn-${phase.id}-weeks" onclick="shedShowTab(${phase.id},'weeks')">Week Map</button>
+      <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-songs" onclick="shedShowTab(${phase.id},'songs')">Songs</button>
       <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-milestones" onclick="shedShowTab(${phase.id},'milestones')">Milestones</button>
     </div>`;
 
     const phaseBody = `<div class="shed-phase-body" id="shed-phase-body-${phase.id}" style="display:${isOpen ? 'block' : 'none'}">
       ${tabStrip}
-      <div id="shed-tab-${phase.id}-songs" style="display:block">
-        ${songCards || '<div class="small muted" style="padding:12px 0">No songs in curriculum yet — add them in Song Library.</div>'}
-      </div>
-      <div id="shed-tab-${phase.id}-weeks" style="display:none">
+      <div id="shed-tab-${phase.id}-weeks" style="display:block">
         ${renderShedWeeks(phase)}
+      </div>
+      <div id="shed-tab-${phase.id}-songs" style="display:none">
+        ${songCards || '<div class="small muted" style="padding:12px 0">No songs in curriculum yet — add them in Song Library.</div>'}
       </div>
       <div id="shed-tab-${phase.id}-milestones" style="display:none" class="shed-milestones-panel">
         ${renderShedMilestones(phase.id)}
@@ -1069,6 +1098,7 @@ function handleStatusChange(e, title, phaseNum) {
   // Rebuild phase header stats and progress bar
   rebuildPhaseHeader(phaseNum);
   refreshSiteFromCurriculum();
+  buildMilestones();
 }
 
 function toggleStretch(e, phaseNum, title) {

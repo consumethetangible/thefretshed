@@ -154,6 +154,24 @@ Auto-advance: timer completion marks block done, activates next incomplete block
 
 ---
 
+## Milestone Data Model
+
+Milestones are embedded in each phase object in `PHASES` (in `data.js`), not a separate array.
+
+Each phase has a `milestones` array with two types:
+
+- `type: 'aggregate'` — one per phase. Renders as a progress bar + song pills. Auto-calculated from song statuses via `getAllSongStatuses()`. `threshold` sets how many curriculum songs must reach `lrn` or `itf` to fill the bar.
+- `type: 'manual'` — subjective items (ear training, feel, theory understanding). Rendered as check-off boxes. State saved to / loaded from DynamoDB via `saveMilestone(id)` / `loadAllMilestones()`.
+
+Songs that are `inOptions: true` (swap slots) or `reach: true` (capstone stretch songs) are excluded from aggregate milestone counting. Reach songs per phase:
+- Phase 1: Wish You Were Here
+- Phase 2: Layla
+- Phase 3: Little Wing
+
+Milestone IDs follow the pattern `p{N}-{key}` (e.g. `p1-songs`, `p1-12bar`) — these are the DynamoDB sort keys (`MILESTONE#p1-12bar`).
+
+---
+
 ## The Shed Tab — Song Cards
 
 Each phase has expandable song workspace cards with:

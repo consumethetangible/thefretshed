@@ -35,14 +35,19 @@ function init() {
     if (checkedItems[key]) row.classList.add('done');
   });
 
-  // New: restore block states and build streak
+  // Restore block states and build streak
   restoreBlockStates();
   stampBlockRefs();
   buildStreakCard();
-  // Restore completion banner if today was already done
   checkSessionComplete();
-  // Load session timer by default
   setTimeout(timerLoadSession, 100);
+
+  // Load milestone state from DynamoDB, then re-render
+  loadAllMilestones().then(map => {
+    milestonesDone = map;
+    buildMilestones();
+    updateMilestoneProgress();
+  }).catch(() => {});
 }
 
 document.addEventListener('DOMContentLoaded', init);

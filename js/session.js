@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════
 let currentWeek = parseInt(localStorage.getItem('ngc-week') || '1');
 let checkedItems = JSON.parse(localStorage.getItem('ngc-checks') || '{}');
-let milestonesDone = JSON.parse(localStorage.getItem('ngc-milestones') || '{}');
+let milestonesDone = {}; // populated from DynamoDB via loadMilestonesFromBackend() in init
 
 // ═══════════════════════════════════════════
 // SESSION BLOCK COMPLETION
