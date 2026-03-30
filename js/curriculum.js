@@ -329,7 +329,7 @@ function renderShedMilestones(phaseId) {
     ? `<button class="shed-complete-btn shed-complete-done" onclick="shedTogglePhaseComplete(${phaseId}, event)">✓ Phase ${phaseId} Complete — Undo</button>`
     : allDone
       ? `<button class="shed-complete-btn shed-complete-ready" onclick="shedTogglePhaseComplete(${phaseId}, event)">Mark Phase ${phaseId} Complete →</button>`
-      : `<button class="shed-complete-btn shed-complete-locked" disabled>${done}/${total} milestones complete</button>`;
+      : `<button class="shed-complete-btn shed-complete-locked" disabled>${manualDone}/${manualTotal} milestones complete</button>`;
 
   return `<div style="padding: 4px 0">
     ${aggHtml}
