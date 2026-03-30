@@ -48,6 +48,14 @@ function init() {
     buildMilestones();
     updateMilestoneProgress();
   }).catch(() => {});
+
+  // Load song statuses from DynamoDB into cache, then re-render all status-dependent UI
+  loadAllSongStatuses().then(map => {
+    _songStatusCache = map;
+    buildDashSongs();
+    buildCurriculum();
+    buildMilestones();
+  }).catch(() => {});
 }
 
 document.addEventListener('DOMContentLoaded', init);

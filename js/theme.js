@@ -359,7 +359,7 @@ function settingsDoAction(id) {
     [1,2,3,4,5].forEach(p => rebuildSwapPhase(p));
     buildDashSongs();
   } else if (id === 'reset-statuses') {
-    localStorage.removeItem('ngc-song-status');
+    _songStatusCache = {};
     [1,2,3,4,5].forEach(p => rebuildSwapPhase(p));
     buildDashSongs();
   }
@@ -371,7 +371,7 @@ function settingsExportData() {
   const data = {
     exportDate: new Date().toISOString(),
     practiceDays: JSON.parse(localStorage.getItem('ngc-practice-days') || '[]'),
-    songStatuses: JSON.parse(localStorage.getItem('ngc-song-status') || '{}'),
+    songStatuses: getAllSongStatuses(),
     curriculum: {},
     notes: localStorage.getItem('ngc-notes') || '',
     currentWeek: currentWeek,

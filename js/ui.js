@@ -308,9 +308,16 @@ function saveCurriculumState(phaseNum, state) {
 const SONG_STATUS_LABELS = { ns:'Not Started', ip:'In Progress', lrn:'Learned', itf:'In The Fingers' };
 const SONG_STATUS_ICONS  = { ns:'○', ip:'◑', lrn:'🎯', itf:'💎' };
 
-function getAllSongStatuses() { return JSON.parse(localStorage.getItem('ngc-song-status') || '{}'); }
+// In-memory cache hydrated from DynamoDB on init. Never read from localStorage.
+let _songStatusCache = null;
+
+function getAllSongStatuses() { return _songStatusCache ?? {}; }
 function getSongStatus(title) { return getAllSongStatuses()[title] || 'ns'; }
-function setSongStatus(title, status) { const all = getAllSongStatuses(); all[title] = status; localStorage.setItem('ngc-song-status', JSON.stringify(all)); }
+function setSongStatus(title, status) {
+  if (!_songStatusCache) _songStatusCache = {};
+  _songStatusCache[title] = status;
+  saveSongStatus(title, status).catch(err => console.warn('setSongStatus DynamoDB write failed:', err));
+}
 function statusClass(status) { return status || 'ns'; }
 function statusBadgeHtml(status) { const s = statusClass(status); return `<span class="status-badge ${s}">${SONG_STATUS_ICONS[s]} ${SONG_STATUS_LABELS[s]}</span>`; }
 function statusIconHtml(status) { const s = statusClass(status); if (s === 'ns') return ''; return `<span class="status-badge ${s}" title="${SONG_STATUS_LABELS[s]}">${SONG_STATUS_ICONS[s]}</span>`; }
