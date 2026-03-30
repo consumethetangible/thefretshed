@@ -183,12 +183,6 @@ function goToSongInLibrary(title, phaseNum) {
 // ═══════════════════════════════════════════
 function buildMilestones() {
   const container = document.getElementById('milestones-content');
-  const activePhaseSongs = (() => {
-    const phase = PHASES.find(p => p.id === currentPhase);
-    if (!phase) return [];
-    return phase.songs.filter(s => !s.inOptions && !s.reach);
-  })();
-
   const activePhases = PHASES.filter(p => p.milestones && p.milestones.length);
   container.innerHTML = activePhases.map((phase, gi) => {
     const aggItem = phase.milestones.find(m => m.type === 'aggregate');
@@ -199,11 +193,13 @@ function buildMilestones() {
     let aggHtml = '';
     if (aggItem) {
       const currSongs = phase.songs.filter(s => !s.inOptions && !s.reach);
-      const qualified = currSongs.filter(s => s.status === 'lrn' || s.status === 'itf');
+      const allStatuses = getAllSongStatuses();
+      const qualified = currSongs.filter(s => { const st = allStatuses[s.title] || 'ns'; return st === 'lrn' || st === 'itf'; });
       const threshold = aggItem.threshold;
       const pct = Math.min(100, Math.round((qualified.length / threshold) * 100));
       const pillHtml = currSongs.map(s => {
-        const cls = s.status === 'itf' ? 'itf' : s.status === 'lrn' ? 'lrn' : s.status === 'ip' ? 'ip' : '';
+        const st = allStatuses[s.title] || 'ns';
+        const cls = st === 'itf' ? 'itf' : st === 'lrn' ? 'lrn' : st === 'ip' ? 'ip' : '';
         return `<span class="milestone-song-pill ${cls}">${s.title}</span>`;
       }).join('');
       aggHtml = `
