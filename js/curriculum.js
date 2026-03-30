@@ -754,18 +754,18 @@ function buildCurriculum() {
 
     // Per-phase tab strip
     const tabStrip = `<div class="shed-phase-tabs">
-      <button class="shed-phase-tab shed-tab-active" id="shed-tabbn-${phase.id}-songs" onclick="shedShowTab(${phase.id},'songs')">Songs</button>
-      <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-weeks" onclick="shedShowTab(${phase.id},'weeks')">Week Map</button>
+      <button class="shed-phase-tab shed-tab-active" id="shed-tabbn-${phase.id}-weeks" onclick="shedShowTab(${phase.id},'weeks')">Week Map</button>
+      <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-songs" onclick="shedShowTab(${phase.id},'songs')">Songs</button>
       <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-milestones" onclick="shedShowTab(${phase.id},'milestones')">Milestones</button>
     </div>`;
 
     const phaseBody = `<div class="shed-phase-body" id="shed-phase-body-${phase.id}" style="display:${isOpen ? 'block' : 'none'}">
       ${tabStrip}
-      <div id="shed-tab-${phase.id}-songs" style="display:block">
-        ${songCards || '<div class="small muted" style="padding:12px 0">No songs in curriculum yet — add them in Song Library.</div>'}
-      </div>
-      <div id="shed-tab-${phase.id}-weeks" style="display:none">
+      <div id="shed-tab-${phase.id}-weeks" style="display:block">
         ${renderShedWeeks(phase)}
+      </div>
+      <div id="shed-tab-${phase.id}-songs" style="display:none">
+        ${songCards || '<div class="small muted" style="padding:12px 0">No songs in curriculum yet — add them in Song Library.</div>'}
       </div>
       <div id="shed-tab-${phase.id}-milestones" style="display:none" class="shed-milestones-panel">
         ${renderShedMilestones(phase.id)}
