@@ -668,6 +668,7 @@ body {
 .milestone-song-pill.lrn { background: rgba(114,168,120,0.12); border-color: var(--green); color: var(--green); }
 .milestone-song-pill.itf { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 .milestone-song-pill.ip  { background: rgba(196,160,80,0.12); border-color: rgba(196,160,80,0.6); color: #c4a050; }
+.milestone-song-pill.reach { border-style: dashed; opacity: 0.75; }
 .milestone-manual-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin: 12px 0 4px; }
 
 /* ─── RIG & TONE ─────────────────────────── */

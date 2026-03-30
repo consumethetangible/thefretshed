@@ -38,9 +38,10 @@ function shedHandleStatusChange(e, title) {
       if (newStatus !== 'ns') header.classList.add('shed-hbg-' + newStatus);
     }
   }
-  // Also sync Song Library and dashboard
+  // Also sync Song Library, dashboard, and milestones
   rebuildPhaseHeader(parseInt(localStorage.getItem('ngc-current-phase') || '1'));
   buildDashSongs();
+  buildMilestones();
 }
 
 function shedToggleCard(el) {
@@ -298,19 +299,21 @@ function renderShedMilestones(phaseId) {
 
   let aggHtml = '';
   if (aggItem) {
-    const currSongs = phase.songs.filter(s => !s.inOptions && !s.reach);
-    const qualified = currSongs.filter(s => { const st = allStatuses[s.title] || 'ns'; return st === 'lrn' || st === 'itf'; });
+    const allSongs = phase.songs.filter(s => !s.inOptions);
+    const coreSongs = allSongs.filter(s => !s.reach);
+    const qualified = coreSongs.filter(s => { const st = allStatuses[s.title] || 'ns'; return st === 'lrn' || st === 'itf'; });
     const threshold = aggItem.threshold;
     const aggPct = Math.min(100, Math.round((qualified.length / threshold) * 100));
-    const pillHtml = currSongs.map(s => {
+    const pillHtml = allSongs.map(s => {
       const st = allStatuses[s.title] || 'ns';
-      const cls = st === 'itf' ? 'itf' : st === 'lrn' ? 'lrn' : st === 'ip' ? 'ip' : '';
-      return `<span class="milestone-song-pill ${cls}">${s.title}</span>`;
+      const statusCls = st === 'itf' ? 'itf' : st === 'lrn' ? 'lrn' : st === 'ip' ? 'ip' : '';
+      const reachCls = s.reach ? 'reach' : '';
+      return `<span class="milestone-song-pill ${statusCls} ${reachCls}" title="${s.reach ? 'Reach goal — bonus' : ''}">${s.title}${s.reach ? ' ★' : ''}</span>`;
     }).join('');
     aggHtml = `<div class="milestone-agg" style="margin-bottom:12px">
       <div class="milestone-agg-label">${aggItem.label}</div>
       <div class="prog-bar" style="margin:6px 0 4px"><div class="prog-fill green" style="width:${aggPct}%"></div></div>
-      <div class="milestone-agg-count">${qualified.length} of ${threshold} curriculum songs at lrn or itf</div>
+      <div class="milestone-agg-count">${qualified.length} out of ${threshold} learned</div>
       <div class="milestone-song-pills">${pillHtml}</div>
     </div>`;
   }
@@ -1095,6 +1098,7 @@ function handleStatusChange(e, title, phaseNum) {
   // Rebuild phase header stats and progress bar
   rebuildPhaseHeader(phaseNum);
   refreshSiteFromCurriculum();
+  buildMilestones();
 }
 
 function toggleStretch(e, phaseNum, title) {
