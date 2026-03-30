@@ -114,7 +114,7 @@ Designed to swap to Cognito (#31) without redesigning the UI.
 - `savePosition(week, phase)` / `loadPosition()` — curriculum position
 - `saveSongStatus(title, status)` / `loadAllSongStatuses()` — song progress
 - `saveBookChapter(bookKey, chapter)` / `loadAllBookCompletions()` — book chapter completions
-- `saveMilestone(id)` / `loadAllMilestones()` — milestone tracking
+- `saveMilestone(id, completed)` / `loadAllMilestones()` — milestone tracking (keyed by milestone id)
 - `calcStreakFromBackend()` — streak derived from session records
 - `saveNotes(notes)` / `loadTodayNotes()` — session notes
 
@@ -180,6 +180,8 @@ Each phase has expandable song workspace cards with:
 - Tuning displayed below resources (amber tag, non-Standard only)
 - Skill tags
 - Action buttons: Spotify (inline player toggle) · Tab (UG link) · Tone (popover)
+
+**Tab order per phase:** Week Map (default) → Songs → Milestones
 
 ---
 
