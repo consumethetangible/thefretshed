@@ -64,20 +64,23 @@ function toggleCheck(el) {
 
 function toggleMilestone(el) {
   el.classList.toggle('done');
-  const key = el.querySelector('.milestone-text').textContent;
-  milestonesDone[key] = el.classList.contains('done');
-  localStorage.setItem('ngc-milestones', JSON.stringify(milestonesDone));
+  const id = el.dataset.milestoneId;
+  const isDone = el.classList.contains('done');
+  milestonesDone[id] = isDone;
+  saveMilestone(id, isDone);
   updateMilestoneProgress();
 }
 
 function updateMilestoneProgress() {
-  MILESTONES.forEach(group => {
-    const total = group.items.length;
-    const done = group.items.filter(item => milestonesDone[item]).length;
-    const bar = document.getElementById('mprog-' + group.phase);
-    if (bar) bar.style.width = Math.round((done/total)*100) + '%';
-    const lbl = document.getElementById('mcount-' + group.phase);
-    if (lbl) lbl.textContent = done + ' / ' + total;
+  PHASES.forEach(phase => {
+    if (!phase.milestones) return;
+    const manualItems = phase.milestones.filter(m => m.type === 'manual');
+    const manualDone = manualItems.filter(m => milestonesDone[m.id]).length;
+    const manualTotal = manualItems.length;
+    const bar = document.getElementById('mprog-' + phase.id);
+    if (bar) bar.style.width = Math.round((manualDone / manualTotal) * 100) + '%';
+    const lbl = document.getElementById('mcount-' + phase.id);
+    if (lbl) lbl.textContent = manualDone + ' / ' + manualTotal;
   });
 }
 
@@ -180,24 +183,55 @@ function goToSongInLibrary(title, phaseNum) {
 // ═══════════════════════════════════════════
 function buildMilestones() {
   const container = document.getElementById('milestones-content');
-  const colors = ['var(--p1c)','var(--p2c)','var(--p3c)'];
-  const badges = ['badge-p1','badge-p2','badge-p3'];
-  container.innerHTML = MILESTONES.map((group, gi) => {
-    const total = group.items.length;
-    const done = group.items.filter(item => milestonesDone[item]).length;
+  const activePhaseSongs = (() => {
+    const phase = PHASES.find(p => p.id === currentPhase);
+    if (!phase) return [];
+    return phase.songs.filter(s => !s.inOptions && !s.reach);
+  })();
+
+  const activePhases = PHASES.filter(p => p.milestones && p.milestones.length);
+  container.innerHTML = activePhases.map((phase, gi) => {
+    const aggItem = phase.milestones.find(m => m.type === 'aggregate');
+    const manualItems = phase.milestones.filter(m => m.type === 'manual');
+    const manualDone = manualItems.filter(m => milestonesDone[m.id]).length;
+    const manualTotal = manualItems.length;
+
+    let aggHtml = '';
+    if (aggItem) {
+      const currSongs = phase.songs.filter(s => !s.inOptions && !s.reach);
+      const qualified = currSongs.filter(s => s.status === 'lrn' || s.status === 'itf');
+      const threshold = aggItem.threshold;
+      const pct = Math.min(100, Math.round((qualified.length / threshold) * 100));
+      const pillHtml = currSongs.map(s => {
+        const cls = s.status === 'itf' ? 'itf' : s.status === 'lrn' ? 'lrn' : s.status === 'ip' ? 'ip' : '';
+        return `<span class="milestone-song-pill ${cls}">${s.title}</span>`;
+      }).join('');
+      aggHtml = `
+        <div class="milestone-agg">
+          <div class="milestone-agg-label">${aggItem.label}</div>
+          <div class="prog-bar" style="margin:6px 0 4px"><div class="prog-fill green" style="width:${pct}%"></div></div>
+          <div class="milestone-agg-count">${qualified.length} of ${threshold} curriculum songs at lrn or itf</div>
+          <div class="milestone-song-pills">${pillHtml}</div>
+        </div>`;
+    }
+
+    const manualHtml = manualItems.map(item => `
+      <div class="milestone-item ${milestonesDone[item.id] ? 'done' : ''}" data-milestone-id="${item.id}" onclick="toggleMilestone(this)">
+        <div class="milestone-icon"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div><div class="milestone-text">${item.label}</div></div>
+      </div>`).join('');
+
     return `<div class="milestone-group">
       <div class="milestone-group-header">
-        <span class="badge ${badges[gi]}">${group.label}</span>
-        <div class="milestone-group-title" style="color:${colors[gi]}">${group.label} Milestones</div>
-        <span class="mono small dimmed" id="mcount-${group.phase}">${done} / ${total}</span>
+        <span class="badge ${phase.badge}">${phase.label}</span>
+        <div class="milestone-group-title" style="color:${phase.color}">${phase.label} Milestones</div>
+        <span class="mono small dimmed" id="mcount-${phase.id}">${manualDone} / ${manualTotal}</span>
       </div>
-      <div class="prog-bar" style="margin-bottom:14px"><div class="prog-fill green" id="mprog-${group.phase}" style="width:${Math.round((done/total)*100)}%"></div></div>
-      <div>${group.items.map(item => `
-        <div class="milestone-item ${milestonesDone[item] ? 'done' : ''}" onclick="toggleMilestone(this)">
-          <div class="milestone-icon"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          <div><div class="milestone-text">${item}</div></div>
-        </div>`).join('')}</div>
-      ${gi < MILESTONES.length - 1 ? '<div class="divider"></div>' : ''}
+      <div class="prog-bar" style="margin-bottom:14px"><div class="prog-fill green" id="mprog-${phase.id}" style="width:${Math.round((manualDone/manualTotal)*100)}%"></div></div>
+      ${aggHtml}
+      <div class="milestone-manual-label">Manual check-off</div>
+      ${manualHtml}
+      ${gi < activePhases.length - 1 ? '<div class="divider"></div>' : ''}
     </div>`;
   }).join('');
 }

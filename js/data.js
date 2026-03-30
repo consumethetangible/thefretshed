@@ -50,6 +50,14 @@ const PHASES = [
     color:'var(--p1c)', badge:'badge-p1', duration:'~12 weeks',
     desc:'Take what you partially know and own it front to back. Build the 12-bar foundation. Make bends intentional.',
     northStar:'Can play six songs front to back including solos. Understands 12-bar blues in your bones. Bending and vibrato are intentional.',
+    milestones:[
+      { id:'p1-songs',   type:'aggregate', label:'Songs learned or in the fingers', threshold:4 },
+      { id:'p1-12bar',   type:'manual',    label:'Can explain and play a 12-bar blues in at least two keys' },
+      { id:'p1-bends',   type:'manual',    label:'Bends land in tune at least 80% of the time' },
+      { id:'p1-vibrato', type:'manual',    label:'Vibrato sounds intentional rather than accidental' },
+      { id:'p1-licks',   type:'manual',    label:'5+ licks from the 300 Licks book, 1–2 usable in improvisation' },
+      { id:'p1-ear',     type:'manual',    label:'Ear training: can reliably identify P4, P5, octave, minor/major 3rds by ear' },
+    ],
     songs:[
       { num:1, title:'Purple Haze', artist:'Jimi Hendrix', tuning:'Eb (½ step down)',
         teaches:'Tritone interval, Hendrix chord-stab rhythm, string bending as expression, pentatonic phrasing in the solo.',
@@ -91,7 +99,7 @@ const PHASES = [
         refs:[
           { label:'300 Blues, Rock & Jazz Licks — Gilmour section', book:'blues1' },
         ],
-        weeksFocus:'Weeks 9–10 (full song)', skills:['fingerpicking','dynamics','clean tone','sustained phrasing'], status:'upcoming' },
+        weeksFocus:'Weeks 9–10 (full song)', skills:['fingerpicking','dynamics','clean tone','sustained phrasing'], status:'upcoming', reach:true },
       { num:7, title:'T.N.T.', artist:'AC/DC', tuning:'Standard',
         teaches:"Economy of phrasing and rhythmic placement in a simpler AC/DC frame — faster confidence builder than Back in Black.",
         resources:'300 Blues, Rock & Jazz Licks — Angus Young rock section.',
@@ -154,6 +162,13 @@ const PHASES = [
     color:'var(--p2c)', badge:'badge-p2', duration:'~14 weeks',
     desc:'Break out of box 1 pentatonic. Learn to target chord tones as the changes move. Build real lick vocabulary.',
     northStar:'Seven songs front to back. Connected pentatonic positions. Guide tone awareness. Lick vocabulary with depth and variety.',
+    milestones:[
+      { id:'p2-songs',      type:'aggregate', label:'Songs learned or in the fingers', threshold:5 },
+      { id:'p2-minorblues', type:'manual',    label:'Can solo in minor blues using at least shape 1 and shape 2 (BB box)' },
+      { id:'p2-guidetone',  type:'manual',    label:'Can explain what a guide tone is and demonstrate targeting one across a I→IV change' },
+      { id:'p2-connected',  type:'manual',    label:'Connected pentatonic positions — can move between at least two shapes fluidly' },
+      { id:'p2-ear',        type:'manual',    label:'Ear training: can identify dominant 7 chords and I–IV–V progressions by ear' },
+    ],
     songs:[
       { num:1, title:"The Thrill Is Gone", artist:'BB King', tuning:'Standard',
         teaches:"Minor blues form, BB box (pentatonic shape 2), call and response in its purest form, restraint and space as expression.",
@@ -195,7 +210,7 @@ const PHASES = [
           { label:'Complete Blues Guitar — Book 3, Part 1, Ch. 1–2', book:'cbg' },
           { label:'300 Blues, Rock & Jazz Licks — Duane Allman section', book:'blues1' },
         ],
-        weeksFocus:'Weeks 11–14 (capstone)', skills:['guide tones','playing the changes','slow blues','slide intro'], status:'future' },
+        weeksFocus:'Weeks 11–14 (capstone)', skills:['guide tones','playing the changes','slow blues','slide intro'], status:'future', reach:true },
       { num:8, title:"Don't Fear the Reaper", artist:'Blue Öyster Cult', tuning:'Standard',
         teaches:"Arpeggiated chord movement, Buck Dharma's clean melodic soloing, minor key phrasing without blues clichés.",
         resources:"300 Blues, Rock & Jazz Licks — rock & blues sections.",
@@ -276,6 +291,13 @@ const PHASES = [
     color:'var(--p3c)', badge:'badge-p3', duration:'~15 weeks',
     desc:'Natural minor, Mixolydian, dark modal vocabulary. The Sabbath world. And then: Little Wing.',
     northStar:'Little Wing front to back with feel. Natural minor and Mixolydian as colors. Soloing beyond pentatonic patterns.',
+    milestones:[
+      { id:'p3-songs',     type:'aggregate', label:'Songs learned or in the fingers', threshold:5 },
+      { id:'p3-modes',     type:'manual',    label:'Can explain and demonstrate natural minor vs Mixolydian by ear and on the fretboard' },
+      { id:'p3-gallop',    type:'manual',    label:'Gallop rhythm clean at tempo — The Trooper' },
+      { id:'p3-sustained', type:'manual',    label:'Comfortably Numb — both solos, musical and sustained' },
+      { id:'p3-ear',       type:'manual',    label:'Ear training: can identify minor vs Mixolydian by ear in context' },
+    ],
     songs:[
       { num:1, title:"Since I've Been Loving You", artist:'Led Zeppelin', tuning:'Standard',
         teaches:"Slow blues, guide tones applied under real emotional pressure, expressive bending as the primary vocabulary.",
@@ -323,7 +345,7 @@ const PHASES = [
         teaches:'Chord-melody — rhythm and lead blurring into one. Thumb-over voicings. Short solo packed with personality. The north star.',
         resources:"Hendrix Are You Experienced songbook.",
         refs:[],
-        weeksFocus:'Weeks 11–15 (capstone)', skills:['chord-melody','thumb voicings','Hendrix phrasing','fretboard freedom'], status:'future' },
+        weeksFocus:'Weeks 11–15 (capstone)', skills:['chord-melody','thumb voicings','Hendrix phrasing','fretboard freedom'], status:'future', reach:true },
       { num:8, title:'Carry On Wayward Son', artist:'Kansas', tuning:'Standard',
         teaches:"Precision picked chord intro, aggressive strumming, Kerry Livgren's pentatonic-with-chromatic-passing-tones solo.",
         resources:"300 Blues, Rock & Jazz Licks — rock sections.",
@@ -444,11 +466,8 @@ const PHASES = [
   }
 ];
 
-const MILESTONES = [
-  { phase:1, label:'Phase 1', items:['Purple Haze front to back including the solo, recognizably, at tempo','Paranoid front to back including the solo','Can explain and play a 12-bar blues in at least two keys','Bends land in tune at least 80% of the time','Vibrato sounds intentional rather than accidental','Sunshine of Your Love — riff and solo complete','5+ licks from the 300 Licks book, 1–2 usable in improvisation','Ear training: can reliably identify P4, P5, octave, minor/major 3rds by ear'] },
-  { phase:2, label:'Phase 2', items:['The Thrill Is Gone — clean tone, BB box phrases, space and restraint','Can solo in minor blues using at least shape 1 and shape 2 (BB box)','Crossroads at tempo, full song — Clapton phrasing recognizable','Whole Lotta Love full song including solo','La Grange intro riff in the pocket, full song','Heartbreaker including the unaccompanied solo section','Can explain what a guide tone is and demonstrate targeting one across a I→IV change','Layla — complete and musical, even if rough at the edges','Ear training: can identify dominant 7 chords and I–IV–V progressions by ear'] },
-  { phase:3, label:'Phase 3', items:["Since I've Been Loving You — complete and emotionally present","Can explain and demonstrate the difference between natural minor and Mixolydian by ear and on the fretboard","Black Sabbath (the song) and War Pigs front to back — riffs in the pocket","Iron Man front to back","The Trooper — gallop rhythm clean at tempo, melodic lead complete","Comfortably Numb — both solos, musical and sustained","Little Wing — front to back, recorded, chord voicings are recognizably Hendrix"] },
-];
+// MILESTONES are now embedded in each phase object as phase.milestones
+// See PHASES above — each phase has: { id, type, label, threshold? }
 
 const TONE_PROFILES = [
   { phase:1, song:'Purple Haze', guitar:'Fender Stratocaster (neck pickup)', amp:'Fender Blues Jr. or Marshall DSL40CR (low gain, clean-ish)', chain:['Crybaby Wah (intro riff)','Bogner La Grange (light drive)'], notes:'Hendrix tone: Strat neck pickup, moderate gain. La Grange set to medium crunch. Mobius can approximate Univibe and Octavia.' },
