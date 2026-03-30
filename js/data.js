@@ -51,7 +51,7 @@ const PHASES = [
     desc:'Take what you partially know and own it front to back. Build the 12-bar foundation. Make bends intentional.',
     northStar:'Can play six songs front to back including solos. Understands 12-bar blues in your bones. Bending and vibrato are intentional.',
     milestones:[
-      { id:'p1-songs',   type:'aggregate', label:'Song progress', threshold:6 },
+      { id:'p1-songs',   type:'aggregate', label:'Song Progress', threshold:6 },
       { id:'p1-12bar',   type:'manual',    label:'Can explain and play a 12-bar blues in at least two keys' },
       { id:'p1-bends',   type:'manual',    label:'Bends land in tune at least 80% of the time' },
       { id:'p1-vibrato', type:'manual',    label:'Vibrato sounds intentional rather than accidental' },
@@ -163,7 +163,7 @@ const PHASES = [
     desc:'Break out of box 1 pentatonic. Learn to target chord tones as the changes move. Build real lick vocabulary.',
     northStar:'Seven songs front to back. Connected pentatonic positions. Guide tone awareness. Lick vocabulary with depth and variety.',
     milestones:[
-      { id:'p2-songs',      type:'aggregate', label:'Song progress', threshold:6 },
+      { id:'p2-songs',      type:'aggregate', label:'Song Progress', threshold:6 },
       { id:'p2-minorblues', type:'manual',    label:'Can solo in minor blues using at least shape 1 and shape 2 (BB box)' },
       { id:'p2-guidetone',  type:'manual',    label:'Can explain what a guide tone is and demonstrate targeting one across a I→IV change' },
       { id:'p2-connected',  type:'manual',    label:'Connected pentatonic positions — can move between at least two shapes fluidly' },
@@ -292,7 +292,7 @@ const PHASES = [
     desc:'Natural minor, Mixolydian, dark modal vocabulary. The Sabbath world. And then: Little Wing.',
     northStar:'Little Wing front to back with feel. Natural minor and Mixolydian as colors. Soloing beyond pentatonic patterns.',
     milestones:[
-      { id:'p3-songs',     type:'aggregate', label:'Song progress', threshold:6 },
+      { id:'p3-songs',     type:'aggregate', label:'Song Progress', threshold:6 },
       { id:'p3-modes',     type:'manual',    label:'Can explain and demonstrate natural minor vs Mixolydian by ear and on the fretboard' },
       { id:'p3-gallop',    type:'manual',    label:'Gallop rhythm clean at tempo — The Trooper' },
       { id:'p3-sustained', type:'manual',    label:'Comfortably Numb — both solos, musical and sustained' },
