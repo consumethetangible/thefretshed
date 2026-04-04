@@ -42,6 +42,16 @@ function shedHandleStatusChange(e, title) {
   rebuildPhaseHeader(parseInt(localStorage.getItem('ngc-current-phase') || '1'));
   buildDashSongs();
   buildMilestones();
+  // Re-render the Shed milestone panel for this phase so song pills + count update live
+  if (card) {
+    const phaseSection = card.closest('.shed-phase-section');
+    if (phaseSection) {
+      const phaseId = parseInt(phaseSection.id.replace('shed-phase-', ''));
+      const milestonePanel = document.getElementById(`shed-tab-${phaseId}-milestones`);
+      if (milestonePanel) milestonePanel.innerHTML = renderShedMilestones(phaseId);
+      rebuildSwapPhase(phaseId);
+    }
+  }
 }
 
 function shedToggleCard(el) {
@@ -938,14 +948,11 @@ function renderSlCard(title, phaseNum, col, state, mastered, phase, swapData) {
   const swapObj = swapData ? swapData.find(s => s.song === title) : null;
   const func = swapObj ? swapObj.func : (songObj ? songObj.teaches.split(',')[0] : '');
   const cardClass = `sl-card status-${sc}`;
-  const statusOpts = Object.entries(SONG_STATUS_LABELS).map(([val, label]) => `<option value="${val}" ${sc === val ? 'selected' : ''}>${label}</option>`).join('');
-  const safetitle = title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   return `<div class="${cardClass}" data-title="${title.replace(/"/g, '&quot;')}" data-phase="${phaseNum}" data-col="${col}">
     <div class="sl-card-top">
       <div style="flex:1"><div class="sl-card-title">${title}</div><div class="sl-card-artist">${songObj ? songObj.artist : ''}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
         ${statusIconHtml(status)}
-        <select class="status-select ${sc}" onclick="event.stopPropagation()" onchange="handleStatusChange(event, '${safetitle}', ${phaseNum})">${statusOpts}</select>
       </div>
     </div>
     ${func ? `<div class="sl-card-func">${func}</div>` : ''}
@@ -1090,6 +1097,9 @@ function handleStatusChange(e, title, phaseNum) {
   rebuildPhaseHeader(phaseNum);
   refreshSiteFromCurriculum();
   buildMilestones();
+  // Re-render the Shed milestone panel for this phase
+  const milestonePanel = document.getElementById(`shed-tab-${phaseNum}-milestones`);
+  if (milestonePanel) milestonePanel.innerHTML = renderShedMilestones(phaseNum);
 }
 
 function toggleStretch(e, phaseNum, title) {
