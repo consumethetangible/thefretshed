@@ -224,10 +224,15 @@ function updateSpotifyButtonState() {
 
 async function initSpotify() {
   // Handle OAuth callback if we're returning from Spotify
-  if (window.location.search.includes('code=')) {
+  const isCallback = window.location.search.includes('code=');
+  if (isCallback) {
     await handleSpotifyCallback();
   }
   updateSpotifyButtonState();
+  // Re-open settings drawer after OAuth redirect so the user sees the connected state
+  if (isCallback) {
+    setTimeout(() => { if (typeof openSettings === 'function') openSettings(); }, 100);
+  }
 }
 
 // Run on load
