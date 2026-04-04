@@ -150,31 +150,56 @@ function buildDashSongs() {
     const artist = song ? song.artist : '';
     const status = getSongStatus(title);
     const sc = statusClass(status);
-    return `<div class="song-row" style="cursor:pointer;border-left:3px solid var(--status-${sc});background:linear-gradient(to right, var(--status-${sc}-bg) 0%, transparent 15%)" onclick="goToSongInLibrary('${title.replace(/'/g, "\\'")}', ${phaseNum})">
+    return `<div class="song-row" style="cursor:pointer;border-left:3px solid var(--status-${sc});background:linear-gradient(to right, var(--status-${sc}-bg) 0%, transparent 15%)" onclick="goToSongInShed('${title.replace(/'/g, "\\'")}', ${phaseNum})">
       <div style="flex:1"><div class="song-title">${title}</div><div class="song-artist">${artist}</div></div>
       <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${statusIconHtml(status)}</div>
     </div>`;
   }).join('') || '<div class="small muted">No songs in curriculum yet.</div>';
 }
 
-function goToSongInLibrary(title, phaseNum) {
-  showPanel('swaps', null);
-  showInner('sw', 'phase' + phaseNum);
-  // Also activate the correct inner-tab button
-  document.querySelectorAll('#panel-swaps .inner-tab').forEach((btn, i) => {
-    btn.classList.toggle('active', i === (phaseNum - 1));
+function goToSongInShed(title, phaseNum) {
+  // Navigate to The Shed panel
+  showPanel('curriculum', null);
+  // Activate the correct nav button
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === 'The Shed');
   });
+
   setTimeout(() => {
-    const cards = document.querySelectorAll('.sl-card');
-    for (const card of cards) {
-      const nameEl = card.querySelector('.sl-card-title');
-      if (nameEl && nameEl.textContent.trim() === title) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.classList.add('drop-target');
-        setTimeout(() => card.classList.remove('drop-target'), 1800);
-        break;
-      }
+    const phase = PHASES.find(p => p.id === phaseNum);
+    if (!phase) return;
+
+    // Ensure the phase body is open
+    const phaseBody = document.getElementById(`shed-phase-body-${phaseNum}`);
+    const phaseChev = document.getElementById(`shed-phase-chev-${phaseNum}`);
+    if (phaseBody && phaseBody.style.display === 'none') {
+      phaseBody.style.display = 'block';
+      if (phaseChev) phaseChev.textContent = '▲';
     }
+
+    // Switch to Songs tab
+    shedShowTab(phaseNum, 'songs');
+
+    // Find the song card by matching data-title attribute
+    const song = phase.songs.find(s => s.title === title);
+    if (!song) return;
+    const cardId = `shed-card-p${phaseNum}-${song.num}`;
+    const card = document.getElementById(cardId);
+    if (!card) return;
+
+    // Expand the card if collapsed
+    if (!card.classList.contains('expanded')) {
+      const body = card.querySelector('.shed-card-body');
+      const chev = card.querySelector('.shed-chevron');
+      card.classList.add('expanded');
+      if (body) body.style.display = 'block';
+      if (chev) chev.textContent = '▲';
+    }
+
+    // Scroll to it and briefly highlight
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('drop-target');
+    setTimeout(() => card.classList.remove('drop-target'), 1800);
   }, 120);
 }
 

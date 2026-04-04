@@ -754,9 +754,9 @@ function buildCurriculum() {
 
     // Per-phase tab strip
     const tabStrip = `<div class="shed-phase-tabs">
-      <button class="shed-phase-tab shed-tab-active" id="shed-tabbn-${phase.id}-weeks" onclick="shedShowTab(${phase.id},'weeks')">Week Map</button>
-      <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-songs" onclick="shedShowTab(${phase.id},'songs')">Songs</button>
-      <button class="shed-phase-tab" id="shed-tabbn-${phase.id}-milestones" onclick="shedShowTab(${phase.id},'milestones')">Milestones</button>
+      <button class="shed-phase-tab shed-tab-active" id="shed-tabbtn-${phase.id}-weeks" onclick="shedShowTab(${phase.id},'weeks')">Week Map</button>
+      <button class="shed-phase-tab" id="shed-tabbtn-${phase.id}-songs" onclick="shedShowTab(${phase.id},'songs')">Songs</button>
+      <button class="shed-phase-tab" id="shed-tabbtn-${phase.id}-milestones" onclick="shedShowTab(${phase.id},'milestones')">Milestones</button>
     </div>`;
 
     const phaseBody = `<div class="shed-phase-body" id="shed-phase-body-${phase.id}" style="display:${isOpen ? 'block' : 'none'}">
@@ -794,15 +794,6 @@ function shedTogglePhase(phaseId) {
   const open = body.style.display !== 'none';
   body.style.display = open ? 'none' : 'block';
   if (chev) chev.textContent = open ? '▼' : '▲';
-}
-
-function shedShowTab(phaseId, tab) {
-  ['songs','weeks','milestones'].forEach(t => {
-    const panel = document.getElementById(`shed-tab-${phaseId}-${t}`);
-    const btn = document.getElementById(`shed-tabbn-${phaseId}-${t}`);
-    if (panel) panel.style.display = t === tab ? 'block' : 'none';
-    if (btn) btn.classList.toggle('shed-tab-active', t === tab);
-  });
 }
 
 // ═══════════════════════════════════════════
