@@ -46,9 +46,7 @@ body {
   z-index: 200;
 }
 .brand { display:flex; align-items:center; gap:10px; }
-.brand-logo-wrap { position: relative; display: inline-block; height: 48px; }
-.brand-logo-img { height: 48px; width: auto; display: block; filter: grayscale(1) brightness(10); }
-.brand-logo-tint { position: absolute; inset: 0; background: var(--accent); mix-blend-mode: multiply; pointer-events: none; }
+.brand-logo-img { height: 48px; width: auto; display: block; color: var(--accent); transition: color 0.2s; overflow: visible; }
 .brand-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
 .brand-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
 .nav { display:flex; gap:2px; }
