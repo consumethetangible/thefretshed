@@ -1,0 +1,92 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 140 120"
+  role="img"
+  aria-labelledby="title"
+>
+  <title id="title">The Fret Shed Logo</title>
+
+  <!-- Left side wall (3/4 perspective) — parallelogram -->
+  <polygon points="6,36 18,30 18,94 6,100" fill="none" stroke="currentColor" stroke-width="2"/>
+  <!-- Siding lines on left wall -->
+  <line x1="6" y1="50" x2="18" y2="44" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+  <line x1="6" y1="60" x2="18" y2="54" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+  <line x1="6" y1="70" x2="18" y2="64" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+  <line x1="6" y1="80" x2="18" y2="74" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+  <line x1="6" y1="90" x2="18" y2="84" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- Front shed body -->
+  <rect x="18" y="30" width="84" height="64" rx="2" ry="2"
+        fill="none" stroke="currentColor" stroke-width="2"/>
+
+  <!-- Roof — 3/4 perspective: left edge pushed up/left -->
+  <path d="M4 30 L14 22 L66 10 L110 30"
+        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Roof ridge (top edge of left slope) -->
+  <line x1="14" y1="22" x2="66" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Chimney on left side of roof -->
+  <rect x="24" y="14" width="6" height="12"
+        fill="none" stroke="currentColor" stroke-width="2"/>
+
+  <!-- Side handle on left wall -->
+  <rect x="4" y="52" width="2" height="12" fill="currentColor"/>
+
+  <!-- Control panel separator -->
+  <line x1="22" y1="42" x2="98" y2="42"
+        stroke="currentColor" stroke-width="2"/>
+
+  <!-- Input jack -->
+  <circle cx="28" cy="36" r="3" fill="currentColor"/>
+  <!-- Two main knobs -->
+  <circle cx="40" cy="36" r="3.5" fill="currentColor"/>
+  <circle cx="52" cy="36" r="3.5" fill="currentColor"/>
+  <!-- Three smaller knobs -->
+  <circle cx="66" cy="36" r="3" fill="currentColor"/>
+  <circle cx="78" cy="36" r="3" fill="currentColor"/>
+  <circle cx="90" cy="36" r="3" fill="currentColor"/>
+
+  <!-- Speaker cabinet frame -->
+  <rect x="24" y="48" width="72" height="40"
+        fill="none" stroke="currentColor" stroke-width="2"/>
+  <!-- Corner brackets -->
+  <rect x="24" y="48" width="4" height="4" fill="currentColor"/>
+  <rect x="92" y="48" width="4" height="4" fill="currentColor"/>
+  <rect x="24" y="84" width="4" height="4" fill="currentColor"/>
+  <rect x="92" y="84" width="4" height="4" fill="currentColor"/>
+
+  <!-- Grille mesh -->
+  <g stroke="currentColor" stroke-width="0.7" opacity="0.6">
+    <line x1="28" y1="52" x2="28" y2="84"/>
+    <line x1="34" y1="52" x2="34" y2="84"/>
+    <line x1="40" y1="52" x2="40" y2="84"/>
+    <line x1="46" y1="52" x2="46" y2="84"/>
+    <line x1="52" y1="52" x2="52" y2="84"/>
+    <line x1="58" y1="52" x2="58" y2="84"/>
+    <line x1="64" y1="52" x2="64" y2="84"/>
+    <line x1="70" y1="52" x2="70" y2="84"/>
+    <line x1="76" y1="52" x2="76" y2="84"/>
+    <line x1="82" y1="52" x2="82" y2="84"/>
+    <line x1="88" y1="52" x2="88" y2="84"/>
+    <line x1="28" y1="56" x2="88" y2="56"/>
+    <line x1="28" y1="62" x2="88" y2="62"/>
+    <line x1="28" y1="68" x2="88" y2="68"/>
+    <line x1="28" y1="74" x2="88" y2="74"/>
+    <line x1="28" y1="80" x2="88" y2="80"/>
+  </g>
+
+  <!-- Speakers -->
+  <circle cx="44" cy="68" r="11"
+          fill="none" stroke="currentColor" stroke-width="2"/>
+  <circle cx="72" cy="68" r="11"
+          fill="none" stroke="currentColor" stroke-width="2"/>
+  <circle cx="44" cy="68" r="4" fill="currentColor"/>
+  <circle cx="72" cy="68" r="4" fill="currentColor"/>
+
+  <!-- Distress hints -->
+  <g fill="currentColor" opacity="0.5">
+    <rect x="30" y="50" width="2" height="1"/>
+    <rect x="54" y="78" width="2" height="1"/>
+    <rect x="80" y="60" width="2" height="1"/>
+  </g>
+</svg>
