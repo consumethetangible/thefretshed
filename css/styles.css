@@ -46,10 +46,10 @@ body {
   z-index: 200;
 }
 .brand { display:flex; align-items:center; gap:10px; }
-.brand-logo-img { height: 48px; width: auto; display: block; transition: filter 0.2s; filter: invert(1) sepia(1) saturate(1.4) hue-rotate(345deg) brightness(1.25); }
-[data-theme="light"]  .brand-logo-img { filter: invert(1) sepia(1) saturate(2.5) hue-rotate(345deg) brightness(0.6); }
-[data-theme="cool"]   .brand-logo-img { filter: invert(1) sepia(1) saturate(2.0) hue-rotate(164deg) brightness(1.1); }
-[data-theme="psych"]  .brand-logo-img { filter: invert(1) sepia(1) saturate(3.0) hue-rotate(270deg) brightness(1.1); }
+.brand-logo-img { height: 48px; width: auto; display: block; transition: filter 0.2s; filter: brightness(0.5) sepia(1) saturate(4) hue-rotate(345deg) brightness(1.8); }
+[data-theme="light"]  .brand-logo-img { filter: brightness(0.5) sepia(1) saturate(4) hue-rotate(345deg) brightness(1.0); }
+[data-theme="cool"]   .brand-logo-img { filter: brightness(0.5) sepia(1) saturate(5) hue-rotate(164deg) brightness(1.8); }
+[data-theme="psych"]  .brand-logo-img { filter: brightness(0.5) sepia(1) saturate(6) hue-rotate(270deg) brightness(1.8); }
 .brand-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
 .brand-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
 .nav { display:flex; gap:2px; }
