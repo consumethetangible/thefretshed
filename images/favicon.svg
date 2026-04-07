@@ -1,0 +1,21 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  role="img"
+  aria-labelledby="title"
+>
+  <title id="title">The Fret Shed Favicon</title>
+  <rect x="10" y="18" width="44" height="34" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M8 18 L32 6 L56 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="16" y="8" width="4" height="8" fill="none" stroke="currentColor" stroke-width="2"/>
+  <rect x="8" y="26" width="2" height="10" fill="currentColor"/>
+  <line x1="12" y1="26" x2="52" y2="26" stroke="currentColor" stroke-width="2"/>
+  <circle cx="16" cy="22" r="2" fill="currentColor"/>
+  <circle cx="24" cy="22" r="2.5" fill="currentColor"/>
+  <circle cx="32" cy="22" r="2.5" fill="currentColor"/>
+  <circle cx="40" cy="22" r="2" fill="currentColor"/>
+  <circle cx="46" cy="22" r="2" fill="currentColor"/>
+  <circle cx="52" cy="22" r="2" fill="currentColor"/>
+  <circle cx="24" cy="40" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+  <circle cx="40" cy="40" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+</svg>
