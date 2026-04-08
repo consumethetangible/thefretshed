@@ -46,9 +46,8 @@ body {
   z-index: 200;
 }
 .brand { display:flex; align-items:center; gap:10px; }
-.brand-logo-img { height: 48px; width: auto; display: block; transition: filter 0.2s; }
-[data-theme="light"] .brand-logo-img { filter: invert(1) brightness(0.15); }
-.brand-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+.brand-logo-img { height: 44px; width: auto; display: block; color: var(--accent); }
+.brand-logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; color: var(--accent); line-height: 1; margin-top: 8px; }
 .brand-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
 .nav { display:flex; gap:2px; }
 .nav-btn { background: none; border: none; color: var(--text3); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 12px; cursor: pointer; border-radius: 4px; transition: all 0.15s; white-space: nowrap; }
@@ -2113,3 +2112,5 @@ select.shed-s-itf { border-color: var(--status-itf); color: var(--status-itf); }
   .pm-body { grid-template-columns: 1fr; }
   .practice-modal { padding: 16px; }
 }
+
+.login-logo-svg { height: 96px; width: auto; }

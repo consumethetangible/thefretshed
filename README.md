@@ -27,9 +27,10 @@ thefretshed/
 │   ├── progress.js     ← DynamoDB progress API (sessions, songs, books, milestones)
 │   ├── spotify.js      ← Spotify OAuth + search + inline player
 │   └── claude.js       ← Claude AI integration (stub)
-├── images/             ← gear images (hardcoded in index.html)
+├── images/             ← gear images (hardcoded in index.html); favicons
 ├── scripts/
-│   └── setup-dynamodb.mjs  ← one-time DynamoDB table provisioning script
+│   ├── setup-dynamodb.mjs  ← one-time DynamoDB table provisioning script
+│   └── fretshed_logo.svg   ← source SVG for brand logo (hand-traced from original artwork)
 ├── tests/
 │   └── streak.test.js  ← Vitest tests for calcStreaks
 ├── .github/
