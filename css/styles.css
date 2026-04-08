@@ -910,6 +910,15 @@ body {
 }
 .sc-drive:hover { box-shadow: 0 0 16px rgba(196,144,96,0.50), 0 2px 8px rgba(0,0,0,0.3); }
 
+/* Distortion — burnt orange */
+.sc-dist {
+  background: rgba(210,110,60,0.11);
+  border-color: rgba(210,110,60,0.40);
+  color: #e8a070;
+  box-shadow: 0 0 6px rgba(210,110,60,0.14);
+}
+.sc-dist:hover { box-shadow: 0 0 16px rgba(210,110,60,0.52), 0 2px 8px rgba(0,0,0,0.3); }
+
 /* Fuzz — red-orange */
 .sc-fuzz {
   background: rgba(200,80,55,0.12);
