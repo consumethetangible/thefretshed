@@ -3,16 +3,22 @@
 function init() {
   initTheme();
   initViewportPreview();
+  // Build 2-week block buttons from active phase's weeks array
   const wbr = document.getElementById('week-btn-row');
   if (wbr) {
-    for (let i = 1; i <= 12; i++) {
+    const phaseNum = parseInt(localStorage.getItem('ngc-current-phase') || '1');
+    const phase = PHASES.find(p => p.id === phaseNum) || PHASES[0];
+    const weeks = phase.weeks || [];
+    weeks.forEach((wk, idx) => {
       const b = document.createElement('button');
       b.className = 'btn btn-week';
-      b.id = 'wbtn-' + i;
-      b.textContent = 'Week ' + i;
-      b.onclick = () => setWeek(i);
+      b.id = 'wbtn-block-' + idx;
+      // Short label: "Wks 1–2" from "Weeks 1–2"
+      b.textContent = wk.range.replace(/^Weeks?\s*/i, 'Wks ');
+      b.title = wk.title;
+      b.onclick = () => goToWeekInShed(phase.id, idx);
       wbr.appendChild(b);
-    }
+    });
   }
   buildDashSongs();
   buildCurriculum();

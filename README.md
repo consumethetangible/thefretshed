@@ -135,7 +135,7 @@ Designed to swap to Cognito (#31) without redesigning the UI.
 **Phase Hero (Row 1):**
 - Top line: phase badge + phase name (left) · Wk N/12 (right)
 - Week focus text below
-- 12 week buttons as status indicators: **done** (struck-through, muted) · **active** (accent highlight) · **not started** (default). Clicking a week marks all prior weeks done.
+- 2-week block buttons — one per entry in `phase.weeks` (e.g. "Wks 1–2", "Wks 3–4"). Clicking a block navigates to The Shed → Week Map tab and scrolls to + expands that block. Button count adapts to the active phase (Phase 1 = 6, Phase 2 = 7, etc.).
 
 **Session card:** blocks (1.6fr) | timer+metro (1fr), left-bordered separator.
 
