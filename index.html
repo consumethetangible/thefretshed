@@ -200,43 +200,67 @@
       </div>
     </div>
 
-    <!-- ROW 3 COL 1: Practice Streak -->
-    <div class="dash-streak">
-      <div class="streak-card">
-        <div class="card-title">Practice Streak</div>
-        <div class="streak-row">
-          <div class="streak-num" id="streak-count">0</div>
-          <div>
-            <div class="streak-label">Day Streak 🔥</div>
-            <div class="streak-meta">
-              <div class="streak-stat"><div class="streak-stat-val" id="streak-longest">0</div><div class="streak-stat-lbl">Longest</div></div>
-              <div class="streak-stat"><div class="streak-stat-val" id="streak-total">0</div><div class="streak-stat-lbl">Total Days</div></div>
+    <!-- ROW 3: Practice Log (full width) -->
+    <div class="dash-practice-log">
+      <div class="practice-log-card" id="practice-log-card" data-state="default">
+
+        <div class="plc-header">
+          <div class="card-title" style="margin-bottom:0">Practice Log</div>
+          <span class="plc-review-badge" id="plc-review-badge">Review &amp; Save</span>
+        </div>
+
+        <div class="plc-body">
+          <!-- Left: streak -->
+          <div class="plc-streak">
+            <div class="streak-row">
+              <div class="streak-num" id="streak-count">0</div>
+              <div>
+                <div class="streak-label">Day Streak 🔥</div>
+                <div class="streak-meta">
+                  <div class="streak-stat"><div class="streak-stat-val" id="streak-longest">0</div><div class="streak-stat-lbl">Longest</div></div>
+                  <div class="streak-stat"><div class="streak-stat-val" id="streak-total">0</div><div class="streak-stat-lbl">Total Days</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="heatmap-wrap">
+              <div class="heatmap-months-row" id="heatmap-months-row"></div>
+              <div class="heatmap-grid" id="heatmap-grid"></div>
+              <div class="heatmap-legend">
+                <span class="heatmap-legend-label">Less</span>
+                <div class="heatmap-cell" style="pointer-events:none"></div>
+                <div class="heatmap-cell practiced" style="pointer-events:none"></div>
+                <span class="heatmap-legend-label">More</span>
+              </div>
+            </div>
+            <!-- Review state: completed blocks summary -->
+            <div class="plc-summary" id="plc-summary"></div>
+          </div>
+
+          <!-- Right: notes -->
+          <div class="plc-notes">
+            <!-- Default state: editable textarea -->
+            <div class="plc-notes-edit" id="plc-notes-edit">
+              <div class="section-label" style="margin-bottom:6px">Tonight's Notes</div>
+              <textarea class="notes-area" id="session-notes" placeholder="What did you work on? What clicked? What needs more time?..." oninput="saveNotes()"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+                <span class="mono small dimmed" id="notes-saved"></span>
+                <button class="btn btn-sm btn-ghost" onclick="clearNotes()">Clear</button>
+              </div>
+            </div>
+            <!-- Review state: notes as text + edit link -->
+            <div class="plc-notes-review" id="plc-notes-review">
+              <div class="section-label" style="margin-bottom:6px">Tonight's Notes <button class="btn btn-sm btn-ghost" onclick="practiceLogEdit()" style="margin-left:8px">Edit</button></div>
+              <div class="plc-notes-text" id="plc-notes-text"></div>
             </div>
           </div>
         </div>
-        <div class="heatmap-wrap">
-          <div class="heatmap-months-row" id="heatmap-months-row"></div>
-          <div class="heatmap-grid" id="heatmap-grid"></div>
-          <div class="heatmap-legend">
-            <span class="heatmap-legend-label">Less</span>
-            <div class="heatmap-cell" style="pointer-events:none"></div>
-            <div class="heatmap-cell practiced" style="pointer-events:none"></div>
-            <span class="heatmap-legend-label">More</span>
-          </div>
-        </div>
-        <button class="log-today-btn" id="log-today-btn" onclick="logPracticeDay(false)">✓ Log Today's Practice</button>
-      </div>
-    </div>
 
-    <!-- ROW 3 COL 2: Session Notes -->
-    <div class="dash-interface">
-      <div class="card">
-        <div class="card-title">Session Notes</div>
-        <textarea class="notes-area" id="session-notes" placeholder="What did you work on? What clicked? What needs more time?..." oninput="saveNotes()"></textarea>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-          <span class="mono small dimmed" id="notes-saved"></span>
-          <button class="btn btn-sm btn-ghost" onclick="clearNotes()">Clear</button>
+        <!-- Shared bottom: action button -->
+        <div class="plc-footer">
+          <button class="plc-log-btn" id="plc-log-btn" onclick="practiceLogToggleReview()">✓ Log Today's Practice</button>
+          <button class="plc-save-btn" id="plc-save-btn" onclick="practiceLogSave()">Save Session</button>
         </div>
+
       </div>
     </div>
 

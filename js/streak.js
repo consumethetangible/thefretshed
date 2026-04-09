@@ -17,10 +17,6 @@ function logPracticeDay(silent) {
     savePracticeDays(days);
   }
   buildStreakCard();
-  if (!silent) {
-    const btn = document.getElementById('log-today-btn');
-    if (btn) { btn.classList.add('logged'); btn.textContent = '✓ Logged Today'; }
-  }
 }
 
 function calcStreaks(days) {
@@ -62,11 +58,6 @@ function buildStreakCard() {
   if (el('streak-longest')) el('streak-longest').textContent = longest;
   if (el('streak-total')) el('streak-total').textContent = days.length;
 
-  const btn = el('log-today-btn');
-  if (btn) {
-    if (daySet.has(today)) { btn.classList.add('logged'); btn.textContent = '✓ Logged Today'; }
-    else { btn.classList.remove('logged'); btn.textContent = "✓ Log Today's Practice"; }
-  }
   buildHeatmap(daySet);
 }
 
