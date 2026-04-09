@@ -112,6 +112,75 @@ function clearNotes() {
   localStorage.removeItem('ngc-notes');
 }
 
+// ═══════════════════════════════════════════
+// PRACTICE LOG CARD
+// ═══════════════════════════════════════════
+
+// Toggle to review state: collect completed blocks + snapshot notes
+function practiceLogToggleReview() {
+  const card = document.getElementById('practice-log-card');
+  if (!card) return;
+
+  // Snapshot notes into the review panel
+  const notes = document.getElementById('session-notes').value.trim();
+  const notesText = document.getElementById('plc-notes-text');
+  if (notesText) notesText.textContent = notes;
+
+  // Collect completed block labels and render summary
+  const planEl = document.querySelector('.session-plan.active');
+  const planId = planEl ? planEl.id.replace('plan-', '') : null;
+  const labels = getCompletedBlockLabels(planId);
+  const summaryEl = document.getElementById('plc-summary');
+  if (summaryEl) {
+    if (labels.length) {
+      summaryEl.innerHTML = '<div class="plc-summary-label">Completed Tonight</div>'
+        + '<div class="plc-summary-blocks">'
+        + labels.map(l => `<div class="plc-summary-block">${l}</div>`).join('')
+        + '</div>';
+    } else {
+      summaryEl.innerHTML = '<div class="plc-summary-label">Completed Tonight</div>'
+        + '<div class="plc-summary-empty">No blocks marked complete yet.</div>';
+    }
+  }
+
+  card.dataset.state = 'review';
+}
+
+// Back to edit state (Edit button in review panel)
+function practiceLogEdit() {
+  const card = document.getElementById('practice-log-card');
+  if (card) card.dataset.state = 'default';
+}
+
+// Save session: write to DynamoDB, refresh streak, return to default state
+async function practiceLogSave() {
+  const notes = document.getElementById('session-notes').value.trim();
+  const planEl = document.querySelector('.session-plan.active');
+  const planId = planEl ? planEl.id.replace('plan-', '') : null;
+  const labels = getCompletedBlockLabels(planId);
+
+  const saveBtn = document.getElementById('plc-save-btn');
+  if (saveBtn) { saveBtn.textContent = 'Saving…'; saveBtn.disabled = true; }
+
+  try {
+    await saveSession(labels, notes);
+  } catch (e) {
+    console.warn('practiceLogSave: saveSession failed', e);
+  }
+
+  // Also log the practice day for streak
+  logPracticeDay(true);
+
+  // Refresh streak display
+  buildStreakCard();
+
+  // Reset card to default state
+  const card = document.getElementById('practice-log-card');
+  if (card) card.dataset.state = 'default';
+
+  if (saveBtn) { saveBtn.textContent = 'Save Session'; saveBtn.disabled = false; }
+}
+
 function toggleSongCard(el) {
   el.classList.toggle('expanded');
   if (el.classList.contains('expanded')) {

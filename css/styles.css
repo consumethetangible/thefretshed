@@ -199,9 +199,8 @@ body {
 /* Row 2: session | songs */
 .dash-session   { grid-column: 1;     grid-row: 2; display: flex; }
 .dash-songs-col { grid-column: 2;     grid-row: 2; display: flex; }
-/* Row 3: notes | streak */
-.dash-interface { grid-column: 1;     grid-row: 3; display: flex; }
-.dash-streak    { grid-column: 2;     grid-row: 3; display: flex; }
+/* Row 3: practice log — full width */
+.dash-practice-log { grid-column: 1 / 3; grid-row: 3; display: flex; }
 /* Row 4: resources — full width */
 .dash-resources { grid-column: 1 / 3; grid-row: 4; }
 
@@ -209,16 +208,11 @@ body {
 .dash-phase > .phase-hero,
 .dash-session > .session-card,
 .dash-songs-col > .card,
-.dash-streak > .streak-card,
-.dash-interface > .card { flex: 1; min-height: 0; box-sizing: border-box; }
+.dash-practice-log > .practice-log-card { flex: 1; min-height: 0; box-sizing: border-box; }
 
 /* Phase songs scrolls */
 .dash-songs-col > .card { overflow: hidden; display: flex; flex-direction: column; }
 .dash-songs-col > .card .stack { flex: 1; overflow-y: auto; }
-
-/* Notes textarea stretches */
-.dash-interface > .card { display: flex; flex-direction: column; }
-.dash-interface > .card .notes-area { flex: 1; resize: none; min-height: 80px; }
 
 /* ── Session card internal layout: blocks | tools ── */
 .session-card {
@@ -467,9 +461,49 @@ body {
 .heatmap-cell:not(.future):hover::after { content: attr(data-tip); position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: var(--bg4); border: 1px solid var(--border2); border-radius: 3px; padding: 2px 6px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text2); white-space: nowrap; z-index: 100; pointer-events: none; }
 .heatmap-legend { display: flex; align-items: center; gap: 4px; margin-top: 8px; justify-content: flex-end; }
 .heatmap-legend-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--text3); letter-spacing: 1px; }
-.log-today-btn { display: flex; align-items: center; gap: 6px; background: var(--accent-dim); border: 1px solid rgba(196,144,96,0.3); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 14px; border-radius: 5px; cursor: pointer; transition: all 0.15s; margin-top: 12px; width: 100%; justify-content: center; }
-.log-today-btn:hover { background: rgba(196,144,96,0.18); }
-.log-today-btn.logged { background: rgba(114,168,120,0.12); border-color: rgba(114,168,120,0.35); color: var(--green); cursor: default; }
+
+/* ─── PRACTICE LOG CARD (Row 3, full-width) ─ */
+.practice-log-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Header: title + review badge */
+.plc-header { display: flex; align-items: center; gap: 10px; }
+.plc-review-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; background: rgba(196,144,96,0.15); border: 1px solid rgba(196,144,96,0.35); color: var(--accent); padding: 3px 8px; border-radius: 4px; display: none; }
+.practice-log-card[data-state="review"] .plc-review-badge { display: inline-block; }
+
+/* Two-column body */
+.plc-body { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; flex: 1; min-height: 0; }
+
+/* Left: streak column — reuses existing streak/heatmap classes */
+.plc-streak { display: flex; flex-direction: column; gap: 0; }
+
+/* Summary panel (review state only) */
+.plc-summary { display: none; margin-top: 10px; }
+.practice-log-card[data-state="review"] .plc-summary { display: block; }
+.plc-summary-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.plc-summary-blocks { display: flex; flex-direction: column; gap: 4px; }
+.plc-summary-block { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); padding: 4px 8px; background: rgba(114,168,120,0.1); border-left: 2px solid var(--green); border-radius: 3px; }
+.plc-summary-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); font-style: italic; }
+
+/* Right: notes column */
+.plc-notes { display: flex; flex-direction: column; gap: 8px; }
+.plc-notes .notes-area { flex: 1; resize: none; min-height: 100px; }
+
+/* State visibility: notes edit vs review */
+.plc-notes-edit { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.plc-notes-review { display: none; flex-direction: column; gap: 6px; flex: 1; }
+.practice-log-card[data-state="review"] .plc-notes-edit { display: none; }
+.practice-log-card[data-state="review"] .plc-notes-review { display: flex; }
+.plc-notes-text { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.6; white-space: pre-wrap; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 12px; flex: 1; min-height: 80px; }
+.plc-notes-text:empty::before { content: 'No notes for tonight yet.'; color: var(--text3); font-style: italic; }
+
+/* Shared footer */
+.plc-footer { display: flex; gap: 10px; }
+.plc-log-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent-dim); border: 1px solid rgba(196,144,96,0.3); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 14px; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
+.plc-log-btn:hover { background: rgba(196,144,96,0.18); }
+.plc-save-btn { flex: 1; display: none; align-items: center; justify-content: center; gap: 6px; background: rgba(114,168,120,0.15); border: 1px solid rgba(114,168,120,0.4); color: var(--green); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 14px; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
+.plc-save-btn:hover { background: rgba(114,168,120,0.25); }
+.practice-log-card[data-state="review"] .plc-log-btn { display: none; }
+.practice-log-card[data-state="review"] .plc-save-btn { display: flex; }
 
 /* ─── POINTER DRAG ───────────────────────── */
 .sl-card { touch-action: none; }
@@ -1077,8 +1111,7 @@ body.preview-tablet #week-btn-row, body.preview-tablet .week-btn-row-single { gr
 body.preview-tablet .dash-phase > .phase-hero,
 body.preview-tablet .dash-session > .session-card,
 body.preview-tablet .dash-songs-col > .card,
-body.preview-tablet .dash-streak > .streak-card,
-body.preview-tablet .dash-interface > .card { height: auto; }
+body.preview-tablet .dash-practice-log > .practice-log-card { height: auto; }
 body.preview-tablet .gear-grid { grid-template-columns: repeat(3, 1fr); }
 
 /* ─── PHONE PREVIEW — applied via body class ─────── */
@@ -1096,8 +1129,8 @@ body.preview-phone .header { padding: 0 14px; }
 body.preview-phone .dash-grid { grid-template-columns: 1fr; }
 body.preview-phone #week-btn-row, body.preview-phone .week-btn-row-single { grid-template-columns: repeat(6, 1fr); }
 body.preview-phone .dash-session, body.preview-phone .dash-songs-col,
-body.preview-phone .dash-interface, body.preview-phone .dash-phase,
-body.preview-phone .dash-streak, body.preview-phone .dash-resources {
+body.preview-phone .dash-practice-log, body.preview-phone .dash-phase,
+body.preview-phone .dash-resources {
   grid-column: 1; grid-row: auto;
 }
 body.preview-phone .session-body { grid-template-columns: 1fr; }
@@ -1109,9 +1142,9 @@ body.preview-phone .session-tools-col {
 }
 body.preview-phone .dash-session > .session-card,
 body.preview-phone .dash-songs-col > .card,
-body.preview-phone .dash-interface > .card,
-body.preview-phone .dash-phase > .phase-hero,
-body.preview-phone .dash-streak > .streak-card { height: auto; }
+body.preview-phone .dash-practice-log > .practice-log-card,
+body.preview-phone .dash-phase > .phase-hero { height: auto; }
+body.preview-phone .plc-body { grid-template-columns: 1fr; }
 body.preview-phone .session-header { flex-direction: column; align-items: flex-start; gap: 10px; }
 body.preview-phone .energy-tabs { width: 100%; }
 body.preview-phone .etab { flex: 1; text-align: center; }
@@ -1129,8 +1162,8 @@ body.preview-phone .theme-mode-btn { padding: 5px 7px; }
   .theme-mode-prefix { display: none; }
   .theme-mode-btn { padding: 5px 7px; }
   .dash-grid { grid-template-columns: 1fr; }
-  .dash-session, .dash-songs-col, .dash-interface,
-  .dash-phase, .dash-streak, .dash-resources { grid-column: 1; grid-row: auto; }
+  .dash-session, .dash-songs-col, .dash-practice-log,
+  .dash-phase, .dash-resources { grid-column: 1; grid-row: auto; }
   #week-btn-row, .week-btn-row-single { grid-template-columns: repeat(6, 1fr); }
   .session-body { grid-template-columns: 1fr; }
   .session-tools-col {
@@ -1140,8 +1173,9 @@ body.preview-phone .theme-mode-btn { padding: 5px 7px; }
     justify-content: flex-start;
   }
   .dash-session > .session-card, .dash-songs-col > .card,
-  .dash-interface > .card, .dash-phase > .phase-hero,
-  .dash-streak > .streak-card { height: auto; }
+  .dash-practice-log > .practice-log-card,
+  .dash-phase > .phase-hero { height: auto; }
+  .plc-body { grid-template-columns: 1fr; }
   .session-header { flex-direction: column; align-items: flex-start; gap: 10px; }
   .energy-tabs { width: 100%; }
   .etab { flex: 1; text-align: center; }

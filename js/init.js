@@ -33,8 +33,6 @@ function init() {
   buildPersonalSection('sw-personal');
   buildAcousticSection('sw-acoustic');
 
-  const savedNotes = localStorage.getItem('ngc-notes');
-  if (savedNotes) document.getElementById('session-notes').value = savedNotes;
   setWeek(currentWeek);
   document.querySelectorAll('.check-row').forEach(row => {
     const key = row.querySelector('.check-label').textContent;
@@ -47,6 +45,17 @@ function init() {
   buildStreakCard();
   checkSessionComplete();
   setTimeout(timerLoadSession, 100);
+
+  // Hydrate today's notes from DynamoDB
+  loadTodayNotes().then(existing => {
+    const area = document.getElementById('session-notes');
+    if (area && existing) area.value = existing;
+  }).catch(() => {
+    // Fallback to localStorage if DynamoDB unavailable
+    const saved = localStorage.getItem('ngc-notes');
+    const area = document.getElementById('session-notes');
+    if (area && saved) area.value = saved;
+  });
 
   // Load milestone state from DynamoDB, then re-render
   loadAllMilestones().then(map => {
