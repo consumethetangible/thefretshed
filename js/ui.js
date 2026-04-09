@@ -37,16 +37,10 @@ function setWeek(w) {
   localStorage.setItem('ngc-current-phase', 1);
   const curEl = document.getElementById('current-week');
   if (curEl) curEl.textContent = w;
-  // Apply 3-state styling to all week buttons
-  document.querySelectorAll('[id^="wbtn-"]').forEach(b => {
-    const num = parseInt(b.id.replace('wbtn-', ''));
-    b.classList.remove('btn-week-active', 'btn-week-done');
-    if (num === w) b.classList.add('btn-week-active');
-    else if (num < w) b.classList.add('btn-week-done');
-  });
+  // Update focus text from WEEK_DATA (block buttons navigate rather than call setWeek)
   const wf = WEEK_DATA[Math.min(Math.floor((w-1)/2), WEEK_DATA.length-1)];
   const focusEl = document.getElementById('week-focus-text');
-  if (focusEl) focusEl.textContent = wf.detail;
+  if (focusEl && wf) focusEl.textContent = wf.detail;
   // progress bar may not exist in new layout — guard
   const prog = document.getElementById('phase-progress');
   if (prog) prog.style.width = Math.round((w / 12) * 100) + '%';
@@ -197,6 +191,48 @@ function goToSongInShed(title, phaseNum) {
     }
 
     // Scroll to it and briefly highlight
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('drop-target');
+    setTimeout(() => card.classList.remove('drop-target'), 1800);
+  }, 120);
+}
+
+function goToWeekInShed(phaseId, blockIndex) {
+  // Navigate to The Shed panel
+  showPanel('curriculum', null);
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === 'The Shed');
+  });
+
+  setTimeout(() => {
+    const phase = PHASES.find(p => p.id === phaseId);
+    if (!phase || !phase.weeks || !phase.weeks[blockIndex]) return;
+
+    // Open phase body if collapsed
+    const phaseBody = document.getElementById(`shed-phase-body-${phaseId}`);
+    const phaseChev = document.getElementById(`shed-phase-chev-${phaseId}`);
+    if (phaseBody && phaseBody.style.display === 'none') {
+      phaseBody.style.display = 'block';
+      if (phaseChev) phaseChev.textContent = '▲';
+    }
+
+    // Switch to Week Map tab
+    shedShowTab(phaseId, 'weeks');
+
+    // Build the card ID using the same pattern as renderShedWeeks
+    const wk = phase.weeks[blockIndex];
+    const cardId = 'shed-wcard-wk-p' + phaseId + '-' + wk.range.replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const card = document.getElementById(cardId);
+    if (!card) return;
+
+    // Expand the card if collapsed
+    const body = card.querySelector('.shed-week-body');
+    if (body && body.style.display === 'none') {
+      body.style.display = 'block';
+      const chev = card.querySelector('.shed-chevron');
+      if (chev) chev.textContent = '▲';
+    }
+
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     card.classList.add('drop-target');
     setTimeout(() => card.classList.remove('drop-target'), 1800);

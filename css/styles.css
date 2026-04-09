@@ -290,7 +290,7 @@ body {
 #week-btn-row,
 .week-btn-row-single {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
   gap: 5px;
 }
 .btn-week {
