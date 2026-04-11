@@ -39,10 +39,10 @@ function init() {
     if (checkedItems[key]) row.classList.add('done');
   });
 
-  // Restore block states and build streak
+  // Restore block states and build streak (async — hydrates from DynamoDB)
   restoreBlockStates();
   stampBlockRefs();
-  buildStreakCard();
+  buildStreakCard(); // async — updates streak/heatmap when backend responds
   checkSessionComplete();
   setTimeout(timerLoadSession, 100);
 

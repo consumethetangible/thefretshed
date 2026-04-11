@@ -352,7 +352,8 @@ function settingsDismissConfirm(id) {
 
 function settingsDoAction(id) {
   if (id === 'clear-streak') {
-    localStorage.removeItem('ngc-practice-days');
+    // ngc-practice-days localStorage key retired in #52 — streak now lives in DynamoDB.
+    // Clear-streak action is a no-op for localStorage; DynamoDB records are preserved.
     buildStreakCard();
   } else if (id === 'reset-curriculum') {
     [1,2,3,4,5].forEach(p => localStorage.removeItem(`ngc-curriculum-p${p}`));
@@ -370,7 +371,6 @@ function settingsDoAction(id) {
 function settingsExportData() {
   const data = {
     exportDate: new Date().toISOString(),
-    practiceDays: JSON.parse(localStorage.getItem('ngc-practice-days') || '[]'),
     songStatuses: getAllSongStatuses(),
     curriculum: {},
     notes: localStorage.getItem('ngc-notes') || '',
