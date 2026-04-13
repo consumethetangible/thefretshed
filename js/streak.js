@@ -2,22 +2,9 @@
 // STREAK & HEATMAP
 // ═══════════════════════════════════════════
 
-function getPracticeDays() {
-  return JSON.parse(localStorage.getItem('ngc-practice-days') || '[]');
-}
-function savePracticeDays(days) {
-  localStorage.setItem('ngc-practice-days', JSON.stringify(days));
-}
-
-function logPracticeDay(silent) {
-  const today = getTodayKey();
-  const days = getPracticeDays();
-  if (!days.includes(today)) {
-    days.push(today);
-    savePracticeDays(days);
-  }
-  buildStreakCard();
-}
+// localStorage-based practice day tracking retired in #52.
+// Session records now written to DynamoDB via saveSession() in session.js.
+// Streak and heatmap are derived from backend data via calcStreakFromBackend().
 
 function calcStreaks(days) {
   const daySet = new Set(days);
@@ -47,18 +34,25 @@ function calcStreaks(days) {
   return { streak, longest };
 }
 
-function buildStreakCard() {
-  const days = getPracticeDays();
-  const daySet = new Set(days);
-  const today = getTodayKey();
-  const { streak, longest } = calcStreaks(days);
+async function buildStreakCard() {
+  let practiceDays = [];
+  let current = 0, longest = 0;
+
+  try {
+    const result = await calcStreakFromBackend();
+    practiceDays = result.practiceDays || [];
+    current = result.current || 0;
+    longest = result.longest || 0;
+  } catch (e) {
+    console.warn('buildStreakCard: backend unavailable, showing zeros', e);
+  }
 
   const el = (id) => document.getElementById(id);
-  if (el('streak-count')) el('streak-count').textContent = streak;
+  if (el('streak-count')) el('streak-count').textContent = current;
   if (el('streak-longest')) el('streak-longest').textContent = longest;
-  if (el('streak-total')) el('streak-total').textContent = days.length;
+  if (el('streak-total')) el('streak-total').textContent = practiceDays.length;
 
-  buildHeatmap(daySet);
+  buildHeatmap(new Set(practiceDays));
 }
 
 function buildHeatmap(daySet) {

@@ -168,10 +168,7 @@ async function practiceLogSave() {
     console.warn('practiceLogSave: saveSession failed', e);
   }
 
-  // Also log the practice day for streak
-  logPracticeDay(true);
-
-  // Refresh streak display
+  // Refresh streak display from backend
   buildStreakCard();
 
   // Reset card to default state

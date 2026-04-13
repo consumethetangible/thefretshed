@@ -169,6 +169,12 @@ function checkSessionComplete() {
     if (card) card.appendChild(banner);
   }
   banner.classList.toggle('visible', allDone);
-  if (allDone) logPracticeDay(true);
+  if (allDone) {
+    // Write session record to DynamoDB (replaces localStorage logPracticeDay)
+    const notes = (document.getElementById('session-notes') || {}).value || '';
+    saveSession(blocks.length, notes).catch(e => console.warn('saveSession failed:', e));
+    // Refresh streak card from backend
+    buildStreakCard();
+  }
 }
 
